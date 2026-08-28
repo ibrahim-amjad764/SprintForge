@@ -1624,8 +1624,10 @@ For local development with Docker Compose, include:
 
 ## License
 
-This project is proprietary software. All rights reserved.
+MIT License © 2026
 
 ---
 
-**Note**: This README is based on the actual implementation found in the codebase. For the most accurate and up-to-date information, always refer to the source code and inline documentation.
+## Author
+
+- GitHub: [Ibrahim Amjad](https://github.com/ibrahim-amjad764)
