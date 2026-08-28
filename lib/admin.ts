@@ -1,0 +1,45 @@
+// // lib/admin.ts 
+// import User from "@/models/User";
+
+// export async function checkAdmin(userId: string) {
+//   const user = await User.findById(userId);
+//   if (!user) return false;
+//   return user.role === "ADMIN";
+// }
+
+
+import User from "@/models/User";
+
+// ==========================================
+// ADMIN VERIFICATION UTILITY
+// ==========================================
+
+/**
+ * Verifies if a user has the ADMIN role directly from the database.
+ * 
+ * ⚠️ CRITICAL WARNING ⚠️
+ * DO NOT import or use this function inside `middleware.ts`.
+ * Middleware runs on the Edge Runtime and will crash if it touches Mongoose.
+ * 
+ * ✅ WHERE TO USE THIS:
+ * - Inside App Router Server Components (if they need DB-level confirmation)
+ * - Inside API Route Handlers (e.g., app/api/admin/users/route.ts)
+ * - Inside Server Actions
+ */
+export async function checkAdmin(userId: string): Promise<boolean> {
+  try {
+    // .select("role") fetches ONLY the role field from MongoDB (Performance optimization)
+    // .lean() returns a plain JS object instead of a heavy Mongoose Document (Memory optimization)
+    const user = await User.findById(userId).select("role").lean();
+
+    if (!user) {
+      return false;
+    }
+
+    return user.role === "ADMIN";
+  } catch (error) {
+    // Fail securely: If the DB is down, deny access rather than allowing it
+    console.error(`[DB Admin Check] Database error verifying user ${userId}:`, error);
+    return false; 
+  }
+}
