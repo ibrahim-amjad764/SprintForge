@@ -1,33 +1,13 @@
 // app/api/auth/reset-password/route.ts
+//
+// DISABLED: The password-reset flow was never implemented
+// (no token generation, persistence, or expiry existed).
+// The endpoint is kept returning a generic error so it cannot
+// be used to enumerate registered email addresses.
+// A proper reset flow is planned for a future phase.
 
-import { sendEmail } from '@/services/email.service';
-import { resetPasswordEmail } from '@/components/templates/emails/reset-password';
-import User from '@/models/User';
+import { errorResponse } from '@/utils/response';
 
-export async function POST(req: Request) {
-  const { email } = await req.json();
-
-  // Find the user in database
-  const user = await User.findOne({ email });
-
-  if (!user) {
-    return Response.json(
-      { message: 'User not found' },
-      { status: 404 }
-    );
-  }
-
-  // Generate reset URL
-  const resetUrl = `http://localhost:3000/reset-password?token=YOUR_TOKEN`;
-
-  await sendEmail({
-    to: user.email,
-    subject: 'Reset Password',
-    html: resetPasswordEmail(
-      user.name,
-      resetUrl
-    ),
-  });
-
-  return Response.json({ success: true });
+export async function POST() {
+  return errorResponse('Password reset is not available', 501);
 }

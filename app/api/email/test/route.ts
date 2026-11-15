@@ -2,9 +2,13 @@
 import { NextRequest } from 'next/server';
 import { sendEmail } from '@/services/email.service';
 import { successResponse, errorResponse } from '@/utils/response';
+import { requireAdmin } from '@/lib/admin';
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAdmin(request);
+    if (auth.response) return auth.response;
+
     const body = await request.json();
 
     await sendEmail({

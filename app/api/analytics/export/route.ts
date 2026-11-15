@@ -1,27 +1,41 @@
 // mkdir -p app/api/analytics/export
+import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 
 import Task from '@/models/Task';
+import { errorResponse } from '@/utils/response';
+import { requireAuth } from '@/lib/auth';
+import { getUserProjectIds } from '@/lib/authorization';
 
-export async function GET() {
-  await connectDB();
+export async function GET(request: NextRequest) {
+  try {
+    const auth = await requireAuth(request);
+    if (auth.response) return auth.response;
+    const userId = auth.user.userId;
 
-  const tasks = await Task.find();
+    await connectDB();
 
-  const csv = [
-    'title,status,priority',
+    // Scope export to tasks inside the user's accessible workspaces
+    const projectIds = await getUserProjectIds(userId);
+    const tasks = await Task.find({ project: { $in: projectIds } });
 
-    ...tasks.map((task) => `${task.title},${task.status},${task.priority}`),
-  ].join('\n');
+    const csv = [
+      'title,status,priority',
 
-  return new Response(
-    csv,
+      ...tasks.map((task) => `${task.title},${task.status},${task.priority}`),
+    ].join('\n');
 
-    {
-      headers: {
-        'Content-Type': 'text/csv',
-        'Content-Disposition': 'attachment; filename=tasks.csv',
-      },
-    }
-  );
+    return new Response(
+      csv,
+
+      {
+        headers: {
+          'Content-Type': 'text/csv',
+          'Content-Disposition': 'attachment; filename=tasks.csv',
+        },
+      }
+    );
+  } catch (error) {
+    return errorResponse('Export failed', 500);
+  }
 }

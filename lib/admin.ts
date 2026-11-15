@@ -1,14 +1,7 @@
-// // lib/admin.ts 
-// import User from "@/models/User";
-
-// export async function checkAdmin(userId: string) {
-//   const user = await User.findById(userId);
-//   if (!user) return false;
-//   return user.role === "ADMIN";
-// }
-
-
+import type { NextRequest } from "next/server";
 import User from "@/models/User";
+import { requireAuth, type AuthResult } from "@/lib/auth";
+import { errorResponse } from "@/utils/response";
 
 // ==========================================
 // ADMIN VERIFICATION UTILITY
@@ -42,4 +35,33 @@ export async function checkAdmin(userId: string): Promise<boolean> {
     console.error(`[DB Admin Check] Database error verifying user ${userId}:`, error);
     return false; 
   }
+}
+
+/**
+ * Require an authenticated ADMIN user for an API route.
+ *
+ * The role is verified against the database on every request —
+ * the JWT role claim is never trusted for authorization.
+ *
+ * Usage:
+ *     const auth = await requireAdmin(request);
+ *     if (auth.response) return auth.response;
+ */
+export async function requireAdmin(request: NextRequest): Promise<AuthResult> {
+  const auth = await requireAuth(request);
+
+  if (auth.response) {
+    return auth;
+  }
+
+  const isAdmin = await checkAdmin(auth.user.userId);
+
+  if (!isAdmin) {
+    return {
+      user: null,
+      response: errorResponse("Forbidden", 403),
+    };
+  }
+
+  return auth;
 }

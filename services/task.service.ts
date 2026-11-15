@@ -25,27 +25,35 @@ export async function createTask(data: {
   assignee?: string;
   dueDate?: Date;
 }) {
-  console.log('💾 createTask data:', data);
-  console.log('👥 Saving teamId:', data.teamId);
-  console.log('👤 Saving assignee:', data.assignee);
-  console.log('📅 Saving dueDate:', data.dueDate);
+  if (process.env.NODE_ENV === 'development') {
+    console.log('💾 createTask data:', data);
+    console.log('👥 Saving teamId:', data.teamId);
+    console.log('👤 Saving assignee:', data.assignee);
+    console.log('📅 Saving dueDate:', data.dueDate);
+  }
   
   const task = await Task.create(data);
-  console.log('✅ Task saved:', task._id);
+  if (process.env.NODE_ENV === 'development') {
+    console.log('✅ Task saved:', task._id);
+  }
   
   return task;
 }
 
 export async function getTasks(project: string) {
-  console.log('📆 Service: getTasks for project:', project);
+  if (process.env.NODE_ENV === 'development') {
+    console.log('📆 Service: getTasks for project:', project);
+  }
   // .lean() converts Mongoose documents to plain JS objects (better performance for JSON responses)
-  const tasks = await Task.find({ project }).populate('assignee').populate('teamId').lean();
-  console.log('📆 Service: Tasks retrieved:', tasks.length);
-  tasks.forEach((task: any) => {
-    console.log('📅 Service task date:', task.dueDate);
-    console.log('👤 Service task assignee:', task.assignee);
-    console.log('👥 Service task teamId:', task.teamId);
-  });
+  const tasks = await Task.find({ project }).populate({ path: 'assignee', select: '-password' }).populate('teamId').lean();
+  if (process.env.NODE_ENV === 'development') {
+    console.log('📆 Service: Tasks retrieved:', tasks.length);
+    tasks.forEach((task: any) => {
+      console.log('📅 Service task date:', task.dueDate);
+      console.log('👤 Service task assignee:', task.assignee);
+      console.log('👥 Service task teamId:', task.teamId);
+    });
+  }
   return tasks;
 }
 
@@ -57,7 +65,7 @@ export async function getTasksByWorkspace(workspace: string) {
   const projectIds = projects.map((p) => p._id);
   
   const tasks = await Task.find({ project: { $in: projectIds } })
-    .populate('assignee')
+    .populate({ path: 'assignee', select: '-password' })
     .populate('teamId')
     .lean();
   
@@ -72,7 +80,7 @@ export async function getTasksByWorkspace(workspace: string) {
 }
 
 export async function getTaskById(id: string) {
-  return Task.findById(id).populate('assignee').lean();
+  return Task.findById(id).populate({ path: 'assignee', select: '-password' }).lean();
 }
 
 export async function updateTask(id: string, data: UpdateTaskDTO) {
@@ -85,7 +93,7 @@ export async function updateTask(id: string, data: UpdateTaskDTO) {
 
   // 2. Perform the update
   const updatedTask = await Task.findByIdAndUpdate(id, data, { new: true })
-    .populate('assignee')
+    .populate({ path: 'assignee', select: '-password' })
     .lean(); // CRITICAL: Use .lean() so it can be safely serialized over WebSockets
 
   if (!updatedTask) {

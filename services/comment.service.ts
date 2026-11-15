@@ -34,7 +34,7 @@
 // }
 
 // export async function getComments(task: string) {
-//   return Comment.find({ task }).populate('user').sort({ createdAt: -1 });
+//   return Comment.find({ task }).populate({ path: 'user', select: '-password' }).sort({ createdAt: -1 });
 // }
 
 // export async function deleteComments(id: string) {
@@ -59,7 +59,7 @@ export async function createComment(data: CreateCommentDTO) {
   // 2. CRITICAL: Comment ko populate karo taake frontend ko pata chale KISNE comment kiya
   // Aur .lean() lagao taake Socket.io crash na kare (Mongoose serialization issue)
   const populatedComment = await Comment.findById(savedComment._id)
-    .populate('user')
+    .populate({ path: 'user', select: '-password' })
     .lean();
 
   // 3. Socket Event Emit karo
@@ -81,7 +81,7 @@ export async function createComment(data: CreateCommentDTO) {
 export async function getComments(task: string) {
   // .lean() add kiya API response fast aur safe banane ke liye
   return Comment.find({ task })
-    .populate('user')
+    .populate({ path: 'user', select: '-password' })
     .sort({ createdAt: -1 }) // Naye comments sabse upar
     .lean();
 }

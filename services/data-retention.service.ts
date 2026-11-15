@@ -133,7 +133,7 @@ export async function getRetentionStatus(workspaceId: string): Promise<{
   if (!workspace.dataRetentionScheduledAt) {
     return {
       scheduled: false,
-      action: workspace.compliancePolicies?.gdprCompliant ? 'archive' : 'delete',
+      action: 'delete',
     };
   }
 
@@ -146,7 +146,7 @@ export async function getRetentionStatus(workspaceId: string): Promise<{
     scheduled: true,
     scheduledDate: workspace.dataRetentionScheduledAt,
     daysRemaining: Math.max(0, daysRemaining),
-    action: workspace.compliancePolicies?.gdprCompliant ? 'archive' : 'delete',
+    action: 'delete',
   };
 }
 

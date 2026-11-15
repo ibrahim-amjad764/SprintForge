@@ -1,6 +1,5 @@
 //lib/db.ts
 import mongoose from 'mongoose';
-import fs from "fs";
 
 /*
     MongoDB Connection Manager
@@ -15,9 +14,6 @@ import fs from "fs";
 
     This file creates one reusable connection.
 */
-console.log("ENV.LOCAL:");
-console.log(fs.readFileSync(".env.local", "utf8"));
-console.log("MONGODB_URI exists:", !!process.env.MONGODB_URI);
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {

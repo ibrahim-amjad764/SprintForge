@@ -10,14 +10,11 @@ let socket: Socket | null = null;
 
 export function getSocket() {
   if (!socket) {
-    const token = typeof document !== 'undefined' 
-      ? document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1]
-      : null;
-
+    // The HttpOnly `token` cookie cannot be read via document.cookie.
+    // The Socket.IO handshake sends cookies automatically and the
+    // server extracts the token from the Cookie header — no client
+    // token is needed here.
     socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000', {
-      auth: {
-        token: token,
-      },
       transports: ['websocket', 'polling'],
     });
 

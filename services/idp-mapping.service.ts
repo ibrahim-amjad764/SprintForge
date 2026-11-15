@@ -34,7 +34,7 @@ export async function syncIdpGroupsToWorkspace(params: {
   for (const idpUser of users) {
     try {
       // Find or create user
-      let user = await User.findOne({ email: idpUser.email });
+      const user = await User.findOne({ email: idpUser.email });
       
       if (!user) {
         // In a real implementation, you might send an invitation email
@@ -162,7 +162,7 @@ export async function syncOktaUsers(params: {
     });
   } catch (error) {
     console.error('Okta sync error:', error);
-    return { synced: 0, errors: [error.message] };
+    return { synced: 0, errors: [error instanceof Error ? error.message : 'Sync failed'] };
   }
 }
 
@@ -231,7 +231,7 @@ export async function syncAzureAdUsers(params: {
     });
   } catch (error) {
     console.error('Azure AD sync error:', error);
-    return { synced: 0, errors: [error.message] };
+    return { synced: 0, errors: [error instanceof Error ? error.message : 'Sync failed'] };
   }
 }
 

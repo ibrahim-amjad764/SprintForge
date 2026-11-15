@@ -1,36 +1,3 @@
-// // middlerware.ts
-// import { NextRequest, NextResponse } from "next/server";
-// import { verifyToken } from "./lib/auth";
-// import { checkAdmin } from "./lib/admin";  
-// /*
-//  Middleware runs before pages load.
-
-//  Protected routes:
-
-//  /dashboard
-//  /workspace
-// */
-
-// export async function middleware(request: NextRequest) {
-//   const token = request.cookies.get("token")?.value;
-
-//   const pathname = request.nextUrl.pathname;
-
-//   if (pathname.startsWith("/dashboard") || pathname.startsWith("/workspace")) {
-//     if (!token) {
-//       return NextResponse.redirect(new URL("/login", request.url));
-//     }
-//     const user = await verifyToken(token);
-//     if (!user) {
-//       return NextResponse.redirect(new URL("/login", request.url));
-//     }
-//   }
-//   return NextResponse.next();
-// }
-
-// export const config = {
-//   matcher: ["/dashboard/:path*", "/workspace/:path*"],
-// };
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "./lib/auth";
 

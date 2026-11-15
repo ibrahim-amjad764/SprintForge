@@ -4,26 +4,36 @@ import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { uploadFile } from '@/services/file.service';
 import { successResponse, errorResponse } from '@/utils/response';
+import { requireAuth } from '@/lib/auth';
+import { validateAttachmentFile } from '@/lib/file-validation';
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth.response) return auth.response;
+    const userId = auth.user.userId;
+
     await connectDB();
 
     const formData = await request.formData();
 
     const file = formData.get('file') as File;
 
-    const user = formData.get('user') as string;
+    // The `user` form field is ignored — identity comes from the JWT
+    if (!file) {
+      return errorResponse('File is required', 400);
+    }
 
-    if (!file || !user) {
-      return errorResponse('File and user are required', 400);
+    const validation = await validateAttachmentFile(file);
+    if (!validation.ok) {
+      return errorResponse(validation.error || 'Invalid file', 400);
     }
 
     const buffer = await file.arrayBuffer();
 
     const base64 = `data:${file.type};base64,${Buffer.from(buffer).toString('base64')}`;
 
-    const result = await uploadFile(base64, user);
+    const result = await uploadFile(base64, userId);
 
     return successResponse(result);
   } catch (error) {

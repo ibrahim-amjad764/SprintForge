@@ -5,32 +5,36 @@ import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { getUserNotifications, markAllAsRead, getUnreadCount } from '@/services/notification.service';
 import { successResponse, errorResponse } from '@/utils/response';
+import { requireAuth } from '@/lib/auth';
 
 /*
   Notification APIs:
   - GET /api/notifications?user=<userId> - Get user notifications
   - GET /api/notifications/unread-count?user=<userId> - Get unread count
   - PATCH /api/notifications/read-all?user=<userId> - Mark all as read
+
+  The authenticated user is always derived from the JWT —
+  the `user` query param is accepted for backward compatibility
+  but never trusted.
 */
 
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth.response) return auth.response;
+    const userId = auth.user.userId;
+
     await connectDB();
 
     const { pathname } = request.nextUrl;
-    const user = request.nextUrl.searchParams.get('user');
-
-    if (!user) {
-      return errorResponse('User ID is required', 400);
-    }
 
     // Handle unread count endpoint
     if (pathname.includes('unread-count')) {
-      const count = await getUnreadCount(user);
+      const count = await getUnreadCount(userId);
       return successResponse({ count });
     }
 
-    const notifications = await getUserNotifications(user);
+    const notifications = await getUserNotifications(userId);
     return successResponse(notifications);
   } catch (error) {
     console.error('Get notifications error:', error);
@@ -40,18 +44,17 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth.response) return auth.response;
+    const userId = auth.user.userId;
+
     await connectDB();
 
     const { pathname } = request.nextUrl;
-    const user = request.nextUrl.searchParams.get('user');
-
-    if (!user) {
-      return errorResponse('User ID is required', 400);
-    }
 
     // Handle mark all as read endpoint
     if (pathname.includes('read-all')) {
-      await markAllAsRead(user);
+      await markAllAsRead(userId);
       return successResponse(null, 'All notifications marked as read');
     }
 

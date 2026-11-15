@@ -8,7 +8,7 @@ export async function createAudit(data: any) {
 
 export async function getLogs() {
   return AuditLog.find()
-    .populate('user')
+    .populate({ path: 'user', select: '-password' })
     .sort({
       createdAt: -1,
     });

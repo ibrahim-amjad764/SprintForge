@@ -34,5 +34,5 @@ export async function stopTimer(id: string) {
 export async function getTaskTime(task: string) {
   return TimeEntry.find({ task })
 
-    .populate('user');
+    .populate({ path: 'user', select: '-password' });
 }

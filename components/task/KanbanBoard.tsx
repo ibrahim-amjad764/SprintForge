@@ -140,7 +140,7 @@ export default function KanbanBoard({
   const inProgressCount = tasks.filter(
     (t) => t.status === 'IN_PROGRESS'
   ).length;
-  const doneCount = tasks.filter((t) => t.status === 'COMPLETED' || t.status === 'DONE').length;
+  const doneCount = tasks.filter((t) => t.status === 'COMPLETED').length;
 
   // Calculate progress percentage
   const progressPercentage =

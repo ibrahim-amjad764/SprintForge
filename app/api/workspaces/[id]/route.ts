@@ -6,14 +6,30 @@ import {
   getWorkspaceById,
 } from '@/services/workspace.service';
 import { successResponse, errorResponse } from '@/utils/response';
+import { requireAuth } from '@/lib/auth';
+import { getWorkspaceMembership } from '@/lib/authorization';
+import type { WorkspaceRole } from '@/models/WorkspaceMember';
+
+const ADMIN_ROLES: WorkspaceRole[] = ['OWNER', 'ADMIN'];
 
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await requireAuth(request);
+    if (auth.response) return auth.response;
+    const userId = auth.user.userId;
+
     await connectDB();
     const { id } = await context.params;
+
+    // IDOR: user must be a member of this workspace
+    const membership = await getWorkspaceMembership(id, userId);
+    if (!membership) {
+      return errorResponse('Forbidden', 403);
+    }
+
     const workspace = await getWorkspaceById(id);
 
     if (!workspace) {
@@ -32,9 +48,19 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await requireAuth(request);
+    if (auth.response) return auth.response;
+    const userId = auth.user.userId;
+
     await connectDB();
     const { id } = await context.params;
     const body = await request.json();
+
+    // Only workspace owners/admins may modify settings
+    const membership = await getWorkspaceMembership(id, userId);
+    if (!membership || !ADMIN_ROLES.includes(membership.role)) {
+      return errorResponse('Forbidden', 403);
+    }
 
     const workspace = await updateWorkspace(id, body);
 
@@ -54,8 +80,18 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await requireAuth(request);
+    if (auth.response) return auth.response;
+    const userId = auth.user.userId;
+
     await connectDB();
     const { id } = await context.params;
+
+    // Only workspace owners/admins may delete the workspace
+    const membership = await getWorkspaceMembership(id, userId);
+    if (!membership || !ADMIN_ROLES.includes(membership.role)) {
+      return errorResponse('Forbidden', 403);
+    }
 
     await deleteWorkspace(id);
     return successResponse(null, 'Workspace deleted');

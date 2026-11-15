@@ -31,7 +31,7 @@ export default function Dashboard({ stats, workspaceId }: { stats: any; workspac
         return true; // All tasks in workspace
       }).length;
 
-      setLocalStats(prev => ({
+      setLocalStats((prev: any) => ({
         ...prev,
         total: taskCount
       }));

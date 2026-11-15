@@ -7,6 +7,6 @@ export async function createActivity(data: any) {
 }
 
 export async function getActivities(task: string) {
-  return Activity.find({ task }).populate('user').sort({ createdAt: -1 });
+  return Activity.find({ task }).populate({ path: 'user', select: '-password' }).sort({ createdAt: -1 });
 }
 

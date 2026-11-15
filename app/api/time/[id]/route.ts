@@ -3,7 +3,9 @@
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { stopTimer } from '@/services/time.service';
+import TimeEntry from '@/models/TimeEntry';
 import { successResponse, errorResponse } from '@/utils/response';
+import { requireAuth } from '@/lib/auth';
 
 export async function PUT(
   request: NextRequest,
@@ -14,9 +16,20 @@ export async function PUT(
   }
 ) {
   try {
+    const auth = await requireAuth(request);
+    if (auth.response) return auth.response;
+    const userId = auth.user.userId;
+
     await connectDB();
 
     const { id } = await context.params;
+
+    // IDOR: a user may only stop their own timer entries
+    const entry = await TimeEntry.findById(id).select('user').lean();
+    if (!entry || String(entry.user) !== userId) {
+      return errorResponse('Forbidden', 403);
+    }
+
     const result = await stopTimer(id);
 
     return successResponse(

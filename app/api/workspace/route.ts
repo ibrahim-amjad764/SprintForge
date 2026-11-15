@@ -9,6 +9,7 @@ import { autoProvisionRepository } from "@/services/vcs-provisioning.service";
 import { autoSyncIdpGroups } from "@/services/idp-mapping.service";
 import { scheduleDataRetention } from "@/services/data-retention.service";
 import { successResponse, errorResponse } from "@/utils/response";
+import { getWorkspaceMembership } from "@/lib/authorization";
 
 /*
     Workspace API
@@ -38,6 +39,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    // IDOR: a child workspace may only be created under a parent
+    // workspace the user belongs to
+    if (body.parentWorkspace) {
+      const parentMembership = await getWorkspaceMembership(
+        String(body.parentWorkspace),
+        userId,
+      );
+      if (!parentMembership) {
+        return errorResponse("Forbidden", 403);
+      }
+    }
 
     // Transform integrations from simple booleans to schema-expected structure
     const transformedIntegrations: any = {};

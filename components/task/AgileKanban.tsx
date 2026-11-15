@@ -61,20 +61,23 @@ export default function AgileKanban({ tasks, onTaskUpdated, filters }: AgileKanb
   });
 
   // Get team name from teamId
-  const getTeamName = (teamId?: string) => {
+  const getTeamName = (teamId?: string | { _id?: string; id?: string; name?: string }) => {
     if (!teamId) return 'Unassigned';
-    try {
-      const workspaceId = window.location.pathname.split('/')[2];
-      const storedTeams = localStorage.getItem(`teams_${workspaceId}`);
-      if (storedTeams) {
-        const teams = JSON.parse(storedTeams);
-        const team = teams.find((t: any) => t.id === teamId);
-        return team?.name || 'Unknown Team';
+    if (typeof teamId === 'string') {
+      try {
+        const workspaceId = window.location.pathname.split('/')[2];
+        const storedTeams = localStorage.getItem(`teams_${workspaceId}`);
+        if (storedTeams) {
+          const teams = JSON.parse(storedTeams);
+          const team = teams.find((t: any) => t.id === teamId);
+          return team?.name || 'Unknown Team';
+        }
+      } catch (error) {
+        console.error('Error getting team name:', error);
       }
-    } catch (error) {
-      console.error('Error getting team name:', error);
+      return 'Unknown Team';
     }
-    return 'Unknown Team';
+    return teamId.name || 'Unknown Team';
   };
 
   // Get member name from assignedToId
@@ -118,13 +121,17 @@ export default function AgileKanban({ tasks, onTaskUpdated, filters }: AgileKanb
   const handleDragStart = (e: React.DragEvent, task: Task) => {
     setDraggedTask(task);
     e.dataTransfer.effectAllowed = 'move';
-    e.currentTarget.style.opacity = '0.5';
-    e.currentTarget.style.transform = 'rotate(2deg)';
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '0.5';
+      e.currentTarget.style.transform = 'rotate(2deg)';
+    }
   };
 
   const handleDragEnd = (e: React.DragEvent) => {
-    e.currentTarget.style.opacity = '1';
-    e.currentTarget.style.transform = 'rotate(0deg)';
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '1';
+      e.currentTarget.style.transform = 'rotate(0deg)';
+    }
     setDraggedTask(null);
   };
 

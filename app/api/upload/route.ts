@@ -3,9 +3,13 @@
 import { NextRequest } from 'next/server';
 import { uploadFile } from '@/lib/upload';
 import { successResponse, errorResponse } from '@/utils/response';
+import { requireAuth } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth.response) return auth.response;
+
     console.log('Upload API - request received');
 
     // --------------------------------------------------------

@@ -22,20 +22,23 @@ export default function ActiveTasksModal({ isOpen, onClose, tasks }: ActiveTasks
   const total = activeTasks.length;
 
   // Get team name from teamId
-  const getTeamName = (teamId?: string) => {
+  const getTeamName = (teamId?: string | { _id?: string; id?: string; name?: string }) => {
     if (!teamId) return 'Unassigned';
-    try {
-      const workspaceId = window.location.pathname.split('/')[2];
-      const storedTeams = localStorage.getItem(`teams_${workspaceId}`);
-      if (storedTeams) {
-        const teams = JSON.parse(storedTeams);
-        const team = teams.find((t: any) => t.id === teamId);
-        return team?.name || 'Unknown Team';
+    if (typeof teamId === 'string') {
+      try {
+        const workspaceId = window.location.pathname.split('/')[2];
+        const storedTeams = localStorage.getItem(`teams_${workspaceId}`);
+        if (storedTeams) {
+          const teams = JSON.parse(storedTeams);
+          const team = teams.find((t: any) => t.id === teamId);
+          return team?.name || 'Unknown Team';
+        }
+      } catch (error) {
+        console.error('Error getting team name:', error);
       }
-    } catch (error) {
-      console.error('Error getting team name:', error);
+      return 'Unknown Team';
     }
-    return 'Unknown Team';
+    return teamId.name || 'Unknown Team';
   };
 
   // Get member name from assignedToId

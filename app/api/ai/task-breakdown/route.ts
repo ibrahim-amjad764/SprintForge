@@ -4,11 +4,39 @@ import { generateTaskBreakdown } from '@/services/ai.service';
 import { successResponse, errorResponse } from '@/utils/response';
 import { createTask } from '@/services/task.service';
 import { connectDB } from '@/lib/db';
+import { requireAuth } from '@/lib/auth';
+import {
+  getMembershipForProject,
+  getMembershipForTask,
+  canWriteWorkspace,
+} from '@/lib/authorization';
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth.response) return auth.response;
+    const userId = auth.user.userId;
+
     await connectDB();
     const body = await request.json();
+
+    // IDOR+RBAC: write-capable member of the workspace owning the task
+    const taskMembership = await getMembershipForTask(String(body.task), userId);
+    if (!body.task || !taskMembership || !canWriteWorkspace(taskMembership.role)) {
+      return errorResponse('Forbidden', 403);
+    }
+
+    // If subtasks will be persisted, the target project must also be
+    // writable by this user
+    if (body.projectId) {
+      const projectMembership = await getMembershipForProject(
+        String(body.projectId),
+        userId,
+      );
+      if (!projectMembership || !canWriteWorkspace(projectMembership.role)) {
+        return errorResponse('Forbidden', 403);
+      }
+    }
 
     const result = await generateTaskBreakdown(body.task);
 

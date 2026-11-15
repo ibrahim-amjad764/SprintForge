@@ -32,33 +32,33 @@ export function useDebounceSlugValidation(
 
   // Validate slug when debounced value changes
   useEffect(() => {
-    if (!debouncedSlug) {
-      setValidation({ isValid: true, isAvailable: true });
-      return;
-    }
-
-    // Client-side validation
-    const slugRegex = /^[a-z0-9-]+$/;
-    if (!slugRegex.test(debouncedSlug)) {
-      setValidation({
-        isValid: false,
-        isAvailable: false,
-        message: 'Slug can only contain lowercase letters, numbers, and hyphens',
-      });
-      return;
-    }
-
-    if (debouncedSlug.length < 3) {
-      setValidation({
-        isValid: false,
-        isAvailable: false,
-        message: 'Slug must be at least 3 characters long',
-      });
-      return;
-    }
-
-    // Server-side validation
     const validateSlug = async () => {
+      if (!debouncedSlug) {
+        setValidation({ isValid: true, isAvailable: true });
+        return;
+      }
+
+      // Client-side validation
+      const slugRegex = /^[a-z0-9-]+$/;
+      if (!slugRegex.test(debouncedSlug)) {
+        setValidation({
+          isValid: false,
+          isAvailable: false,
+          message: 'Slug can only contain lowercase letters, numbers, and hyphens',
+        });
+        return;
+      }
+
+      if (debouncedSlug.length < 3) {
+        setValidation({
+          isValid: false,
+          isAvailable: false,
+          message: 'Slug must be at least 3 characters long',
+        });
+        return;
+      }
+
+      // Server-side validation
       setIsValidating(true);
       try {
         const response = await apiRequest('/api/workspace/validate-slug', {

@@ -78,6 +78,8 @@ export interface Task {
   assignee?:
     | string
     | {
+        _id?: string;
+        id?: string;
         name?: string;
         fullName?: string;
         email?: string;
@@ -91,7 +93,7 @@ export interface Task {
       };
   assignedToId?: string;
   completedAt?: string;
-  teamId?: string | { _id?: string; id?: string };
+  teamId?: string | { _id?: string; id?: string; name?: string };
   projectId?: string;
 }
 
@@ -464,8 +466,8 @@ export default function Calendar({
       
       if (typeof task.dueDate === 'string') {
         taskDateStr = task.dueDate.split('T')[0];
-      } else if (task.dueDate instanceof Date) {
-        const taskDate = task.dueDate;
+      } else if (task.dueDate && typeof task.dueDate === 'object' && 'getFullYear' in task.dueDate) {
+        const taskDate = task.dueDate as Date;
         const taskYear = taskDate.getFullYear();
         const taskMonth = String(taskDate.getMonth() + 1).padStart(2, '0');
         const taskDay = String(taskDate.getDate()).padStart(2, '0');

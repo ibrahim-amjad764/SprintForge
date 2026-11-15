@@ -5,6 +5,14 @@ import { connectDB } from '@/lib/db';
 import { createTask, getTasks, getTasksByWorkspace } from '@/services/task.service';
 import { successResponse, errorResponse } from '@/utils/response';
 import { rateLimit } from '@/lib/rate-limit';
+import { requireAuth } from '@/lib/auth';
+import {
+  getMembershipForProject,
+  getMembershipForTeam,
+  getWorkspaceMembership,
+  canWriteWorkspace,
+  isWorkspaceMember,
+} from '@/lib/authorization';
 import { revalidatePath } from 'next/cache';
 import Team from '@/models/Team';
 
@@ -41,25 +49,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const auth = await requireAuth(request);
+    if (auth.response) return auth.response;
+    const userId = auth.user.userId;
+
     await connectDB();
 
     const body = await request.json();
 
-    console.log('📥 Task API body:', body);
-
     const projectField = body.project || body.projectId;
-    console.log('📌 Project ID:', projectField);
-    console.log('👥 Team ID:', body.teamId);
-    console.log('👤 Assignee ID:', body.assignee);
-    console.log('📅 Due Date (raw):', body.dueDate);
 
     if (!projectField) {
-      console.error('❌ Project ID is missing!');
       return errorResponse('Project ID is required', 400);
     }
 
+    // IDOR: user must be a member of the project's workspace.
+    // RBAC: creating tasks requires a write-capable role
+    // (VIEWER and COMMENTER are read/comment-only).
+    const membership = await getMembershipForProject(String(projectField), userId);
+    if (!membership || !canWriteWorkspace(membership.role)) {
+      return errorResponse('Forbidden', 403);
+    }
+
+    // The team must belong to the SAME workspace as the project —
+    // membership in some other workspace is not sufficient.
+    if (body.teamId && typeof body.teamId === 'string') {
+      const teamMembership = await getMembershipForTeam(body.teamId, userId);
+      if (!teamMembership || teamMembership.workspaceId !== membership.workspaceId) {
+        return errorResponse('Forbidden', 403);
+      }
+    }
+
+    // The assignee must be a member (or owner) of the same workspace
+    if (body.assignee && typeof body.assignee === 'string') {
+      const assigneeIsMember = await isWorkspaceMember(
+        membership.workspaceId,
+        body.assignee,
+      );
+      if (!assigneeIsMember) {
+        return errorResponse('Assignee is not a member of this workspace', 400);
+      }
+    }
+
     if (!body.title || !body.title.trim()) {
-      console.error('❌ Task title is missing!');
       return errorResponse('Task title is required', 400);
     }
 
@@ -98,13 +130,11 @@ export async function POST(request: NextRequest) {
 
     // Validate assignee if provided
     if (body.assignee && typeof body.assignee !== 'string') {
-      console.error('❌ Invalid assignee format:', body.assignee);
       return errorResponse('Invalid assignee format', 400);
     }
 
     // Validate teamId if provided
     if (body.teamId && typeof body.teamId !== 'string') {
-      console.error('❌ Invalid teamId format:', body.teamId);
       return errorResponse('Invalid teamId format', 400);
     }
 
@@ -120,8 +150,6 @@ export async function POST(request: NextRequest) {
     if (body.assignee) taskData.assignee = body.assignee;
     if (body.teamId) taskData.teamId = body.teamId;
     if (processedDueDate) taskData.dueDate = processedDueDate;
-
-    console.log('📝 Final task data:', taskData);
 
     const task = await createTask(taskData);
 
@@ -171,31 +199,34 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const auth = await requireAuth(request);
+    if (auth.response) return auth.response;
+    const userId = auth.user.userId;
+
     await connectDB();
 
     const project = request.nextUrl.searchParams.get('project');
     const workspace = request.nextUrl.searchParams.get('workspace');
 
-    console.log('📆 GET Tasks API - Project:', project, 'Workspace:', workspace);
-
     let tasks;
 
     if (project) {
-      // Project-scoped request
+      // IDOR: user must be a member of the project's workspace
+      const membership = await getMembershipForProject(project, userId);
+      if (!membership) {
+        return errorResponse('Forbidden', 403);
+      }
       tasks = await getTasks(project);
     } else if (workspace) {
-      // Workspace-scoped request (global team view)
+      // IDOR: user must be a member of the workspace
+      const membership = await getWorkspaceMembership(workspace, userId);
+      if (!membership) {
+        return errorResponse('Forbidden', 403);
+      }
       tasks = await getTasksByWorkspace(workspace);
     } else {
       return errorResponse('Project or workspace required');
     }
-
-    console.log('📆 Calendar tasks retrieved:', tasks.length);
-    tasks.forEach((task: any) => {
-      console.log('📅 Calendar task date:', task.dueDate);
-      console.log('👤 Calendar task assignee:', task.assignee);
-      console.log('👥 Calendar task teamId:', task.teamId);
-    });
 
     return successResponse(tasks);
   } catch (error) {

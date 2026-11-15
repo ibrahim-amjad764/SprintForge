@@ -1,6 +1,7 @@
 // services/webhook.service.ts
 import Organization from '@/models/Organization';
 import Workspace from '@/models/Workspace';
+import crypto from 'crypto';
 
 export interface WebhookEvent {
   eventType: string;
@@ -94,7 +95,6 @@ async function sendWebhook(url: string, secret: string, payload: WebhookEvent): 
 
 // Generate HMAC signature for webhook
 function generateSignature(payload: any, secret: string): string {
-  const crypto = require('crypto');
   const payloadString = JSON.stringify(payload);
   return crypto.createHmac('sha256', secret).update(payloadString).digest('hex');
 }

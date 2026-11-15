@@ -869,7 +869,7 @@ export async function getWorkspaceById(
 
     const workspace =
       await Workspace.findById(id)
-        .populate('owner');
+        .populate({ path: 'owner', select: '-password' });
 
     if (!workspace) {
       console.error(
@@ -906,7 +906,7 @@ export async function getWorkspaceMembers(
       await WorkspaceMember.find({
         workspace: workspaceId,
       })
-        .populate('user')
+        .populate({ path: 'user', select: '-password' })
         .lean();
 
     console.log(

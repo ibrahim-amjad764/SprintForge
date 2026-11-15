@@ -1,5 +1,6 @@
 // app/api/auth/logout/route.ts
 import { successResponse } from "@/utils/response";
+import { buildAuthCookie } from "@/lib/auth";
 /*
     Logout
 
@@ -11,6 +12,6 @@ import { successResponse } from "@/utils/response";
 export async function POST() {
   const response = successResponse(null, "logged out");
 
-  response.headers.append("Set-Cookies", "token=; HttpOnly; Path=/; Max-Age=0");
+  response.headers.append("Set-Cookie", buildAuthCookie("", 0));
   return response;
 }

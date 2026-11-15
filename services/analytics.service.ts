@@ -1,7 +1,6 @@
 // services/analytics.service.ts
 import Task from '@/models/Task';
-
-import User from '@/models/User';
+import { getUserProjectIds } from '@/lib/authorization';
 
 /*
 Analytics Engine
@@ -12,12 +11,19 @@ Calculates:
 - Velocity
 - User workload
 - Team performance
+
+All metrics are scoped to the projects inside workspaces
+the given user belongs to.
 */
 
-export async function getAnalytics() {
-  const totalTasks = await Task.countDocuments();
+export async function getAnalytics(userId: string) {
+  const projectIds = await getUserProjectIds(userId);
+  const taskScope = { project: { $in: projectIds } };
+
+  const totalTasks = await Task.countDocuments(taskScope);
 
   const completedTasks = await Task.countDocuments({
+    ...taskScope,
     status: 'COMPLETED',
   });
 
@@ -25,6 +31,9 @@ export async function getAnalytics() {
     totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
 
   const workload = await Task.aggregate([
+    {
+      $match: taskScope,
+    },
     {
       $group: {
         _id: '$assignee',
@@ -39,6 +48,7 @@ export async function getAnalytics() {
   const velocity = await Task.aggregate([
     {
       $match: {
+        ...taskScope,
         status: 'COMPLETED',
       },
     },

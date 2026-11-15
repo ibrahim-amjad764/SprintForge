@@ -64,7 +64,7 @@ export default function TaskChart({ stats }: { stats: any }) {
                 borderRadius: '8px',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
               }}
-              formatter={(value: number) => [value, 'Tasks']}
+              formatter={(value: any) => [value, 'Tasks']}
             />
           </PieChart>
         </ResponsiveContainer>
