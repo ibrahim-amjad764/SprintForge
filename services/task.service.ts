@@ -3,8 +3,15 @@ import Task, { ITask } from '@/models/Task'; // Assuming you have an ITask inter
 import { sendEmail } from '@/services/email.service';
 import { taskAssignedEmail } from '@/components/templates/emails/task-assigned';
 import User from '@/models/User';
+import Project from '@/models/Project';
 import { getIO } from '@/server/socket';
 import { createNotification } from '@/services/notification.service';
+import logger from '@/lib/logger';
+
+// Unbounded task reads (Kanban/Calendar need full sets) still get a
+// ceiling so a pathological query fails fast instead of hanging a
+// request worker. 30s is far above normal latency at current scale.
+const UNBOUNDED_QUERY_MAX_MS = 30_000;
 
 // 1. Strongly typed DTO (Data Transfer Object) for updates
 export type UpdateTaskDTO = Partial<
@@ -26,15 +33,15 @@ export async function createTask(data: {
   dueDate?: Date;
 }) {
   if (process.env.NODE_ENV === 'development') {
-    console.log('💾 createTask data:', data);
-    console.log('👥 Saving teamId:', data.teamId);
-    console.log('👤 Saving assignee:', data.assignee);
-    console.log('📅 Saving dueDate:', data.dueDate);
+    logger.info({ values: [data] }, '💾 createTask data:');
+    logger.info({ values: [data.teamId] }, '👥 Saving teamId:');
+    logger.info({ values: [data.assignee] }, '👤 Saving assignee:');
+    logger.info({ values: [data.dueDate] }, '📅 Saving dueDate:');
   }
   
   const task = await Task.create(data);
   if (process.env.NODE_ENV === 'development') {
-    console.log('✅ Task saved:', task._id);
+    logger.info({ values: [task._id] }, '✅ Task saved:');
   }
   
   return task;
@@ -42,45 +49,129 @@ export async function createTask(data: {
 
 export async function getTasks(project: string) {
   if (process.env.NODE_ENV === 'development') {
-    console.log('📆 Service: getTasks for project:', project);
+    logger.info({ values: [project] }, '📆 Service: getTasks for project:');
   }
   // .lean() converts Mongoose documents to plain JS objects (better performance for JSON responses)
-  const tasks = await Task.find({ project }).populate({ path: 'assignee', select: '-password' }).populate('teamId').lean();
+  const tasks = await Task.find({ project })
+    .populate({ path: 'assignee', select: '_id name email avatar' })
+    .populate('teamId')
+    .maxTimeMS(UNBOUNDED_QUERY_MAX_MS)
+    .lean();
   if (process.env.NODE_ENV === 'development') {
-    console.log('📆 Service: Tasks retrieved:', tasks.length);
+    logger.info({ values: [tasks.length] }, '📆 Service: Tasks retrieved:');
     tasks.forEach((task: any) => {
-      console.log('📅 Service task date:', task.dueDate);
-      console.log('👤 Service task assignee:', task.assignee);
-      console.log('👥 Service task teamId:', task.teamId);
+      logger.info({ values: [task.dueDate] }, '📅 Service task date:');
+      logger.info({ values: [task.assignee] }, '👤 Service task assignee:');
+      logger.info({ values: [task.teamId] }, '👥 Service task teamId:');
     });
   }
   return tasks;
 }
 
 export async function getTasksByWorkspace(workspace: string) {
-  console.log('📆 Service: getTasksByWorkspace for workspace:', workspace);
+  if (process.env.NODE_ENV === 'development') {
+    logger.info({ values: [workspace] }, '📆 Service: getTasksByWorkspace for workspace:');
+  }
   // Get all projects in the workspace, then fetch tasks from those projects
-  const Project = (await import('@/models/Project')).default;
-  const projects = await Project.find({ workspace }).select('_id').lean();
+  const projects = await Project.find({ workspace })
+    .select('_id')
+    .maxTimeMS(UNBOUNDED_QUERY_MAX_MS)
+    .lean();
   const projectIds = projects.map((p) => p._id);
   
   const tasks = await Task.find({ project: { $in: projectIds } })
-    .populate({ path: 'assignee', select: '-password' })
+    .populate({ path: 'assignee', select: '_id name email avatar' })
     .populate('teamId')
+    .maxTimeMS(UNBOUNDED_QUERY_MAX_MS)
     .lean();
   
-  console.log('📆 Service: Workspace tasks retrieved:', tasks.length);
-  tasks.forEach((task: any) => {
-    console.log('📅 Service task date:', task.dueDate);
-    console.log('👤 Service task assignee:', task.assignee);
-    console.log('👥 Service task teamId:', task.teamId);
-  });
+  if (process.env.NODE_ENV === 'development') {
+    logger.info({ values: [tasks.length] }, '📆 Service: Workspace tasks retrieved:');
+    tasks.forEach((task: any) => {
+      logger.info({ values: [task.dueDate] }, '📅 Service task date:');
+      logger.info({ values: [task.assignee] }, '👤 Service task assignee:');
+      logger.info({ values: [task.teamId] }, '👥 Service task teamId:');
+    });
+  }
   
   return tasks;
 }
 
+interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+interface PaginationInput {
+  page: number;
+  limit: number;
+  skip: number;
+}
+
+function paginatedResponse<T>(
+  items: T[],
+  total: number,
+  { page, limit, skip }: PaginationInput,
+): PaginatedResult<T> {
+  return {
+    items,
+    total,
+    page,
+    limit,
+    hasMore: skip + items.length < total,
+  };
+}
+
+/*
+ * Paginated variants — deterministic createdAt-desc ordering so
+ * offset pages are stable. The legacy unpaginated functions are
+ * kept for consumers that need the complete dataset (Kanban,
+ * Calendar, server-rendered pages).
+ */
+export async function getTasksPaginated(
+  project: string,
+  pagination: PaginationInput,
+) {
+  const { page, limit, skip } = pagination;
+  const [items, total] = await Promise.all([
+    Task.find({ project })
+      .populate({ path: 'assignee', select: '_id name email avatar' })
+      .populate('teamId')
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Task.countDocuments({ project }),
+  ]);
+  return paginatedResponse(items, total, { page, limit, skip });
+}
+
+export async function getTasksByWorkspacePaginated(
+  workspace: string,
+  pagination: PaginationInput,
+) {
+  const { page, limit, skip } = pagination;
+  const projects = await Project.find({ workspace }).select('_id').lean();
+  const projectIds = projects.map((p) => p._id);
+
+  const [items, total] = await Promise.all([
+    Task.find({ project: { $in: projectIds } })
+      .populate({ path: 'assignee', select: '_id name email avatar' })
+      .populate('teamId')
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Task.countDocuments({ project: { $in: projectIds } }),
+  ]);
+  return paginatedResponse(items, total, { page, limit, skip });
+}
+
 export async function getTaskById(id: string) {
-  return Task.findById(id).populate({ path: 'assignee', select: '-password' }).lean();
+  return Task.findById(id).populate({ path: 'assignee', select: '_id name email avatar' }).lean();
 }
 
 export async function updateTask(id: string, data: UpdateTaskDTO) {
@@ -93,7 +184,7 @@ export async function updateTask(id: string, data: UpdateTaskDTO) {
 
   // 2. Perform the update
   const updatedTask = await Task.findByIdAndUpdate(id, data, { new: true })
-    .populate({ path: 'assignee', select: '-password' })
+    .populate({ path: 'assignee', select: '_id name email avatar' })
     .lean(); // CRITICAL: Use .lean() so it can be safely serialized over WebSockets
 
   if (!updatedTask) {
@@ -127,10 +218,7 @@ export async function updateTask(id: string, data: UpdateTaskDTO) {
     }
 
     handleTaskAssignmentEmail(updatedTask, newAssigneeId).catch((err) => {
-      console.error(
-        `[Background] Failed to send assignment email for task ${id}:`,
-        err
-      );
+      logger.error({ err: err }, `[Background] Failed to send assignment email for task ${id}:`);
     });
   }
 
@@ -173,14 +261,19 @@ export async function filterTasks(filters: any) {
   if (filters.project) query.project = filters.project;
 
   if (filters.workspace) {
-    const Project = (await import('@/models/Project')).default;
-    const projects = await Project.find({ workspace: filters.workspace })
+    // Accepts a single workspace ID or an array — callers scoping to
+    // "all of a user's workspaces" pass the array form.
+    const workspaceFilter = Array.isArray(filters.workspace)
+      ? { $in: filters.workspace }
+      : filters.workspace;
+    const projects = await Project.find({ workspace: workspaceFilter })
       .select('_id')
+      .maxTimeMS(UNBOUNDED_QUERY_MAX_MS)
       .lean();
     query.project = { $in: projects.map((project) => project._id) };
   }
 
-  return Task.find(query).lean();
+  return Task.find(query).maxTimeMS(UNBOUNDED_QUERY_MAX_MS).lean();
 }
 
 // --- Helper Functions ---

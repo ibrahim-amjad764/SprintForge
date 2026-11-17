@@ -4,9 +4,10 @@ import { connectDB } from '@/lib/db';
 import WorkspaceMember from '@/models/WorkspaceMember';
 import { updateWorkspaceMember, removeWorkspaceMember } from '@/services/workspace.service';
 import { successResponse, errorResponse } from '@/utils/response';
-import { requireAuth } from '@/lib/auth';
+import { requireSession } from '@/lib/session';
 import { getWorkspaceMembership } from '@/lib/authorization';
 import type { WorkspaceRole } from '@/models/WorkspaceMember';
+import logger from '@/lib/logger';
 
 const VALID_ROLES: WorkspaceRole[] = ['OWNER', 'ADMIN', 'EDITOR', 'COMMENTER', 'VIEWER'];
 const ADMIN_ROLES: WorkspaceRole[] = ['OWNER', 'ADMIN'];
@@ -41,7 +42,7 @@ export async function PATCH(
   context: { params: Promise<{ id: string; memberId: string }> }
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
@@ -66,7 +67,7 @@ export async function PATCH(
     const updated = await updateWorkspaceMember(memberId, role);
     return successResponse(updated, 'Member role updated');
   } catch (error) {
-    console.error('Update member error:', error);
+    logger.error({ err: error }, 'Update member error:');
     return errorResponse('Server error', 500);
   }
 }
@@ -76,7 +77,7 @@ export async function DELETE(
   context: { params: Promise<{ id: string; memberId: string }> }
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
@@ -99,7 +100,7 @@ export async function DELETE(
     await removeWorkspaceMember(memberId);
     return successResponse(null, 'Member removed');
   } catch (error) {
-    console.error('Remove member error:', error);
+    logger.error({ err: error }, 'Remove member error:');
     return errorResponse('Server error', 500);
   }
 }

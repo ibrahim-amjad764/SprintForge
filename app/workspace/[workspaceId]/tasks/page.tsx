@@ -2,23 +2,28 @@ import { connectDB } from '@/lib/db';
 import { filterTasks } from '@/services/task.service';
 import { getProjects } from '@/services/project.service';
 import { getWorkspaceMembers } from '@/services/workspace.service';
-import KanbanBoard from '@/components/task/KanbanBoard';
+import LazyKanbanBoard from '@/components/task/LazyKanbanBoard';
+import { requireWorkspaceAccess } from '@/lib/page-guards';
+import logger from '@/lib/logger';
 
 export default async function WorkspaceTasksPage({
   params,
 }: {
   params: Promise<{ workspaceId: string }>;
 }) {
-  console.log("=== WORKSPACE TASKS PAGE INITIALIZED ===");
+  logger.info("=== WORKSPACE TASKS PAGE INITIALIZED ===");
   
   await connectDB();
 
   const { workspaceId } = await params;
-  console.log("Workspace tasks page workspaceId:", workspaceId);
+  await requireWorkspaceAccess(workspaceId);
+  logger.info({ values: [workspaceId] }, "Workspace tasks page workspaceId:");
   
-  const tasks = await filterTasks({ workspace: workspaceId });
-  const projects = await getProjects(workspaceId);
-  const members = await getWorkspaceMembers(workspaceId);
+  const [tasks, projects, members] = await Promise.all([
+    filterTasks({ workspace: workspaceId }),
+    getProjects(workspaceId),
+    getWorkspaceMembers(workspaceId),
+  ]);
 
   // Transform members to team member format
   const teamMembers = members.map((member: any) => ({
@@ -28,7 +33,7 @@ export default async function WorkspaceTasksPage({
   }));
 
   return (
-    <KanbanBoard
+    <LazyKanbanBoard
       workspaceId={workspaceId}
       tasks={JSON.parse(JSON.stringify(tasks))}
       projects={JSON.parse(JSON.stringify(projects))}

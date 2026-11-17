@@ -1,15 +1,21 @@
 // app/api/ai/generate-description/route.ts
 
 import { NextRequest } from "next/server";
-import { verifyToken } from "@/lib/auth";
+import { validateSessionToken } from "@/lib/session";
 import { generateWorkspaceDescription } from "@/services/ai-description.service";
 import { successResponse, errorResponse } from "@/utils/response";
+import { rateLimit } from "@/lib/rate-limit";
+import logger from '@/lib/logger';
+
+// AI calls cost real money — cap per user per hour.
+const AI_RATE_LIMIT = 20;
+const AI_WINDOW_MS = 60 * 60 * 1000;
 
 async function getUserId(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
   if (!token) return null;
-  const payload = await verifyToken(token);
-  return payload?.userId as string;
+  const session = await validateSessionToken(token);
+  return session?.userId ?? null;
 }
 
 export async function POST(request: NextRequest) {
@@ -17,6 +23,10 @@ export async function POST(request: NextRequest) {
     const userId = await getUserId(request);
     if (!userId) {
       return errorResponse("Unauthorized", 401);
+    }
+
+    if (!rateLimit(`ai:${userId}`, AI_RATE_LIMIT, AI_WINDOW_MS)) {
+      return errorResponse("Too many requests — please try again later", 429);
     }
 
     const body = await request.json();
@@ -35,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     return successResponse({ description }, "Description generated successfully");
   } catch (error) {
-    console.error("AI description generation error:", error);
+    logger.error({ err: error }, "AI description generation error:");
     return errorResponse("Failed to generate description", 500);
   }
 }

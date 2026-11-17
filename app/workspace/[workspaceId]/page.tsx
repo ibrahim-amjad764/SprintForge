@@ -1,19 +1,22 @@
 import Link from 'next/link';
 import { connectDB } from '@/lib/db';
 import { getWorkspaceById } from '@/services/workspace.service';
+import { requireWorkspaceAccess } from '@/lib/page-guards';
+import logger from '@/lib/logger';
 
 export default async function WorkspacePage({
   params,
 }: {
   params: Promise<{ workspaceId: string }>;
 }) {
-  console.log("=== WORKSPACE PAGE INITIALIZED ===");
+  logger.info("=== WORKSPACE PAGE INITIALIZED ===");
   
   await connectDB();
 
   const { workspaceId } = await params;
+  await requireWorkspaceAccess(workspaceId);
   const workspace = await getWorkspaceById(workspaceId);
-  console.log("Workspace data:", workspace);
+  logger.info({ values: [workspace] }, "Workspace data:");
 
   if (!workspace) {
     return (

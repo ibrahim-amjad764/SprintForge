@@ -6,6 +6,7 @@ import { useState } from "react";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import { Toaster } from "react-hot-toast";
+import SocketProvider from "@/components/realtime/SocketProvider";
 
 export default function MainLayout({
   children,
@@ -15,6 +16,11 @@ export default function MainLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
+    // MainLayout is the shared chrome for every authenticated page, so it
+    // is the single mount point for the realtime socket. getSocket() is a
+    // module-level singleton — remounts across navigations reuse the same
+    // connection, and logout does a full page unload which closes it.
+    <SocketProvider>
     <div className="min-h-screen bg-background">
       <Navbar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
       <Toaster position="top-right" />
@@ -37,5 +43,6 @@ export default function MainLayout({
         <main className="flex-1 p-6 lg:ml-0">{children}</main>
       </div>
     </div>
+    </SocketProvider>
   );
 }

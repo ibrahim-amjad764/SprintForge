@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import {
   ChevronLeft,
   ChevronRight,
@@ -110,42 +111,39 @@ export default function Calendar({
   onTaskUpdated,
   onTaskDeleted,
 }: CalendarProps) {
+  const pathname = usePathname();
+  // /workspace/[workspaceId]/projects/[projectId]/...
+  const currentProjectId = pathname?.split('/')[4] || undefined;
   const [currentTeamId, setCurrentTeamId] = useState<string | undefined>(
     undefined
   );
-  const [currentProjectId, setCurrentProjectId] = useState<string | undefined>(
-    undefined
-  );
-
-  // Extract project ID from URL
-  useEffect(() => {
-    const pathParts = window.location.pathname.split('/');
-    const projectId = pathParts[4] || undefined; // /workspace/[workspaceId]/projects/[projectId]/...
-    setCurrentProjectId(projectId);
-  }, []);
 
   // Check URL for team query parameter
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const teamParam = urlParams.get('team');
-    if (teamParam) {
-      // Find team by slug and get its ID
-      try {
-        const workspaceId = window.location.pathname.split('/')[2];
-        const storedTeams = localStorage.getItem(`teams_${workspaceId}`);
-        if (storedTeams) {
-          const teams = JSON.parse(storedTeams);
-          const team = teams.find(
-            (t: any) => t.name.toLowerCase().replace(/\s+/g, '-') === teamParam
-          );
-          if (team) {
-            setCurrentTeamId(team.id);
+    const timeoutId = setTimeout(() => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const teamParam = urlParams.get('team');
+      if (teamParam) {
+        // Find team by slug and get its ID
+        try {
+          const workspaceId = window.location.pathname.split('/')[2];
+          const storedTeams = localStorage.getItem(`teams_${workspaceId}`);
+          if (storedTeams) {
+            const teams = JSON.parse(storedTeams);
+            const team = teams.find(
+              (t: any) => t.name.toLowerCase().replace(/\s+/g, '-') === teamParam
+            );
+            if (team) {
+              setCurrentTeamId(team.id);
+            }
           }
+        } catch (error) {
+          console.error('Error finding team from URL:', error);
         }
-      } catch (error) {
-        console.error('Error finding team from URL:', error);
       }
-    }
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, []);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<ViewType>('month');
@@ -326,23 +324,27 @@ export default function Calendar({
 
   // Resolve team URL slug to team ID for global team view
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const teamParam = urlParams.get('team');
+    const timeoutId = setTimeout(() => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const teamParam = urlParams.get('team');
 
-    if (teamParam && teamsList.length > 0) {
-      const matchedTeam = teamsList.find(
-        (team) =>
-          team.name?.toLowerCase().replace(/\s+/g, '-') ===
-          teamParam.toLowerCase()
-      );
+      if (teamParam && teamsList.length > 0) {
+        const matchedTeam = teamsList.find(
+          (team) =>
+            team.name?.toLowerCase().replace(/\s+/g, '-') ===
+            teamParam.toLowerCase()
+        );
 
-      if (matchedTeam?._id) {
-        setFilters((prev) => ({
-          ...prev,
-          team: String(matchedTeam._id),
-        }));
+        if (matchedTeam?._id) {
+          setFilters((prev) => ({
+            ...prev,
+            team: String(matchedTeam._id),
+          }));
+        }
       }
-    }
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, [teamsList]);
 
   // Navigation functions
@@ -1531,33 +1533,37 @@ function EventModal({ date, onClose, onTaskCreated, teamId }: EventModalProps) {
 
   // Load members from teams LocalStorage with team mapping
   useEffect(() => {
-    try {
-      const workspaceId = window.location.pathname.split('/')[2];
-      const storedTeams = localStorage.getItem(`teams_${workspaceId}`);
-      if (storedTeams) {
-        const teams = JSON.parse(storedTeams);
-        const memberToTeamMap: Record<string, string> = {};
-        const members: { id: string; name: string; teamId: string }[] = [];
+    const timeoutId = setTimeout(() => {
+      try {
+        const workspaceId = window.location.pathname.split('/')[2];
+        const storedTeams = localStorage.getItem(`teams_${workspaceId}`);
+        if (storedTeams) {
+          const teams = JSON.parse(storedTeams);
+          const memberToTeamMap: Record<string, string> = {};
+          const members: { id: string; name: string; teamId: string }[] = [];
 
-        teams.forEach((team: any) => {
-          team.members.forEach((member: any) => {
-            if (!memberToTeamMap[member.name]) {
-              memberToTeamMap[member.name] = team.id;
-              members.push({
-                id: member.id,
-                name: member.name,
-                teamId: team.id,
-              });
-            }
+          teams.forEach((team: any) => {
+            team.members.forEach((member: any) => {
+              if (!memberToTeamMap[member.name]) {
+                memberToTeamMap[member.name] = team.id;
+                members.push({
+                  id: member.id,
+                  name: member.name,
+                  teamId: team.id,
+                });
+              }
+            });
           });
-        });
 
-        setMemberTeams(memberToTeamMap);
-        setAvailableMembers(members);
+          setMemberTeams(memberToTeamMap);
+          setAvailableMembers(members);
+        }
+      } catch (error) {
+        console.error('Error loading members from teams:', error);
       }
-    } catch (error) {
-      console.error('Error loading members from teams:', error);
-    }
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   // Auto-extract team ID when member is selected

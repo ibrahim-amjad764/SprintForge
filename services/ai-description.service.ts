@@ -1,5 +1,6 @@
 // services/ai-description.service.ts
 import OpenAI from 'openai';
+import logger from '@/lib/logger';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -48,7 +49,7 @@ export async function generateWorkspaceDescription(params: {
     
     return description;
   } catch (error) {
-    console.error('Error generating AI description:', error);
+    logger.error({ err: error }, 'Error generating AI description:');
     // Fallback description if AI fails
     return `A collaborative workspace for ${params.name}, designed to streamline team productivity and project management.`;
   }
@@ -97,7 +98,7 @@ export async function generateWorkspaceSuggestions(params: {
       recommendedIntegrations: response.integrations || ['Slack', 'Google Calendar']
     };
   } catch (error) {
-    console.error('Error generating AI suggestions:', error);
+    logger.error({ err: error }, 'Error generating AI suggestions:');
     return {
       description: `A collaborative workspace for ${params.name}.`,
       suggestedTags: ['collaboration', 'productivity', 'teamwork'],

@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db";
 import { updateTask, deleteTask } from "@/services/task.service";
 import { successResponse, errorResponse } from "@/utils/response";
-import { requireAuth } from "@/lib/auth";
+import { requireSession } from "@/lib/session";
 import { getMembershipForTask, canWriteWorkspace } from "@/lib/authorization";
 import { revalidatePath } from "next/cache";
 
@@ -13,7 +13,7 @@ export async function PUT(
   context: { params: Promise<{ id: string }> },
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
@@ -52,7 +52,7 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> },
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 

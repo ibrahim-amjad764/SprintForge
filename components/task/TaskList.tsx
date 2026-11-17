@@ -148,6 +148,17 @@ export default function TaskList({
     return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
   };
 
+  // Join the project room so task:updated/task:deleted reach this list.
+  // The server re-validates workspace membership on every join, so a
+  // forged projectId cannot subscribe a non-member to its events.
+  useEffect(() => {
+    if (!socket || !projectId) return;
+    socket.emit('join-project', projectId);
+    return () => {
+      socket.emit('leave-project', projectId);
+    };
+  }, [socket, projectId]);
+
   useEffect(() => {
     // Agar socket connect nahi hua hai toh kuch mat karo
     if (!socket) return;

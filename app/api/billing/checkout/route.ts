@@ -6,11 +6,11 @@ import User from '@/models/User';
 import { createCheckout } from '@/services/billing.service';
 
 import { successResponse, errorResponse } from '@/utils/response';
-import { requireAuth } from '@/lib/auth';
+import { requireSession } from '@/lib/session';
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 

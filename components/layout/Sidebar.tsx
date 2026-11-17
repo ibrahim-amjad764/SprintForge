@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import WorkspaceSwitcher from '@/components/workspace/WorkspaceSwitcher';
 import useAuth from '@/hooks/useAuth';
+import { useIsClient } from '@/hooks/useIsClient';
 import { useLocalStorageSubscription } from '@/hooks/useLocalStorageSubscription';
 
 function getWorkspaceId(pathname: string | null): string | null {
@@ -61,11 +62,7 @@ export default function Sidebar() {
   });
 
   // Prevent hydration mismatch
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsClient();
 
   const currentProjectId = useMemo(() => {
     return pathname?.split('/')[4];

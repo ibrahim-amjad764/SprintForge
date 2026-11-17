@@ -3,9 +3,10 @@ import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { getWorkspaceMembers, addWorkspaceMember } from '@/services/workspace.service';
 import { successResponse, errorResponse } from '@/utils/response';
-import { requireAuth } from '@/lib/auth';
+import { requireSession } from '@/lib/session';
 import { getWorkspaceMembership } from '@/lib/authorization';
 import type { WorkspaceRole } from '@/models/WorkspaceMember';
+import logger from '@/lib/logger';
 
 const VALID_ROLES: WorkspaceRole[] = ['OWNER', 'ADMIN', 'EDITOR', 'COMMENTER', 'VIEWER'];
 const ADMIN_ROLES: WorkspaceRole[] = ['OWNER', 'ADMIN'];
@@ -15,7 +16,7 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
@@ -31,7 +32,7 @@ export async function GET(
     const members = await getWorkspaceMembers(id);
     return successResponse(members);
   } catch (error) {
-    console.error('Get members error:', error);
+    logger.error({ err: error }, 'Get members error:');
     return errorResponse('Server error', 500);
   }
 }
@@ -41,7 +42,7 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
@@ -73,7 +74,7 @@ export async function POST(
 
     return successResponse(member, 'Member added');
   } catch (error) {
-    console.error('Add member error:', error);
+    logger.error({ err: error }, 'Add member error:');
     return errorResponse('Server error', 500);
   }
 }

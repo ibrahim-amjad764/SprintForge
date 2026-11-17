@@ -5,11 +5,11 @@ import { connectDB } from '@/lib/db';
 import { getAnalytics } from '@/services/analytics.service';
 
 import { successResponse, errorResponse } from '@/utils/response';
-import { requireAuth } from '@/lib/auth';
+import { requireSession } from '@/lib/session';
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 

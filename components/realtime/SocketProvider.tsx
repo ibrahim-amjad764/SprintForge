@@ -3,7 +3,7 @@
 'use client';
 
 import { createContext, useEffect, useState } from 'react';
-import { Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 import getSocket from '@/lib/socket-client';
 
 export const SocketContext = createContext<Socket | null>(null);
@@ -25,22 +25,29 @@ export default function SocketProvider({
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const socketInstance = getSocket();
-    setSocket(socketInstance);
+    let cancelled = false;
+    let socketInstance: Socket | null = null;
 
-    socketInstance.on('connect', () => {
-      setIsConnected(true);
-      console.log('Socket connected');
-    });
+    getSocket().then((instance) => {
+      if (cancelled) return;
+      socketInstance = instance;
+      setSocket(instance);
 
-    socketInstance.on('disconnect', () => {
-      setIsConnected(false);
-      console.log('Socket disconnected');
+      instance.on('connect', () => {
+        setIsConnected(true);
+        console.log('Socket connected');
+      });
+
+      instance.on('disconnect', () => {
+        setIsConnected(false);
+        console.log('Socket disconnected');
+      });
     });
 
     return () => {
-      socketInstance.off('connect');
-      socketInstance.off('disconnect');
+      cancelled = true;
+      socketInstance?.off('connect');
+      socketInstance?.off('disconnect');
     };
   }, []);
 

@@ -55,6 +55,10 @@ const TimeEntrySchema = new Schema<ITimeEntry>(
   { timestamps: true }
 );
 
+// Time lookups are per-task (task detail) and per-user (reports).
+TimeEntrySchema.index({ task: 1 });
+TimeEntrySchema.index({ user: 1 });
+
 const TimeEntry: Model<ITimeEntry> =
   mongoose.models.TimeEntry ||
   mongoose.model<ITimeEntry>('TimeEntry', TimeEntrySchema);

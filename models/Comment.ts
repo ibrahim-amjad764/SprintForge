@@ -1,5 +1,4 @@
 // models/Comment.ts
-import { schema } from '@hookform/resolvers/ajv/src/__tests__/__fixtures__/data.js';
 import mongoose, { Schema, Model } from 'mongoose';
 
 /*
@@ -35,6 +34,9 @@ const CommentSchema = new Schema<IComment>(
   },
   { timestamps: true }
 );
+
+// Comment threads are fetched per task, newest first.
+CommentSchema.index({ task: 1, createdAt: -1 });
 
 const Comment: Model<IComment> =
   mongoose.models.Comment || mongoose.model<IComment>('Comment', CommentSchema);

@@ -5,7 +5,7 @@ import { connectDB } from '@/lib/db';
 import Attachment from '@/models/Attachment';
 import { deleteAttachment } from '@/services/attachment.service';
 import { successResponse, errorResponse } from '@/utils/response';
-import { requireAuth } from '@/lib/auth';
+import { requireSession } from '@/lib/session';
 import { getMembershipForTask, canWriteWorkspace } from '@/lib/authorization';
 
 export async function DELETE(
@@ -17,7 +17,7 @@ export async function DELETE(
   }
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 

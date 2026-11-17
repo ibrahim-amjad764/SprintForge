@@ -59,6 +59,9 @@ const ProjectSchema = new Schema<IProject>(
   }
 );
 
+// Projects are always listed per workspace.
+ProjectSchema.index({ workspace: 1 });
+
 const Project: Model<IProject> =
   mongoose.models.Project || mongoose.model<IProject>('Project', ProjectSchema);
 

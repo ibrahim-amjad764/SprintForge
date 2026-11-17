@@ -1,7 +1,9 @@
 import type { NextRequest } from "next/server";
 import User from "@/models/User";
-import { requireAuth, type AuthResult } from "@/lib/auth";
+import { requireSession } from "@/lib/session";
+import type { AuthResult } from "@/lib/auth";
 import { errorResponse } from "@/utils/response";
+import logger from '@/lib/logger';
 
 // ==========================================
 // ADMIN VERIFICATION UTILITY
@@ -32,7 +34,7 @@ export async function checkAdmin(userId: string): Promise<boolean> {
     return user.role === "ADMIN";
   } catch (error) {
     // Fail securely: If the DB is down, deny access rather than allowing it
-    console.error(`[DB Admin Check] Database error verifying user ${userId}:`, error);
+    logger.error({ err: error }, `[DB Admin Check] Database error verifying user ${userId}:`);
     return false; 
   }
 }
@@ -48,7 +50,7 @@ export async function checkAdmin(userId: string): Promise<boolean> {
  *     if (auth.response) return auth.response;
  */
 export async function requireAdmin(request: NextRequest): Promise<AuthResult> {
-  const auth = await requireAuth(request);
+  const auth = await requireSession(request);
 
   if (auth.response) {
     return auth;

@@ -18,28 +18,26 @@ function LoginContent() {
   const [showPassword, setShowPassword] = useState(false);
   
   // Custom Toast State Configuration
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | '' }>({
-    message: '',
-    type: ''
-  });
+  const [toast, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error' | '';
+  }>(() =>
+    isRegistered
+      ? { message: 'Account created successfully! Please login.', type: 'success' }
+      : { message: '', type: '' }
+  );
 
   const [form, setForm] = useState({
     email: '',
     password: '',
   });
 
-  // Automatically trigger success toast if coming from register redirect parameters
+  // Automatically hide the registration success toast after 4 seconds
   useEffect(() => {
-    if (isRegistered) {
-      setToast({
-        message: 'Account created successfully! Please login.',
-        type: 'success'
-      });
-      
-      // Auto-hide toast after 4 seconds
-      const timer = setTimeout(() => setToast({ message: '', type: '' }), 4000);
-      return () => clearTimeout(timer);
-    }
+    if (!isRegistered) return;
+
+    const timer = setTimeout(() => setToast({ message: '', type: '' }), 4000);
+    return () => clearTimeout(timer);
   }, [isRegistered]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {

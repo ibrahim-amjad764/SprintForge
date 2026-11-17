@@ -74,6 +74,11 @@ const TaskSchema = new Schema<ITask>(
   { timestamps: true }
 );
 
+// Hot paths: task lists/counts/aggregations filter by project (+status);
+// assignee lookups for workload/my-tasks queries.
+TaskSchema.index({ project: 1, status: 1 });
+TaskSchema.index({ assignee: 1 });
+
 const Task: Model<ITask> =
   mongoose.models.Task || mongoose.model<ITask>('Task', TaskSchema);
 

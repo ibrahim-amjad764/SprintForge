@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import useAuth from '@/hooks/useAuth';
@@ -14,40 +15,45 @@ interface NavbarProps {
 export default function Navbar({ onMenuToggle }: NavbarProps) {
   const { user } = useAuth();
   const pathname = usePathname();
-  const [workspaceLogo, setWorkspaceLogo] = useState<string | null>(null);
-  const [workspaceName, setWorkspaceName] = useState<string | null>(null);
+  const [workspaceInfo, setWorkspaceInfo] = useState<{
+    id: string;
+    logo: string | null;
+    name: string | null;
+  } | null>(null);
+
+  const match = pathname?.match(/^\/workspace\/([^/]+)(?:\/|$)/);
+  const workspaceId = match?.[1];
+  const isWorkspaceDetail = Boolean(workspaceId && workspaceId !== 'new');
 
   useEffect(() => {
-    const match = pathname?.match(/^\/workspace\/([^/]+)(?:\/|$)/);
-    const workspaceId = match?.[1];
-    const isWorkspaceDetail = Boolean(workspaceId && workspaceId !== 'new');
+    if (!isWorkspaceDetail || !workspaceId) return;
 
-    if (!isWorkspaceDetail) {
-      setWorkspaceLogo(null);
-      setWorkspaceName(null);
-      return;
-    }
-
-    async function loadWorkspace() {
-      try {
-        const response = await fetch(`/api/workspace/${workspaceId}`);
-        const data = await response.json();
-
-        if (data?.success) {
-          setWorkspaceLogo(data.data?.logo || null);
-          setWorkspaceName(data.data?.name || null);
-        } else {
-          setWorkspaceLogo(null);
-          setWorkspaceName(null);
+    let cancelled = false;
+    fetch(`/api/workspace/${workspaceId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (cancelled) return;
+        setWorkspaceInfo({
+          id: workspaceId,
+          logo: data?.success ? data.data?.logo || null : null,
+          name: data?.success ? data.data?.name || null : null,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setWorkspaceInfo({ id: workspaceId, logo: null, name: null });
         }
-      } catch {
-        setWorkspaceLogo(null);
-        setWorkspaceName(null);
-      }
-    }
+      });
 
-    loadWorkspace();
-  }, [pathname]);
+    return () => {
+      cancelled = true;
+    };
+  }, [workspaceId, isWorkspaceDetail]);
+
+  const activeWorkspace =
+    isWorkspaceDetail && workspaceInfo?.id === workspaceId
+      ? workspaceInfo
+      : null;
 
   // Hide search box on workspace creation page
   const isWorkspaceCreationPage = pathname === '/workspace/new';
@@ -68,17 +74,30 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
           </button>
 
           <Link href="/" className="flex items-center gap-3">
-            <img
-              src={workspaceLogo || '/file.svg'}
-              alt="Workspace logo"
-              className="h-10 w-10 rounded-md border border-slate-200 bg-slate-50 object-cover"
-            />
+            {(() => {
+              const logoSrc = activeWorkspace?.logo || '/file.svg';
+              // Only http(s) raster images go through the optimizer —
+              // local SVGs and data: URLs must render unoptimized.
+              const optimizable =
+                /^https?:\/\//.test(logoSrc) && !logoSrc.endsWith('.svg');
+              return (
+                <Image
+                  src={logoSrc}
+                  alt="Workspace logo"
+                  width={40}
+                  height={40}
+                  priority
+                  unoptimized={!optimizable}
+                  className="h-10 w-10 rounded-md border border-slate-200 bg-slate-50 object-cover"
+                />
+              );
+            })()}
             <div>
               <p className="text-lg font-semibold text-slate-900">
                 SprintForge
               </p>
-              {workspaceName && (
-                <p className="text-sm text-slate-500">{workspaceName}</p>
+              {activeWorkspace?.name && (
+                <p className="text-sm text-slate-500">{activeWorkspace.name}</p>
               )}
             </div>
           </Link>

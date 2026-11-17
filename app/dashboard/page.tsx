@@ -3,12 +3,14 @@ import Link from 'next/link';
 import MainLayout from '@/components/layout/MainLayout';
 import { connectDB } from '@/lib/db';
 import { getDashboardStats } from '@/services/dashboard.service';
+import { requirePageUserId } from '@/lib/page-guards';
 import Dashboard from '@/components/dashboard/Dashboard';
 
 export default async function DashboardPage() {
   await connectDB();
 
-  const stats = await getDashboardStats();
+  const userId = await requirePageUserId();
+  const stats = await getDashboardStats(userId);
 
   return (
     <MainLayout>

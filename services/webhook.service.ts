@@ -2,6 +2,7 @@
 import Organization from '@/models/Organization';
 import Workspace from '@/models/Workspace';
 import crypto from 'crypto';
+import logger from '@/lib/logger';
 
 export interface WebhookEvent {
   eventType: string;
@@ -62,7 +63,7 @@ export async function dispatchWebhookEvent(params: {
     try {
       await sendWebhook(endpoint.url, endpoint.secret, eventPayload);
     } catch (error) {
-      console.error(`Webhook delivery failed to ${endpoint.url}:`, error);
+      logger.error({ err: error }, `Webhook delivery failed to ${endpoint.url}:`);
       failures.push(endpoint.url);
     }
   }
@@ -170,7 +171,7 @@ export async function retryFailedWebhooks(failedUrls: string[], payload: Webhook
       try {
         await sendWebhook(url, endpoint.secret, payload);
       } catch (error) {
-        console.error(`Retry failed for webhook ${url}:`, error);
+        logger.error({ err: error }, `Retry failed for webhook ${url}:`);
       }
     }
   }

@@ -1,22 +1,41 @@
 // app/api/admin/logs/route.ts
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
-import { getLogs } from '@/services/audit.service';
+import { getLogsPaginated } from '@/services/audit.service';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireAdmin } from '@/lib/admin';
+import { rateLimit } from '@/lib/rate-limit';
+import { parsePaginationParams } from '@/lib/pagination';
+import logger from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
     const auth = await requireAdmin(request);
     if (auth.response) return auth.response;
 
+    // Admin endpoints are low-traffic but DB-backed — modest per-admin cap.
+    if (!rateLimit(`admin:${auth.user.userId}`, 120, 60 * 1000)) {
+      return errorResponse('Too many requests', 429);
+    }
+
     await connectDB();
 
-    const logs = await getLogs();
+    const sp = request.nextUrl.searchParams;
+    const pagination = parsePaginationParams(sp);
+    if ('error' in pagination) {
+      return errorResponse(pagination.error, 400);
+    }
 
-    return successResponse(logs);
+    const result = await getLogsPaginated({
+      ...pagination,
+      q: sp.get('q') ?? undefined,
+      action: sp.get('action') ?? undefined,
+      user: sp.get('user') ?? undefined,
+    });
+
+    return successResponse(result);
   } catch (error) {
-    console.error('Get admin logs error:', error);
+    logger.error({ err: error }, 'Get admin logs error:');
     return errorResponse('Failed to fetch logs', 500);
   }
 }

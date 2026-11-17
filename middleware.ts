@@ -20,16 +20,26 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("token")?.value;
 
+  // Server-generated correlation ID. Always overwritten — a
+  // client-supplied x-request-id is never trusted.
+  const requestId = crypto.randomUUID();
+
   // - Check if current route requires authentication
   const isProtectedRoute = PROTECTED_PATHS.some((path) =>
     pathname.startsWith(path)
   );
 
   if (!isProtectedRoute) {
-    const response = NextResponse.next();
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-request-id", requestId);
+
+    const response = NextResponse.next({
+      request: { headers: requestHeaders },
+    });
 
     // - Prevent private routes from being indexed
     response.headers.set("X-Robots-Tag", "noindex");
+    response.headers.set("x-request-id", requestId);
 
     return response;
   }
@@ -64,6 +74,7 @@ export async function middleware(request: NextRequest) {
 
   requestHeaders.set("x-user-id", user.userId);
   requestHeaders.set("x-user-role", user.role || "USER");
+  requestHeaders.set("x-request-id", requestId);
 
   const response = NextResponse.next({
     request: {
@@ -73,6 +84,7 @@ export async function middleware(request: NextRequest) {
 
   // - Prevent authenticated pages from search indexing
   response.headers.set("X-Robots-Tag", "noindex");
+  response.headers.set("x-request-id", requestId);
 
   return response;
 }
@@ -108,5 +120,6 @@ export const config = {
     "/profile/:path*",
     "/analytics/:path*",
     "/settings/:path*",
+    "/api/:path*",
   ],
 };

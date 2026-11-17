@@ -4,12 +4,12 @@ import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { uploadFile } from '@/services/file.service';
 import { successResponse, errorResponse } from '@/utils/response';
-import { requireAuth } from '@/lib/auth';
+import { requireSession } from '@/lib/session';
 import { validateAttachmentFile } from '@/lib/file-validation';
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 

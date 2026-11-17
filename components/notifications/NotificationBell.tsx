@@ -6,10 +6,15 @@ import { useState, useEffect } from 'react';
 import { apiRequest } from '@/lib/api';
 import useSocket from '@/hooks/useSocket';
 
+const PAGE_SIZE = 20;
+
 export default function NotificationBell({ userId }: { userId: string }) {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const socket = useSocket();
 
   useEffect(() => {
@@ -40,10 +45,40 @@ export default function NotificationBell({ userId }: { userId: string }) {
 
   async function fetchNotifications() {
     try {
-      const response = await apiRequest(`/api/notifications?user=${userId}`);
-      setNotifications(response.data || []);
+      const response = await apiRequest(
+        `/api/notifications?user=${userId}&page=1&limit=${PAGE_SIZE}`
+      );
+      const data = response.data;
+      setNotifications(data?.items || []);
+      setPage(1);
+      setHasMore(data?.hasMore || false);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
+    }
+  }
+
+  async function loadMoreNotifications() {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const response = await apiRequest(
+        `/api/notifications?user=${userId}&page=${nextPage}&limit=${PAGE_SIZE}`
+      );
+      const data = response.data;
+      const newItems: { _id: string }[] = data?.items || [];
+      // Dedupe by _id so socket-prepended or overlapping items
+      // are never rendered twice.
+      setNotifications((prev) => {
+        const seen = new Set(prev.map((n) => n._id));
+        return [...prev, ...newItems.filter((n) => !seen.has(n._id))];
+      });
+      setPage(nextPage);
+      setHasMore(data?.hasMore || false);
+    } catch (error) {
+      console.error('Failed to load more notifications:', error);
+    } finally {
+      setLoadingMore(false);
     }
   }
 
@@ -137,6 +172,15 @@ export default function NotificationBell({ userId }: { userId: string }) {
                     </p>
                   </div>
                 ))
+              )}
+              {hasMore && (
+                <button
+                  onClick={loadMoreNotifications}
+                  disabled={loadingMore}
+                  className="w-full p-3 text-sm text-blue-600 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  {loadingMore ? 'Loading...' : 'Load more'}
+                </button>
               )}
             </div>
           </div>

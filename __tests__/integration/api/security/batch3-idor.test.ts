@@ -13,6 +13,15 @@ jest.mock('@/lib/auth', () => ({
   createToken: jest.fn(),
 }));
 
+// Routes authenticate via requireSession (DB-backed tokenVersion check).
+jest.mock('@/lib/session', () => ({
+  requireSession: jest.fn(),
+  validateSessionToken: jest.fn(),
+  assertTokenVersion: jest.fn(),
+  bumpTokenVersion: jest.fn(),
+  extractTokenVersion: jest.fn(),
+}));
+
 jest.mock('@/lib/db', () => ({
   connectDB: jest.fn(async () => {}),
 }));
@@ -197,8 +206,8 @@ const nonMember = () => {
 };
 
 beforeAll(async () => {
-  const authModule = await import('@/lib/auth');
-  mockRequireAuth = jest.mocked(authModule.requireAuth) as typeof mockRequireAuth;
+  const sessionModule = await import('@/lib/session');
+  mockRequireAuth = jest.mocked(sessionModule.requireSession) as typeof mockRequireAuth;
 
   const taskService = await import('@/services/task.service');
   mockGetTasks = jest.mocked(taskService.getTasks) as typeof mockGetTasks;

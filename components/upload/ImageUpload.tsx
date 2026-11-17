@@ -3,6 +3,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { apiRequest } from '@/lib/api';
 
 interface ImageUploadProps {
@@ -162,12 +163,15 @@ export default function ImageUpload({
 
   return (
     <div className={className}>
-      <div className="relative">
+      <div className="relative h-32 w-full">
         {preview ? (
-          <img
+          <Image
             src={preview}
             alt="Preview"
-            className="h-32 w-full rounded-lg object-cover"
+            fill
+            sizes="(max-width: 768px) 100vw, 400px"
+            unoptimized={!/^https?:\/\//.test(preview)}
+            className="rounded-lg object-cover"
           />
         ) : (
           <div className="flex h-32 w-full items-center justify-center rounded-lg bg-gray-200">

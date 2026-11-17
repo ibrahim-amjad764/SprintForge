@@ -5,13 +5,13 @@ import { connectDB } from '@/lib/db';
 import { createAttachment,getAttachments } from '@/services/attachment.service';
 import { successResponse, errorResponse } from '@/utils/response';
 import cloudinary from '@/lib/cloudinary';
-import { requireAuth } from '@/lib/auth';
+import { requireSession } from '@/lib/session';
 import { validateAttachmentFile } from '@/lib/file-validation';
 import { getMembershipForTask, canWriteWorkspace } from '@/lib/authorization';
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 

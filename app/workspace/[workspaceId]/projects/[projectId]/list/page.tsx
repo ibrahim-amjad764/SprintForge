@@ -3,28 +3,34 @@ import { getTasks } from '@/services/task.service';
 import { getProjects } from '@/services/project.service';
 import { getWorkspaceMembers } from '@/services/workspace.service';
 import TaskList from '@/components/task/TaskList';
+import { requireWorkspaceAccess, requireProjectInWorkspace } from '@/lib/page-guards';
+import logger from '@/lib/logger';
 
 export default async function TaskListPage({
   params,
 }: {
   params: Promise<{ workspaceId: string; projectId: string }>;
 }) {
-  console.log("=== TASK LIST PAGE INITIALIZED ===");
+  logger.info("=== TASK LIST PAGE INITIALIZED ===");
   
   await connectDB();
 
   const { workspaceId, projectId } = await params;
-  console.log("Task list page params:", { workspaceId, projectId });
+  await requireWorkspaceAccess(workspaceId);
+  await requireProjectInWorkspace(projectId, workspaceId);
+  logger.info({ values: [{ workspaceId, projectId }] }, "Task list page params:");
   
-  const tasks = await getTasks(projectId);
-  const projects = await getProjects(workspaceId);
-  const workspaceMembers = await getWorkspaceMembers(workspaceId);
+  const [tasks, projects, workspaceMembers] = await Promise.all([
+    getTasks(projectId),
+    getProjects(workspaceId),
+    getWorkspaceMembers(workspaceId),
+  ]);
   
-  console.log("Data loaded:", { 
+  logger.info({ values: [{
     tasksCount: tasks.length, 
     projectsCount: projects.length, 
     membersCount: workspaceMembers.length 
-  });
+  }] }, "Data loaded:");
 
   // Transform workspace members to match TeamMember interface
   const teamMembers = workspaceMembers

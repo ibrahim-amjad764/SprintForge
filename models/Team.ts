@@ -85,6 +85,9 @@ const TeamSchema = new Schema<ITeam>(
   },
 );
 
+// Teams are always listed per workspace.
+TeamSchema.index({ workspace: 1 });
+
 const Team: Model<ITeam> =  mongoose.models.Team || mongoose.model<ITeam>("Team", TeamSchema);
 
 export default Team;

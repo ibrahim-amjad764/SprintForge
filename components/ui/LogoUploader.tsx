@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
 interface LogoUploaderProps {
@@ -104,10 +105,13 @@ export function LogoUploader({ logoUrl, onLogoChange, workspaceName, disabled = 
       >
         {preview ? (
           <>
-            <img
+            <Image
               src={preview}
               alt="Workspace logo"
-              className="w-full h-full object-cover rounded-lg"
+              fill
+              sizes="128px"
+              unoptimized={!/^https?:\/\//.test(preview)}
+              className="object-cover rounded-lg"
             />
             {!disabled && (
               <button

@@ -20,8 +20,19 @@ if (!JWT_SECRET) {
 const secretKey = new TextEncoder().encode(JWT_SECRET);
 
 // Create JWT token
-export async function createToken(userId: string) {
-  const token = await new SignJWT({ userId })
+// `role` is included for page-level routing hints only — privileged
+// API access is always re-verified against the database via
+// requireAdmin()/checkAdmin() and is never trusted from this claim.
+export async function createToken(
+  userId: string,
+  role?: string,
+  tokenVersion?: number,
+) {
+  const token = await new SignJWT({
+    userId,
+    ...(role ? { role } : {}),
+    ...(tokenVersion !== undefined ? { tokenVersion } : {}),
+  })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
@@ -42,6 +53,7 @@ export async function verifyToken(token: string) {
 export interface AuthPayload {
   userId: string;
   role?: string;
+  tokenVersion?: number;
 }
 
 export type AuthResult =

@@ -2,10 +2,11 @@
 
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
-import { createTask, getTasks, getTasksByWorkspace } from '@/services/task.service';
+import { createTask, getTasks, getTasksByWorkspace, getTasksPaginated, getTasksByWorkspacePaginated } from '@/services/task.service';
+import { parsePaginationParams } from '@/lib/pagination';
 import { successResponse, errorResponse } from '@/utils/response';
 import { rateLimit } from '@/lib/rate-limit';
-import { requireAuth } from '@/lib/auth';
+import { requireSession } from '@/lib/session';
 import {
   getMembershipForProject,
   getMembershipForTeam,
@@ -15,6 +16,7 @@ import {
 } from '@/lib/authorization';
 import { revalidatePath } from 'next/cache';
 import Team from '@/models/Team';
+import logger from '@/lib/logger';
 
 /*
  Task API
@@ -49,7 +51,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
@@ -121,9 +123,9 @@ export async function POST(request: NextRequest) {
           }
         }
         
-        console.log('📅 Processed Due Date:', processedDueDate);
+        logger.info({ values: [processedDueDate] }, '📅 Processed Due Date:');
       } catch (error) {
-        console.error('❌ Invalid due date format:', body.dueDate, error);
+        logger.error({ err: error, context: [body.dueDate] }, '❌ Invalid due date format:');
         return errorResponse('Invalid due date format', 400);
       }
     }
@@ -159,9 +161,9 @@ export async function POST(request: NextRequest) {
         await Team.findByIdAndUpdate(body.teamId, {
           $inc: { totalTasksCount: 1 }
         });
-        console.log('📈 Team task counter incremented');
+        logger.info('📈 Team task counter incremented');
       } catch (error) {
-        console.error('⚠️ Failed to increment team task counter:', error);
+        logger.error({ err: error }, '⚠️ Failed to increment team task counter:');
         // Don't fail the task creation if this fails
       }
     }
@@ -177,7 +179,7 @@ export async function POST(request: NextRequest) {
 
     return successResponse(task, 'Task created');
   } catch (error) {
-    console.error('❌ Create Task Error:', error);
+    logger.error({ err: error }, '❌ Create Task Error:');
     
     // Don't expose internal error details to client
     return errorResponse('Failed to create task', 500);
@@ -199,14 +201,27 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
     await connectDB();
 
-    const project = request.nextUrl.searchParams.get('project');
-    const workspace = request.nextUrl.searchParams.get('workspace');
+    const sp = request.nextUrl.searchParams;
+    const project = sp.get('project');
+    const workspace = sp.get('workspace');
+
+    // Opt-in pagination: only when the client passes page/limit.
+    // Otherwise the legacy full-array response is preserved for
+    // consumers that need complete datasets (Kanban, Calendar).
+    let pagination = null;
+    if (sp.has('page') || sp.has('limit')) {
+      const parsed = parsePaginationParams(sp);
+      if ('error' in parsed) {
+        return errorResponse(parsed.error, 400);
+      }
+      pagination = parsed;
+    }
 
     let tasks;
 
@@ -216,21 +231,25 @@ export async function GET(request: NextRequest) {
       if (!membership) {
         return errorResponse('Forbidden', 403);
       }
-      tasks = await getTasks(project);
+      tasks = pagination
+        ? await getTasksPaginated(project, pagination)
+        : await getTasks(project);
     } else if (workspace) {
       // IDOR: user must be a member of the workspace
       const membership = await getWorkspaceMembership(workspace, userId);
       if (!membership) {
         return errorResponse('Forbidden', 403);
       }
-      tasks = await getTasksByWorkspace(workspace);
+      tasks = pagination
+        ? await getTasksByWorkspacePaginated(workspace, pagination)
+        : await getTasksByWorkspace(workspace);
     } else {
       return errorResponse('Project or workspace required');
     }
 
     return successResponse(tasks);
   } catch (error) {
-    console.error('❌ Get Tasks Error:', error);
+    logger.error({ err: error }, '❌ Get Tasks Error:');
 
     return errorResponse('Server error', 500);
   }

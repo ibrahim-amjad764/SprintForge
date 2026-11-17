@@ -66,6 +66,9 @@ const NotificationSchema = new Schema<INotification>(
   }
 );
 
+// Notification feed: per-user list sorted newest-first, plus unread counts.
+NotificationSchema.index({ user: 1, read: 1, createdAt: -1 });
+
 const Notification: Model<INotification> =
   mongoose.models.Notification ||
   mongoose.model<INotification>('Notification', NotificationSchema);

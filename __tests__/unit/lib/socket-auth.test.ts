@@ -57,6 +57,15 @@ jest.mock('@/models/Team', () => ({
   default: { findById: jest.fn() },
 }));
 
+// Session validation (tokenVersion) hits the User collection.
+const mockUserFindById = jest.fn();
+jest.mock('@/models/User', () => ({
+  __esModule: true,
+  default: {
+    findById: (...args: unknown[]) => mockUserFindById(...args),
+  },
+}));
+
 type Middleware = (
   socket: ReturnType<typeof fakeSocket>,
   next: (err?: Error) => void,
@@ -80,8 +89,10 @@ function fakeSocket(handshake: {
   return {
     handshake,
     userId: undefined as string | undefined,
+    tokenVersion: undefined as number | undefined,
     join: mockJoin,
     leave: mockLeave,
+    disconnect: jest.fn(),
   };
 }
 
@@ -110,12 +121,16 @@ beforeAll(async () => {
 beforeEach(() => {
   jest.clearAllMocks();
   mockJwtVerify.mockResolvedValue({ payload: { userId: 'user-1' } });
+  // DB session version 0 matches JWTs without a tokenVersion claim.
+  mockUserFindById.mockReturnValue(chain({ tokenVersion: 0 }));
 
   roomHandlers = {};
   const fakeSock = {
     userId: 'user-1',
+    tokenVersion: 0,
     join: mockJoin,
     leave: mockLeave,
+    disconnect: jest.fn(),
     on: (event: string, handler: (arg: string) => Promise<void>) => {
       roomHandlers[event] = handler;
     },
@@ -192,5 +207,50 @@ describe('Socket.IO room authorization', () => {
     mockMemberFindOne.mockReturnValue(chain({ role: 'VIEWER' }));
     await roomHandlers['join-project']('proj-1');
     expect(mockJoin).toHaveBeenCalledWith('project:proj-1');
+  });
+});
+
+describe('Socket.IO session revocation', () => {
+  it('rejects new connections when tokenVersion mismatches (revoked)', async () => {
+    // JWT carries version 0 but DB was bumped to 1 (e.g. logout).
+    mockUserFindById.mockReturnValue(chain({ tokenVersion: 1 }));
+    const sock = fakeSocket({ auth: { token: 'stale' }, headers: {} });
+    const next = jest.fn();
+    await middleware(sock, next);
+    expect(next).toHaveBeenCalledWith(expect.any(Error));
+    expect(sock.userId).toBeUndefined();
+  });
+
+  it('rejects new connections with malformed tokenVersion claim', async () => {
+    mockJwtVerify.mockResolvedValue({
+      payload: { userId: 'user-1', tokenVersion: 'not-a-number' },
+    });
+    const sock = fakeSocket({ auth: { token: 'bad-claim' }, headers: {} });
+    const next = jest.fn();
+    await middleware(sock, next);
+    expect(next).toHaveBeenCalledWith(expect.any(Error));
+    expect(sock.userId).toBeUndefined();
+  });
+
+  it('disconnects a live socket that tries to join a room after revocation', async () => {
+    // Socket connected at version 0; DB now at version 1.
+    mockUserFindById.mockReturnValue(chain({ tokenVersion: 1 }));
+    mockMemberFindOne.mockReturnValue(chain({ role: 'EDITOR' }));
+
+    const liveSock = {
+      userId: 'user-1',
+      tokenVersion: 0,
+      join: mockJoin,
+      leave: mockLeave,
+      disconnect: jest.fn(),
+      on: (event: string, handler: (arg: string) => Promise<void>) => {
+        roomHandlers[event] = handler;
+      },
+    };
+    connectionHandler(liveSock);
+
+    await roomHandlers['join-workspace']('ws-1');
+    expect(liveSock.disconnect).toHaveBeenCalledWith(true);
+    expect(mockJoin).not.toHaveBeenCalledWith('workspace:ws-1');
   });
 });

@@ -12,6 +12,7 @@ import { PrivacyRadioCards } from "@/components/ui/PrivacyRadioCards";
 import { IndustryTags } from "@/components/ui/IndustryTags";
 import { WorkspaceHeroBanner } from "@/components/ui/WorkspaceHeroBanner";
 import { useDebounceSlugValidation } from "@/hooks/useDebounceSlugValidation";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { Sparkles, Users, Zap, Shield, Globe, Calendar, X, AlertCircle } from "lucide-react";
 import { SiGithub, SiGitlab } from 'react-icons/si';
 
@@ -83,7 +84,7 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
   const [currentStep, setCurrentStep] = useState<Step>("basic");
   const [formData, setFormData] = useState<FormData>(defaultFormData);
   const [loading, setLoading] = useState(false);
-  const [isOnline, setIsOnline] = useState(true);
+  const isOnline = useOnlineStatus();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDirty, setIsDirty] = useState(false);
   const [showDraftAlert, setShowDraftAlert] = useState(false);
@@ -94,17 +95,21 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
 
   // Local draft auto-save with crash recovery
   useEffect(() => {
-    const savedDraft = localStorage.getItem('workspaceDraft');
-    if (savedDraft && !isDirty) {
-      try {
-        const parsed = JSON.parse(savedDraft);
-        setFormData(parsed);
-        setIsDirty(true);
-        setShowDraftAlert(true);
-      } catch (e) {
-        console.error('Failed to parse draft:', e);
+    const timeoutId = setTimeout(() => {
+      const savedDraft = localStorage.getItem('workspaceDraft');
+      if (savedDraft) {
+        try {
+          const parsed = JSON.parse(savedDraft);
+          setFormData(parsed);
+          setIsDirty(true);
+          setShowDraftAlert(true);
+        } catch (e) {
+          console.error('Failed to parse draft:', e);
+        }
       }
-    }
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   useEffect(() => {
@@ -133,33 +138,21 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
     }
   }, []);
 
-  // Network offline detection
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    setIsOnline(navigator.onLine);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
   // Update slug when name changes
-  useEffect(() => {
-    const newSlug = formData.name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-    setSlug(newSlug);
-    setFormData(prev => ({ ...prev, slug: newSlug }));
+  const slugifiedName = formData.name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+  const [prevSlugifiedName, setPrevSlugifiedName] =
+    useState(slugifiedName);
+  if (slugifiedName !== prevSlugifiedName) {
+    setPrevSlugifiedName(slugifiedName);
+    setSlug(slugifiedName);
+    setFormData((prev) => ({ ...prev, slug: slugifiedName }));
     setIsDirty(formData.name.length > 0);
-  }, [formData.name, setSlug]);
+  }
 
   // AI Description Generation
   const handleGenerateDescription = async () => {

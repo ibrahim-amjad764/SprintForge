@@ -4,7 +4,7 @@ import { connectDB } from "@/lib/db";
 import Workspace from "@/models/Workspace";
 import { updateWorkspace, deleteWorkspace } from "@/services/workspace.service";
 import { successResponse, errorResponse } from "@/utils/response";
-import { requireAuth } from "@/lib/auth";
+import { requireSession } from "@/lib/session";
 import { getWorkspaceMembership } from "@/lib/authorization";
 import type { WorkspaceRole } from "@/models/WorkspaceMember";
 
@@ -17,7 +17,7 @@ export async function GET(
   },
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
@@ -30,7 +30,7 @@ export async function GET(
       return errorResponse("Forbidden", 403);
     }
 
-    const workspace = await Workspace.findById(id).populate({ path: 'owner', select: '-password' });
+    const workspace = await Workspace.findById(id).populate({ path: 'owner', select: '_id name email avatar' });
     
     if (!workspace) {
       return errorResponse("Workspace not found", 404);
@@ -49,7 +49,7 @@ export async function PUT(
   },
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
@@ -78,7 +78,7 @@ export async function DELETE(
   },
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 

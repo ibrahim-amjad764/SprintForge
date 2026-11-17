@@ -2,6 +2,7 @@
 
 import { NextRequest } from 'next/server';
 import stripe from '@/lib/stripe';
+import logger from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -30,12 +31,12 @@ export async function POST(request: NextRequest) {
 
   switch (event.type) {
     case 'customer.subscription.created':
-      console.log('Subscription created');
+      logger.info('Subscription created');
 
       break;
 
     case 'customer.subscription.deleted':
-      console.log('Subscription cancelled');
+      logger.info('Subscription cancelled');
 
       break;
   }

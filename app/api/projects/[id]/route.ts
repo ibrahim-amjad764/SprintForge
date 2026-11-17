@@ -3,13 +3,13 @@ import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db";
 import { updateProject, deleteProject, unarchiveProject } from "@/services/project.service";
 import { successResponse, errorResponse } from "@/utils/response";
-import { requireAuth } from "@/lib/auth";
+import { requireSession } from "@/lib/session";
 import { getMembershipForProject, canWriteWorkspace } from "@/lib/authorization";
 import { revalidatePath } from "next/cache";
 
 export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
-        const auth = await requireAuth(request);
+        const auth = await requireSession(request);
         if (auth.response) return auth.response;
         const userId = auth.user.userId;
 
@@ -48,7 +48,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
 
 export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
-        const auth = await requireAuth(request);
+        const auth = await requireSession(request);
         if (auth.response) return auth.response;
         const userId = auth.user.userId;
 

@@ -1,5 +1,6 @@
 // services/vcs-provisioning.service.ts
 import Workspace from '@/models/Workspace';
+import logger from '@/lib/logger';
 
 export interface RepositoryConfig {
   name: string;
@@ -321,7 +322,7 @@ export async function autoProvisionRepository(workspaceId: string): Promise<stri
 
     return repositoryUrl;
   } catch (error) {
-    console.error('Repository provisioning error:', error);
+    logger.error({ err: error }, 'Repository provisioning error:');
     return null;
   }
 }

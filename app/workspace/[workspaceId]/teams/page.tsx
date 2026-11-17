@@ -1,14 +1,17 @@
 import TeamsClient from '@/components/team/TeamsClient';
+import { requireWorkspaceAccess } from '@/lib/page-guards';
+import logger from '@/lib/logger';
 
 export default async function TeamsPage({
   params,
 }: {
   params: Promise<{ workspaceId: string }>;
 }) {
-  console.log("=== TEAMS PAGE INITIALIZED ===");
+  logger.info("=== TEAMS PAGE INITIALIZED ===");
   
   const { workspaceId } = await params;
-  console.log("Teams page workspaceId:", workspaceId);
+  await requireWorkspaceAccess(workspaceId);
+  logger.info({ values: [workspaceId] }, "Teams page workspaceId:");
 
   return (
     <div>

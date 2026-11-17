@@ -3,14 +3,15 @@
 import { NextRequest } from 'next/server';
 import { uploadFile } from '@/lib/upload';
 import { successResponse, errorResponse } from '@/utils/response';
-import { requireAuth } from '@/lib/auth';
+import { requireSession } from '@/lib/session';
+import logger from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
 
-    console.log('Upload API - request received');
+    logger.info('Upload API - request received');
 
     // --------------------------------------------------------
     // Parse multipart/form-data.
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
 
-    console.log('Upload API - FormData parsed successfully');
+    logger.info('Upload API - FormData parsed successfully');
 
     // --------------------------------------------------------
     // Get uploaded file.
@@ -29,12 +30,12 @@ export async function POST(request: NextRequest) {
 
     const fileValue = formData.get('file');
 
-    console.log('Upload API - file received:', {
+    logger.info({ values: [{
       exists: !!fileValue,
       type: fileValue instanceof File ? fileValue.type : typeof fileValue,
       name: fileValue instanceof File ? fileValue.name : undefined,
       size: fileValue instanceof File ? fileValue.size : undefined,
-    });
+    }] }, 'Upload API - file received:');
 
     // --------------------------------------------------------
     // Runtime file validation.
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
     // --------------------------------------------------------
 
     if (!(fileValue instanceof File)) {
-      console.error('Upload API - No valid file provided');
+      logger.error('Upload API - No valid file provided');
 
       return errorResponse('No valid file provided', 400);
     }
@@ -72,13 +73,13 @@ export async function POST(request: NextRequest) {
         ? (resourceTypeValue.trim() as (typeof validResourceTypes)[number])
         : 'image';
 
-    console.log('Upload API - upload options:', {
+    logger.info({ values: [{
       folder,
       resourceType,
       fileName: file.name,
       fileType: file.type,
       fileSize: file.size,
-    });
+    }] }, 'Upload API - upload options:');
 
     // --------------------------------------------------------
     // Validate file size before sending it to the provider.
@@ -89,11 +90,11 @@ export async function POST(request: NextRequest) {
     const maxFileSize = 5 * 1024 * 1024; // 5MB
 
     if (file.size > maxFileSize) {
-      console.error('❌ Upload API - file size exceeded:', {
+      logger.error({ values: [{
         fileName: file.name,
         fileSize: file.size,
         maxFileSize,
-      });
+      }] }, '❌ Upload API - file size exceeded:');
 
       return errorResponse('File size must be 5MB or less', 400);
     }
@@ -114,10 +115,10 @@ export async function POST(request: NextRequest) {
     ];
 
     if (!allowedMimeTypes.includes(file.type)) {
-      console.error('❌ Upload API - unsupported file type:', {
+      logger.error({ values: [{
         fileName: file.name,
         fileType: file.type,
-      });
+      }] }, '❌ Upload API - unsupported file type:');
 
       return errorResponse(
         'Unsupported image format. Allowed formats: JPG, JPEG, PNG, GIF, WEBP',
@@ -131,11 +132,11 @@ export async function POST(request: NextRequest) {
     // Existing uploadFile() functionality is preserved.
     // --------------------------------------------------------
 
-    console.log('Upload API - uploading file:', {
+    logger.info({ values: [{
       fileName: file.name,
       folder,
       resourceType,
-    });
+    }] }, 'Upload API - uploading file:');
 
     const result = await uploadFile(file, {
       folder,
@@ -151,12 +152,12 @@ export async function POST(request: NextRequest) {
     // response contains sensitive credentials.
     // --------------------------------------------------------
 
-    console.log('Upload API - file uploaded successfully:', {
+    logger.info({ values: [{
       fileName: file.name,
       folder,
       resourceType,
       hasResult: !!result,
-    });
+    }] }, 'Upload API - file uploaded successfully:');
 
     return successResponse(result, 'File uploaded successfully');
   } catch (error: unknown) {
@@ -164,11 +165,11 @@ export async function POST(request: NextRequest) {
     // Centralized upload error handling.
     // --------------------------------------------------------
 
-    console.error('Upload API - upload failed:', error);
+    logger.error({ err: error }, 'Upload API - upload failed:');
 
     const message = error instanceof Error ? error.message : 'Upload failed';
 
-    console.error('Upload API - error message:', message);
+    logger.error({ values: [message] }, 'Upload API - error message:');
 
     return errorResponse(message, 500);
   }

@@ -15,33 +15,38 @@ interface Task {
 }
 
 export default function TaskFeed({ workspaceId }: { workspaceId?: string }) {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [refreshTick, setRefreshTick] = useState(0);
+  const fetchKey = workspaceId ? `${workspaceId}:${refreshTick}` : null;
+  const [result, setResult] = useState<{ key: string; tasks: Task[] } | null>(
+    null
+  );
 
-  async function loadTasks() {
-    // Intercept call if no workspace is active/selected yet
-    if (!workspaceId) {
-      setTasks([]);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Direct integration matching your active workspace state
-      const url = `/api/tasks?workspace=${workspaceId}`;
-      const response = await apiRequest(url);
-      setTasks(response.data || []);
-    } catch (error) {
-      console.error("Failed to load tasks:", error);
-      setTasks([]);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const tasks = result?.key === fetchKey ? result.tasks : [];
+  const loading = fetchKey !== null && result?.key !== fetchKey;
 
   useEffect(() => {
-    loadTasks();
-  }, [workspaceId]);
+    if (!fetchKey || !workspaceId) return;
+
+    let cancelled = false;
+    // Paginated: fetch only the 10 most recent tasks instead of
+    // the entire workspace collection.
+    apiRequest(`/api/tasks?workspace=${workspaceId}&page=1&limit=10`)
+      .then((response) => {
+        if (!cancelled) {
+          setResult({ key: fetchKey, tasks: response.data?.items || [] });
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load tasks:", error);
+        if (!cancelled) {
+          setResult({ key: fetchKey, tasks: [] });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchKey, workspaceId]);
 
 
   const getStatusColor = (status: string) => {
@@ -75,7 +80,7 @@ export default function TaskFeed({ workspaceId }: { workspaceId?: string }) {
       <div className="mb-4 flex items-center justify-between">
         <h2 className="font-bold">Recent Tasks</h2>
         <button
-          onClick={loadTasks}
+          onClick={() => setRefreshTick((tick) => tick + 1)}
           className="rounded px-3 py-1 text-sm text-blue-600 hover:bg-blue-50"
         >
           Refresh
@@ -103,7 +108,7 @@ export default function TaskFeed({ workspaceId }: { workspaceId?: string }) {
               </tr>
             </thead>
             <tbody>
-              {tasks.slice(0, 10).map((task) => (
+              {tasks.map((task) => (
                 <tr key={task._id} className="border-b hover:bg-gray-50">
                   <td className="py-3 font-medium">{task.title}</td>
                   <td className="py-3 text-gray-600">{task.project?.name || "-"}</td>

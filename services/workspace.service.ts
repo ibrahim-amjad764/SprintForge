@@ -7,6 +7,7 @@ import WorkspaceMember, {
 import Organization from '@/models/Organization';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
+import logger from '@/lib/logger';
 
 /*
   Workspace Service Layer
@@ -53,7 +54,7 @@ export async function generateUniqueSlug(
   });
 
   if (!existing) {
-    console.log('Workspace slug available:', baseSlug);
+    logger.info({ values: [baseSlug] }, 'Workspace slug available:');
 
     return baseSlug;
   }
@@ -75,7 +76,7 @@ export async function generateUniqueSlug(
     });
 
     if (!exists) {
-      console.log('Generated unique workspace slug:', alt);
+      logger.info({ values: [alt] }, 'Generated unique workspace slug:');
 
       return alt;
     }
@@ -83,10 +84,7 @@ export async function generateUniqueSlug(
 
   const fallbackSlug = `${baseSlug}-${Date.now()}`;
 
-  console.log(
-    'Using fallback workspace slug:',
-    fallbackSlug
-  );
+  logger.info({ values: [fallbackSlug] }, 'Using fallback workspace slug:');
 
   return fallbackSlug;
 }
@@ -96,7 +94,7 @@ export async function generateUniqueSlug(
 // ============================================================
 
 export function generateTenantKey(): string {
-  console.log('Generating tenant encryption key');
+  logger.info('Generating tenant encryption key');
 
   return crypto.randomBytes(32).toString('hex');
 }
@@ -204,11 +202,11 @@ export async function createWorkspace(data: {
   const session = await mongoose.startSession();
 
   try {
-    console.log('Creating workspace:', {
+    logger.info({ values: [{
       name: data.name,
       owner: data.owner,
       organization: data.organization,
-    });
+    }] }, 'Creating workspace:');
 
     session.startTransaction();
 
@@ -269,10 +267,7 @@ export async function createWorkspace(data: {
         };
 
     if (scrubbedDescription.flagged) {
-      console.warn(
-        'PII/Secrets detected in workspace description:',
-        scrubbedDescription.patterns
-      );
+      logger.warn({ values: [scrubbedDescription.patterns] }, 'PII/Secrets detected in workspace description:');
     }
 
     // --------------------------------------------------------
@@ -387,10 +382,7 @@ export async function createWorkspace(data: {
 
     const createdWorkspace = workspace[0];
 
-    console.log(
-      'Workspace created:',
-      createdWorkspace._id
-    );
+    logger.info({ values: [createdWorkspace._id] }, 'Workspace created:');
 
     // --------------------------------------------------------
     // Add owner as workspace member
@@ -417,10 +409,7 @@ export async function createWorkspace(data: {
       { session }
     );
 
-    console.log(
-      'Workspace owner added:',
-      data.owner
-    );
+    logger.info({ values: [data.owner] }, 'Workspace owner added:');
 
     // --------------------------------------------------------
     // Add additional workspace members
@@ -465,10 +454,7 @@ export async function createWorkspace(data: {
         }).session(session);
 
         if (!user) {
-          console.log(
-            'User not found, skipping member:',
-            memberEmail
-          );
+          logger.info({ values: [memberEmail] }, 'User not found, skipping member:');
 
           continue;
         }
@@ -484,10 +470,7 @@ export async function createWorkspace(data: {
           }).session(session);
 
         if (existingMember) {
-          console.log(
-            'User already belongs to workspace, skipping:',
-            memberEmail
-          );
+          logger.info({ values: [memberEmail] }, 'User already belongs to workspace, skipping:');
 
           continue;
         }
@@ -514,13 +497,10 @@ export async function createWorkspace(data: {
 
         addedMembersCount++;
 
-        console.log(
-          'Workspace member added:',
-          {
+        logger.info({ values: [{
             email: memberEmail,
             userId: user._id,
-          }
-        );
+          }] }, 'Workspace member added:');
       }
 
       // ----------------------------------------------------
@@ -538,27 +518,18 @@ export async function createWorkspace(data: {
         { session }
       );
 
-      console.log(
-        'Workspace member count updated:',
-        addedMembersCount + 1
-      );
+      logger.info({ values: [addedMembersCount + 1] }, 'Workspace member count updated:');
     }
 
     await session.commitTransaction();
 
-    console.log(
-      'Workspace transaction committed:',
-      createdWorkspace._id
-    );
+    logger.info({ values: [createdWorkspace._id] }, 'Workspace transaction committed:');
 
     return createdWorkspace;
   } catch (error) {
     await session.abortTransaction();
 
-    console.error(
-      'Failed to create workspace:',
-      error
-    );
+    logger.error({ err: error }, 'Failed to create workspace:');
 
     throw error;
   } finally {
@@ -574,29 +545,20 @@ export async function getUserWorkspaces(
   userId: string
 ) {
   try {
-    console.log(
-      'Fetching workspaces for user:',
-      userId
-    );
+    logger.info({ values: [userId] }, 'Fetching workspaces for user:');
 
     const memberships =
       await WorkspaceMember.find({
         user: userId,
       }).populate('workspace');
 
-    console.log(
-      'User workspaces found:',
-      memberships.length
-    );
+    logger.info({ values: [memberships.length] }, 'User workspaces found:');
 
     return memberships.map(
       (item) => item.workspace
     );
   } catch (error) {
-    console.error(
-      'Failed to fetch user workspaces:',
-      error
-    );
+    logger.error({ err: error }, 'Failed to fetch user workspaces:');
 
     throw error;
   }
@@ -611,19 +573,13 @@ export async function updateWorkspace(
   data: any
 ) {
   try {
-    console.log(
-      'Updating workspace:',
-      id
-    );
+    logger.info({ values: [id] }, 'Updating workspace:');
 
     const existingWorkspace =
       await Workspace.findById(id);
 
     if (!existingWorkspace) {
-      console.error(
-        'Workspace not found:',
-        id
-      );
+      logger.error({ values: [id] }, 'Workspace not found:');
 
       return null;
     }
@@ -661,17 +617,11 @@ export async function updateWorkspace(
         }
       );
 
-    console.log(
-      'Workspace updated:',
-      id
-    );
+    logger.info({ values: [id] }, 'Workspace updated:');
 
     return updatedWorkspace;
   } catch (error) {
-    console.error(
-      'Failed to update workspace:',
-      error
-    );
+    logger.error({ err: error }, 'Failed to update workspace:');
 
     throw error;
   }
@@ -685,10 +635,7 @@ export async function deleteWorkspace(
   id: string
 ) {
   try {
-    console.log(
-      'Starting workspace deletion:',
-      id
-    );
+    logger.info({ values: [id] }, 'Starting workspace deletion:');
 
     // --------------------------------------------------------
     // Load related models
@@ -718,10 +665,7 @@ export async function deleteWorkspace(
       (project) => project._id
     );
 
-    console.log(
-      'Projects found for deletion:',
-      projectIds.length
-    );
+    logger.info({ values: [projectIds.length] }, 'Projects found for deletion:');
 
     // --------------------------------------------------------
     // Find tasks belonging to these projects.
@@ -740,10 +684,7 @@ export async function deleteWorkspace(
       (task) => task._id
     );
 
-    console.log(
-      'Tasks found for deletion:',
-      taskIds.length
-    );
+    logger.info({ values: [taskIds.length] }, 'Tasks found for deletion:');
 
     // --------------------------------------------------------
     // Delete comments first
@@ -756,10 +697,7 @@ export async function deleteWorkspace(
         },
       });
 
-      console.log(
-        'Task comments deleted:',
-        taskIds.length
-      );
+      logger.info({ values: [taskIds.length] }, 'Task comments deleted:');
     }
 
     // --------------------------------------------------------
@@ -773,10 +711,7 @@ export async function deleteWorkspace(
         },
       });
 
-      console.log(
-        'Tasks deleted:',
-        taskIds.length
-      );
+      logger.info({ values: [taskIds.length] }, 'Tasks deleted:');
     }
 
     // --------------------------------------------------------
@@ -789,9 +724,7 @@ export async function deleteWorkspace(
       },
     });
 
-    console.log(
-      'Workspace notifications deleted'
-    );
+    logger.info('Workspace notifications deleted');
 
     // --------------------------------------------------------
     // Delete workspace members
@@ -801,9 +734,7 @@ export async function deleteWorkspace(
       workspace: id,
     });
 
-    console.log(
-      'Workspace members deleted'
-    );
+    logger.info('Workspace members deleted');
 
     // --------------------------------------------------------
     // Delete projects
@@ -816,10 +747,7 @@ export async function deleteWorkspace(
         },
       });
 
-      console.log(
-        'Projects deleted:',
-        projectIds.length
-      );
+      logger.info({ values: [projectIds.length] }, 'Projects deleted:');
     }
 
     // --------------------------------------------------------
@@ -830,25 +758,16 @@ export async function deleteWorkspace(
       await Workspace.findByIdAndDelete(id);
 
     if (!deletedWorkspace) {
-      console.error(
-        'Workspace not found:',
-        id
-      );
+      logger.error({ values: [id] }, 'Workspace not found:');
 
       return null;
     }
 
-    console.log(
-      'Workspace successfully deleted:',
-      id
-    );
+    logger.info({ values: [id] }, 'Workspace successfully deleted:');
 
     return deletedWorkspace;
   } catch (error) {
-    console.error(
-      'Failed to delete workspace:',
-      error
-    );
+    logger.error({ err: error }, 'Failed to delete workspace:');
 
     throw error;
   }
@@ -862,28 +781,19 @@ export async function getWorkspaceById(
   id: string
 ) {
   try {
-    console.log(
-      'Fetching workspace:',
-      id
-    );
+    logger.info({ values: [id] }, 'Fetching workspace:');
 
     const workspace =
       await Workspace.findById(id)
-        .populate({ path: 'owner', select: '-password' });
+        .populate({ path: 'owner', select: '_id name email avatar' });
 
     if (!workspace) {
-      console.error(
-        'Workspace not found:',
-        id
-      );
+      logger.error({ values: [id] }, 'Workspace not found:');
     }
 
     return workspace;
   } catch (error) {
-    console.error(
-      'Failed to fetch workspace:',
-      error
-    );
+    logger.error({ err: error }, 'Failed to fetch workspace:');
 
     throw error;
   }
@@ -897,29 +807,20 @@ export async function getWorkspaceMembers(
   workspaceId: string
 ) {
   try {
-    console.log(
-      'Fetching workspace members:',
-      workspaceId
-    );
+    logger.info({ values: [workspaceId] }, 'Fetching workspace members:');
 
     const members =
       await WorkspaceMember.find({
         workspace: workspaceId,
       })
-        .populate({ path: 'user', select: '-password' })
+        .populate({ path: 'user', select: '_id name email avatar' })
         .lean();
 
-    console.log(
-      'Workspace members found:',
-      members.length
-    );
+    logger.info({ values: [members.length] }, 'Workspace members found:');
 
     return members;
   } catch (error) {
-    console.error(
-      'Failed to fetch workspace members:',
-      error
-    );
+    logger.error({ err: error }, 'Failed to fetch workspace members:');
 
     throw error;
   }
@@ -935,14 +836,11 @@ export async function addWorkspaceMember(data: {
   role?: WorkspaceRole;
 }) {
   try {
-    console.log(
-      'Adding workspace member:',
-      {
+    logger.info({ values: [{
         workspace: data.workspace,
         user: data.user,
         role: data.role,
-      }
-    );
+      }] }, 'Adding workspace member:');
 
     // --------------------------------------------------------
     // Check workspace exists
@@ -954,10 +852,7 @@ export async function addWorkspaceMember(data: {
       );
 
     if (!workspace) {
-      console.error(
-        'Workspace not found:',
-        data.workspace
-      );
+      logger.error({ values: [data.workspace] }, 'Workspace not found:');
 
       throw new Error(
         'Workspace not found'
@@ -975,13 +870,10 @@ export async function addWorkspaceMember(data: {
       });
 
     if (existing) {
-      console.log(
-        'User already belongs to workspace:',
-        {
+      logger.info({ values: [{
           workspace: data.workspace,
           user: data.user,
-        }
-      );
+        }] }, 'User already belongs to workspace:');
 
       throw new Error(
         'User is already a member of this workspace'
@@ -995,21 +887,18 @@ export async function addWorkspaceMember(data: {
 const currentMembers = workspace.currentMembers ?? 0;
 const maxMembers = workspace.maxMembers ?? 50;
 
-console.log('Workspace member limit check:', {
+logger.info({ values: [{
   workspaceId: data.workspace,
   currentMembers,
   maxMembers,
-});
+}] }, 'Workspace member limit check:');
 
 if (currentMembers >= maxMembers) {
-  console.error(
-    'Workspace member limit reached:',
-    {
+  logger.error({ values: [{
       workspace: data.workspace,
       currentMembers,
       maxMembers,
-    }
-  );
+    }] }, 'Workspace member limit reached:');
 
   throw new Error(
     'Workspace member limit reached'
@@ -1047,22 +936,16 @@ if (currentMembers >= maxMembers) {
       }
     );
 
-    console.log(
-      'Workspace member created:',
-      {
+    logger.info({ values: [{
         id: member._id,
         workspace: member.workspace,
         user: member.user,
         role: member.role,
-      }
-    );
+      }] }, 'Workspace member created:');
 
     return member;
   } catch (error) {
-    console.error(
-      'Failed to add workspace member:',
-      error
-    );
+    logger.error({ err: error }, 'Failed to add workspace member:');
 
     throw error;
   }
@@ -1077,13 +960,10 @@ export async function updateWorkspaceMember(
   role: WorkspaceRole
 ) {
   try {
-    console.log(
-      'Updating workspace member:',
-      {
+    logger.info({ values: [{
         memberId,
         role,
-      }
-    );
+      }] }, 'Updating workspace member:');
 
     const member =
       await WorkspaceMember.findByIdAndUpdate(
@@ -1098,30 +978,21 @@ export async function updateWorkspaceMember(
       );
 
     if (!member) {
-      console.error(
-        'Workspace member not found:',
-        memberId
-      );
+      logger.error({ values: [memberId] }, 'Workspace member not found:');
 
       throw new Error(
         'Workspace member not found'
       );
     }
 
-    console.log(
-      'Workspace member role updated:',
-      {
+    logger.info({ values: [{
         memberId,
         role: member.role,
-      }
-    );
+      }] }, 'Workspace member role updated:');
 
     return member;
   } catch (error) {
-    console.error(
-      'Failed to update workspace member:',
-      error
-    );
+    logger.error({ err: error }, 'Failed to update workspace member:');
 
     throw error;
   }
@@ -1135,10 +1006,7 @@ export async function removeWorkspaceMember(
   memberId: string
 ) {
   try {
-    console.log(
-      'Removing workspace member:',
-      memberId
-    );
+    logger.info({ values: [memberId] }, 'Removing workspace member:');
 
     const member =
       await WorkspaceMember.findByIdAndDelete(
@@ -1146,10 +1014,7 @@ export async function removeWorkspaceMember(
       );
 
     if (!member) {
-      console.error(
-        'Workspace member not found:',
-        memberId
-      );
+      logger.error({ values: [memberId] }, 'Workspace member not found:');
 
       throw new Error(
         'Workspace member not found'
@@ -1169,21 +1034,15 @@ export async function removeWorkspaceMember(
       }
     );
 
-    console.log(
-      'Workspace member removed:',
-      {
+    logger.info({ values: [{
         memberId,
         workspace: member.workspace,
         user: member.user,
-      }
-    );
+      }] }, 'Workspace member removed:');
 
     return member;
   } catch (error) {
-    console.error(
-      'Failed to remove workspace member:',
-      error
-    );
+    logger.error({ err: error }, 'Failed to remove workspace member:');
 
     throw error;
   }

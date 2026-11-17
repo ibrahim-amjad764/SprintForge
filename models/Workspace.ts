@@ -173,7 +173,6 @@ const WorkspaceSchema = new Schema<IWorkspace>(
   }
 );
 
-WorkspaceSchema.index({ slug: 1 });
 WorkspaceSchema.index({ organization: 1 });
 WorkspaceSchema.index({ owner: 1 });
 

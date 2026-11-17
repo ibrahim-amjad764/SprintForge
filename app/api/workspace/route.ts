@@ -2,7 +2,7 @@
 
 import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db";
-import { verifyToken } from "@/lib/auth";
+import { validateSessionToken } from "@/lib/session";
 import { createWorkspace, getUserWorkspaces } from "@/services/workspace.service";
 import { dispatchWorkspaceCreatedEvent } from "@/services/webhook.service";
 import { autoProvisionRepository } from "@/services/vcs-provisioning.service";
@@ -10,6 +10,7 @@ import { autoSyncIdpGroups } from "@/services/idp-mapping.service";
 import { scheduleDataRetention } from "@/services/data-retention.service";
 import { successResponse, errorResponse } from "@/utils/response";
 import { getWorkspaceMembership } from "@/lib/authorization";
+import logger from '@/lib/logger';
 
 /*
     Workspace API
@@ -24,8 +25,8 @@ async function getUserId(request: NextRequest) {
 
   if (!token) return null;
 
-  const payload = await verifyToken(token);
-  return payload?.userId as string;
+  const session = await validateSessionToken(token);
+  return session?.userId ?? null;
 }
 
 export async function POST(request: NextRequest) {
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
 
     return successResponse(workspace, "Workspace created");
   } catch (error: any) {
-    console.error("Workspace creation error:", error);
+    logger.error({ err: error }, "Workspace creation error:");
     return errorResponse(error.message || "Server error", 500);
   }
 }

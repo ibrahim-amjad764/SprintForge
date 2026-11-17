@@ -30,6 +30,32 @@ export async function getUserNotifications(user: string) {
   return Notification.find({ user }).sort({ createdAt: -1 });
 }
 
+/*
+ * Paginated variant — returns one page plus metadata.
+ * Uses the { user, read, createdAt } index for the sort.
+ */
+export async function getUserNotificationsPaginated(
+  user: string,
+  { page, limit, skip }: { page: number; limit: number; skip: number },
+) {
+  const [items, total] = await Promise.all([
+    Notification.find({ user })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Notification.countDocuments({ user }),
+  ]);
+
+  return {
+    items,
+    total,
+    page,
+    limit,
+    hasMore: skip + items.length < total,
+  };
+}
+
 export async function markRead(id: string) {
   return Notification.findByIdAndUpdate(id, { read: true }, { new: true });
 }

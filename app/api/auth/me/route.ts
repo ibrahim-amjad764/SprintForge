@@ -1,7 +1,7 @@
 // app/api/auth/me/route.ts
 import { NextRequest } from "next/server";
 
-import { verifyToken } from "@/lib/auth";
+import { validateSessionToken } from "@/lib/session";
 import { connectDB } from "@/lib/db";
 import { errorResponse, successResponse } from "@/utils/response";
 import User from "@/models/User";
@@ -31,13 +31,13 @@ export async function GET(request: NextRequest) {
       return errorResponse("Not authenticated", 401);
     }
 
-    const payload = await verifyToken(token);
+    const session = await validateSessionToken(token);
 
-    if (!payload) {
+    if (!session) {
       return errorResponse("Invalid token", 401);
     }
 
-    const user = await User.findById(payload.userId).select("-password");
+    const user = await User.findById(session.userId).select('_id name email avatar role');
 
     if (!user) {
       return errorResponse("User not found", 404);

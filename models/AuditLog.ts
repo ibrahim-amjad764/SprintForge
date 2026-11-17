@@ -34,6 +34,9 @@ const AuditSchema = new Schema<IAuditLog>(
   }
 );
 
+// Admin log view sorts all entries newest-first.
+AuditSchema.index({ createdAt: -1 });
+
 const AuditLog: Model<IAuditLog> =
   mongoose.models.AuditLog ||
   mongoose.model<IAuditLog>('AuditLog', AuditSchema);

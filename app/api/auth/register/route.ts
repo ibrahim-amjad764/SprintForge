@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { rateLimit, getClientIP } from "@/lib/rate-limit";
 import { isSameOriginMutation } from "@/lib/auth";
+import logger from '@/lib/logger';
 
 /*
     Register API
@@ -75,7 +76,7 @@ export async function POST(request: Request) {
       "Account Created Successfully",
     );
   } catch (error) {
-    console.log(error);
+    logger.info({ err: error });
     return errorResponse("Server error", 500);
   }
 }

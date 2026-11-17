@@ -96,9 +96,11 @@ export default function TeamManagement({
   const [isMostActiveModalOpen, setIsMostActiveModalOpen] = useState(false);
 
   // Sync with parent when initialTeams changes
-  useEffect(() => {
+  const [prevInitialTeams, setPrevInitialTeams] = useState(initialTeams);
+  if (prevInitialTeams !== initialTeams) {
+    setPrevInitialTeams(initialTeams);
     setTeams(initialTeams);
-  }, [initialTeams]);
+  }
 
   // Load calendar tasks from API
   useEffect(() => {

@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db";
 import { updateTeam, deleteTeam } from "@/services/team.service";
 import { successResponse, errorResponse } from "@/utils/response";
-import { requireAuth } from "@/lib/auth";
+import { requireSession } from "@/lib/session";
 import { getMembershipForTeam, canWriteWorkspace } from "@/lib/authorization";
 
 export async function PUT(
@@ -15,7 +15,7 @@ export async function PUT(
   },
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
@@ -45,7 +45,7 @@ export async function DELETE(
   },
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 

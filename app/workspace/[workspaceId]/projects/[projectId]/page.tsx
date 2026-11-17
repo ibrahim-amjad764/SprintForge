@@ -1,7 +1,9 @@
 import { connectDB } from '@/lib/db';
 import { getProjectWithProgress } from '@/services/project.service';
+import { requireWorkspaceAccess, requireProjectInWorkspace } from '@/lib/page-guards';
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
+import logger from '@/lib/logger';
 
 export const revalidate = 0; // Disable static caching for this page
 
@@ -10,18 +12,20 @@ export default async function ProjectDetailPage({
 }: {
   params: Promise<{ workspaceId: string; projectId: string }>;
 }) {
-  console.log("=== PROJECT DETAIL PAGE INITIALIZED ===");
+  logger.info("=== PROJECT DETAIL PAGE INITIALIZED ===");
   
   await connectDB();
 
   const { workspaceId, projectId } = await params;
-  console.log("Project page params:", { workspaceId, projectId });
+  await requireWorkspaceAccess(workspaceId);
+  await requireProjectInWorkspace(projectId, workspaceId);
+  logger.info({ values: [{ workspaceId, projectId }] }, "Project page params:");
   
   const project = await getProjectWithProgress(projectId);
-  console.log("Project data retrieved:", project);
+  logger.info({ values: [project] }, "Project data retrieved:");
 
   if (!project) {
-    console.log("Project not found, rendering error page");
+    logger.info("Project not found, rendering error page");
     return (
       <div className="text-center py-12">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Project Not Found</h1>

@@ -1,20 +1,17 @@
-// app/workspace/[workspaceId]/projects/[projectId]/tasks/[taskId]/page.tsx
+// app/workspace/[workspaceId]/tasks/[taskId]/page.tsx
 
 import Timer from '@/components/time/Timer';
+import { requireTaskAccess } from '@/lib/page-guards';
 
-interface Props {
-  params: {
-    workspaceId: string;
-    projectId: string;
-    taskId: string;
-  };
-}
+export default async function TaskPage({
+  params,
+}: {
+  params: Promise<{ workspaceId: string; taskId: string }>;
+}) {
+  const { taskId } = await params;
+  // Verifies the task's owning workspace membership — covers both
+  // the URL workspace and the task's actual project binding.
+  await requireTaskAccess(taskId);
 
-export default function TaskPage({ params }: Props) {
-  return (
-    <Timer
-      taskId={params.taskId}
-      userId="CURRENT_USER"
-    />
-  );
+  return <Timer taskId={taskId} userId="CURRENT_USER" />;
 }

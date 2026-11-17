@@ -14,10 +14,18 @@ export function OAuthSimulator({ isOpen, provider, onComplete }: OAuthSimulatorP
   const [step, setStep] = useState(0);
   const [dots, setDots] = useState('');
 
-  useEffect(() => {
+  // Reset progress state when the simulator closes
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
     if (!isOpen) {
       setStep(0);
       setDots('');
+    }
+  }
+
+  useEffect(() => {
+    if (!isOpen) {
       return;
     }
 

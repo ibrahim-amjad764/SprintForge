@@ -4,12 +4,12 @@ import { connectDB } from '@/lib/db';
 
 import Task from '@/models/Task';
 import { errorResponse } from '@/utils/response';
-import { requireAuth } from '@/lib/auth';
+import { requireSession } from '@/lib/session';
 import { getUserProjectIds } from '@/lib/authorization';
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 

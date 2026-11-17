@@ -1,7 +1,7 @@
 // components/workspace/WorkspaceSettings.tsx
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
 import ImageUpload from '@/components/upload/ImageUpload';
@@ -95,7 +95,24 @@ export default function WorkspaceSettings({
   // Keep component synchronized with server data
   // ---------------------------------------------------------
 
-  useEffect(() => {
+  const [prevWorkspaceSync, setPrevWorkspaceSync] = useState({
+    name: workspace.name,
+    description: workspace.description,
+    logo: workspace.logo,
+    settings: workspace.settings,
+  });
+  if (
+    prevWorkspaceSync.name !== workspace.name ||
+    prevWorkspaceSync.description !== workspace.description ||
+    prevWorkspaceSync.logo !== workspace.logo ||
+    prevWorkspaceSync.settings !== workspace.settings
+  ) {
+    setPrevWorkspaceSync({
+      name: workspace.name,
+      description: workspace.description,
+      logo: workspace.logo,
+      settings: workspace.settings,
+    });
     setName(workspace.name || '');
     setDescription(workspace.description || '');
     setLogo(workspace.logo || '');
@@ -104,12 +121,7 @@ export default function WorkspaceSettings({
       ...DEFAULT_SETTINGS,
       ...(workspace.settings || {}),
     });
-  }, [
-    workspace.name,
-    workspace.description,
-    workspace.logo,
-    workspace.settings,
-  ]);
+  }
 
   // ---------------------------------------------------------
   // Detect unsaved changes

@@ -2,15 +2,16 @@
 
 import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db";
-import { verifyToken } from "@/lib/auth";
+import { validateSessionToken } from "@/lib/session";
 import Workspace from "@/models/Workspace";
 import { successResponse, errorResponse } from "@/utils/response";
+import logger from '@/lib/logger';
 
 async function getUserId(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
   if (!token) return null;
-  const payload = await verifyToken(token);
-  return payload?.userId as string;
+  const session = await validateSessionToken(token);
+  return session?.userId ?? null;
 }
 
 export async function POST(request: NextRequest) {
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
       available ? "Slug is available" : "Slug is already taken"
     );
   } catch (error) {
-    console.error("Slug validation error:", error);
+    logger.error({ err: error }, "Slug validation error:");
     return errorResponse("Server error", 500);
   }
 }

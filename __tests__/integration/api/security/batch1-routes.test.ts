@@ -13,6 +13,15 @@ jest.mock('@/lib/auth', () => ({
   createToken: jest.fn(),
 }));
 
+// Routes authenticate via requireSession (DB-backed tokenVersion check).
+jest.mock('@/lib/session', () => ({
+  requireSession: jest.fn(),
+  validateSessionToken: jest.fn(),
+  assertTokenVersion: jest.fn(),
+  bumpTokenVersion: jest.fn(),
+  extractTokenVersion: jest.fn(),
+}));
+
 jest.mock('@/lib/admin', () => ({
   requireAdmin: jest.fn(),
   checkAdmin: jest.fn(),
@@ -39,12 +48,24 @@ jest.mock('@/lib/db', () => ({
 }));
 
 jest.mock('@/services/admin.service', () => ({
-  getAllUsers: jest.fn(async () => [{ _id: 'u1', email: 'admin@test.com' }]),
-  updateUserRole: jest.fn(),
+  getUsersPaginated: jest.fn(async () => ({
+    users: [{ _id: 'u1', email: 'admin@test.com' }],
+    pagination: { page: 1, limit: 20, total: 1, totalPages: 1 },
+  })),
+  getWorkspacesPaginated: jest.fn(async () => ({
+    workspaces: [],
+    pagination: { page: 1, limit: 20, total: 0, totalPages: 1 },
+  })),
+  getAdminStats: jest.fn(async () => ({})),
+  setUserRole: jest.fn(),
 }));
 
 jest.mock('@/services/audit.service', () => ({
-  getLogs: jest.fn(async () => [{ _id: 'log1' }]),
+  getLogsPaginated: jest.fn(async () => ({
+    logs: [{ _id: 'log1' }],
+    pagination: { page: 1, limit: 20, total: 1, totalPages: 1 },
+  })),
+  createAudit: jest.fn(async () => ({})),
 }));
 
 jest.mock('@/services/email.service', () => ({
@@ -79,18 +100,18 @@ let attachmentsPOST: typeof import('@/app/api/attachments/route').POST;
 
 let mockRequireAdmin: jest.MockedFunction<(request: NextRequest) => Promise<AuthResult>>;
 let mockRequireAuth: jest.MockedFunction<(request: NextRequest) => Promise<AuthResult>>;
-let mockGetAllUsers: jest.MockedFunction<() => Promise<unknown[]>>;
+let mockGetUsersPaginated: jest.MockedFunction<(args: unknown) => Promise<unknown>>;
 let mockSendEmail: jest.MockedFunction<(args: { to: string; subject: string; html: string }) => Promise<unknown>>;
 
 beforeAll(async () => {
   const adminModule = await import('@/lib/admin');
   mockRequireAdmin = jest.mocked(adminModule.requireAdmin) as typeof mockRequireAdmin;
 
-  const authModule = await import('@/lib/auth');
-  mockRequireAuth = jest.mocked(authModule.requireAuth) as typeof mockRequireAuth;
+  const sessionModule = await import('@/lib/session');
+  mockRequireAuth = jest.mocked(sessionModule.requireSession) as typeof mockRequireAuth;
 
   const adminService = await import('@/services/admin.service');
-  mockGetAllUsers = jest.mocked(adminService.getAllUsers) as typeof mockGetAllUsers;
+  mockGetUsersPaginated = jest.mocked(adminService.getUsersPaginated) as typeof mockGetUsersPaginated;
 
   const emailService = await import('@/services/email.service');
   mockSendEmail = jest.mocked(emailService.sendEmail) as typeof mockSendEmail;
@@ -104,6 +125,13 @@ beforeAll(async () => {
 });
 
 const fakeRequest = {} as NextRequest;
+
+// Admin GET routes read request.nextUrl.searchParams — provide it.
+function adminGetRequest(query = ''): NextRequest {
+  return {
+    nextUrl: { searchParams: new URLSearchParams(query) },
+  } as unknown as NextRequest;
+}
 
 const adminAuth = { user: { userId: 'admin-1' }, response: null } as const;
 const userForbidden = {
@@ -132,44 +160,44 @@ describe('Batch 1 — protected routes', () => {
   describe('GET /api/admin/users', () => {
     it('returns 401 when unauthenticated', async () => {
       mockRequireAdmin.mockResolvedValue(unauthenticated);
-      const res = await adminUsersGET(fakeRequest);
+      const res = await adminUsersGET(adminGetRequest());
       expect(res.status).toBe(401);
-      expect(mockGetAllUsers).not.toHaveBeenCalled();
+      expect(mockGetUsersPaginated).not.toHaveBeenCalled();
     });
 
     it('returns 403 for non-admin users', async () => {
       mockRequireAdmin.mockResolvedValue(userForbidden);
-      const res = await adminUsersGET(fakeRequest);
+      const res = await adminUsersGET(adminGetRequest());
       expect(res.status).toBe(403);
-      expect(mockGetAllUsers).not.toHaveBeenCalled();
+      expect(mockGetUsersPaginated).not.toHaveBeenCalled();
     });
 
     it('returns users for admins', async () => {
       mockRequireAdmin.mockResolvedValue(adminAuth);
-      const res = await adminUsersGET(fakeRequest);
+      const res = await adminUsersGET(adminGetRequest('page=1&limit=20'));
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body.success).toBe(true);
-      expect(mockGetAllUsers).toHaveBeenCalled();
+      expect(mockGetUsersPaginated).toHaveBeenCalled();
     });
   });
 
   describe('GET /api/admin/logs', () => {
     it('returns 401 when unauthenticated', async () => {
       mockRequireAdmin.mockResolvedValue(unauthenticated);
-      const res = await adminLogsGET(fakeRequest);
+      const res = await adminLogsGET(adminGetRequest());
       expect(res.status).toBe(401);
     });
 
     it('returns 403 for non-admin users', async () => {
       mockRequireAdmin.mockResolvedValue(userForbidden);
-      const res = await adminLogsGET(fakeRequest);
+      const res = await adminLogsGET(adminGetRequest());
       expect(res.status).toBe(403);
     });
 
     it('returns logs for admins', async () => {
       mockRequireAdmin.mockResolvedValue(adminAuth);
-      const res = await adminLogsGET(fakeRequest);
+      const res = await adminLogsGET(adminGetRequest('page=1'));
       expect(res.status).toBe(200);
     });
   });

@@ -1,4 +1,6 @@
 import TasksClient from '@/components/task/TasksClient';
+import { requireWorkspaceAccess, requireProjectInWorkspace } from '@/lib/page-guards';
+import logger from '@/lib/logger';
 
 export const revalidate = 0; // Disable static caching for this page
 
@@ -7,10 +9,12 @@ export default async function TasksPage({
 }: {
   params: Promise<{ workspaceId: string; projectId: string }>;
 }) {
-  console.log("=== PROJECT TASKS PAGE INITIALIZED ===");
+  logger.info("=== PROJECT TASKS PAGE INITIALIZED ===");
   
   const { workspaceId, projectId } = await params;
-  console.log("Project tasks page params:", { workspaceId, projectId });
+  await requireWorkspaceAccess(workspaceId);
+  await requireProjectInWorkspace(projectId, workspaceId);
+  logger.info({ values: [{ workspaceId, projectId }] }, "Project tasks page params:");
 
   return (
     <div className="h-full">

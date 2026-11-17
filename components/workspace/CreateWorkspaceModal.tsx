@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
+import { useIsClient } from '@/hooks/useIsClient';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 
 interface CreateWorkspaceModalProps {
   isOpen: boolean;
@@ -44,10 +46,10 @@ export default function CreateWorkspaceModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const isSubmittingRef = useRef(false);
 
-  const [mounted, setMounted] = useState(false);
+  const mounted = useIsClient();
 
   const [name, setName] = useState('');
-  const [slug, setSlug] = useState('');
+  const slug = useMemo(() => generateSlug(sanitizeInput(name)), [name]);
   const [emails, setEmails] = useState<string[]>([]);
   const [emailInput, setEmailInput] = useState('');
 
@@ -60,7 +62,7 @@ export default function CreateWorkspaceModal({
   >('blank');
 
   const [loading, setLoading] = useState(false);
-  const [isOnline, setIsOnline] = useState(true);
+  const isOnline = useOnlineStatus();
 
   const [errors, setErrors] = useState<{
     name?: string;
@@ -77,9 +79,6 @@ export default function CreateWorkspaceModal({
   //
   // Portal renders the modal directly under <body>.
   // --------------------------------------------------------
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // --------------------------------------------------------
   // Prevent page scrolling while modal is open.
@@ -97,39 +96,12 @@ export default function CreateWorkspaceModal({
   }, [isOpen]);
 
   // --------------------------------------------------------
-  // Network offline detection.
+  // Track unsaved changes when the workspace name changes.
   // --------------------------------------------------------
-  useEffect(() => {
-    const handleOnline = () => {
-      console.log('Internet connection restored');
-      setIsOnline(true);
-    };
-
-    const handleOffline = () => {
-      console.warn('Internet connection lost');
-      setIsOnline(false);
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    setIsOnline(navigator.onLine);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  // --------------------------------------------------------
-  // Generate slug automatically when workspace name changes.
-  // --------------------------------------------------------
-  useEffect(() => {
-    const sanitized = sanitizeInput(name);
-
-    setSlug(generateSlug(sanitized));
-    setIsDirty(sanitized.length > 0);
-  }, [name]);
+  const handleNameChange = (value: string) => {
+    setName(value);
+    setIsDirty(sanitizeInput(value).length > 0);
+  };
 
   // --------------------------------------------------------
   // Escape key closes modal.
@@ -442,7 +414,7 @@ export default function CreateWorkspaceModal({
                     id="name"
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => handleNameChange(e.target.value)}
                     className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-gray-100"
                     placeholder="e.g. Project Alpha"
                     required

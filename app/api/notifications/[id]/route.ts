@@ -4,14 +4,14 @@ import { connectDB } from '@/lib/db';
 import Notification from '@/models/Notification';
 import { markRead } from '@/services/notification.service';
 import { successResponse, errorResponse } from '@/utils/response';
-import { requireAuth } from '@/lib/auth';
+import { requireSession } from '@/lib/session';
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const auth = await requireAuth(req);
+    const auth = await requireSession(req);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 

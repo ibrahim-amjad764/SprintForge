@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { Socket } from 'socket.io-client';
 import { apiRequest } from '@/lib/api';
 import useAuth from '@/hooks/useAuth';
 import getSocket from '@/lib/socket-client';
@@ -11,15 +12,20 @@ export default function CommentBox({ taskId }: { taskId: string }) {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const socket = getSocket();
-    if (!socket) return;
+    let socket: Socket | null = null;
+    let cancelled = false;
 
-    socket.on('new-comment', (comment: unknown) => {
-      console.log('New Comment', comment);
+    getSocket().then((s) => {
+      if (cancelled) return;
+      socket = s;
+      socket.on('new-comment', (comment: unknown) => {
+        console.log('New Comment', comment);
+      });
     });
 
     return () => {
-      socket.off('new-comment');
+      cancelled = true;
+      socket?.off('new-comment');
     };
   }, []);
 

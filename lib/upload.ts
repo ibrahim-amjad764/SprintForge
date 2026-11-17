@@ -1,5 +1,6 @@
 // lib/upload.ts
 import { v2 as cloudinary } from 'cloudinary';
+import logger from '@/lib/logger';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -36,17 +37,17 @@ export async function uploadFile(
     allowedFormats = ['jpg', 'jpeg', 'png', 'gif', 'webp'],
   } = options;
 
-  console.log('📤 Upload file input:', {
+  logger.info({ values: [{
     fileName: file instanceof File ? file.name : 'buffer/string',
     fileSize: file instanceof File ? file.size : 'N/A',
     fileType: file instanceof File ? file.type : 'N/A',
-  });
+  }] }, '📤 Upload file input:');
 
   // Convert File to Buffer if needed
   let buffer: Buffer;
   
   if (file instanceof File) {
-    console.log('📤 Converting File to Buffer...');
+    logger.info('📤 Converting File to Buffer...');
     
     // Check file size
     if (file.size > maxFileSize) {
@@ -63,23 +64,23 @@ export async function uploadFile(
     const arrayBuffer = await file.arrayBuffer();
     buffer = Buffer.from(arrayBuffer);
     
-    console.log('✅ File converted to Buffer successfully');
-    console.log('File:', file.name);
-    console.log('Size:', file.size);
-    console.log('Buffer size:', buffer.length);
+    logger.info('✅ File converted to Buffer successfully');
+    logger.info({ values: [file.name] }, 'File:');
+    logger.info({ values: [file.size] }, 'Size:');
+    logger.info({ values: [buffer.length] }, 'Buffer size:');
   } else if (typeof file === 'string') {
-    console.log('📤 Converting string to Buffer...');
+    logger.info('📤 Converting string to Buffer...');
     buffer = Buffer.from(file);
-    console.log('✅ String converted to Buffer successfully');
-    console.log('Buffer size:', buffer.length);
+    logger.info('✅ String converted to Buffer successfully');
+    logger.info({ values: [buffer.length] }, 'Buffer size:');
   } else {
-    console.log('📤 Using existing Buffer...');
+    logger.info('📤 Using existing Buffer...');
     buffer = file as Buffer;
-    console.log('Buffer size:', buffer.length);
+    logger.info({ values: [buffer.length] }, 'Buffer size:');
   }
 
   return new Promise((resolve, reject) => {
-    console.log('📤 Starting Cloudinary upload...');
+    logger.info('📤 Starting Cloudinary upload...');
     
     cloudinary.uploader.upload_stream(
       {
@@ -89,15 +90,15 @@ export async function uploadFile(
       },
       (error, result) => {
         if (error) {
-          console.error('❌ Cloudinary upload failed:', error);
+          logger.error({ err: error }, '❌ Cloudinary upload failed:');
           reject(error);
         } else if (result) {
-          console.log('✅ Cloudinary upload successful:', {
+          logger.info({ values: [{
             publicId: result.public_id,
             url: result.secure_url,
             width: result.width,
             height: result.height,
-          });
+          }] }, '✅ Cloudinary upload successful:');
           resolve({
             url: result.secure_url,
             publicId: result.public_id,
@@ -106,7 +107,7 @@ export async function uploadFile(
             format: result.format || '',
           });
         } else {
-          console.error('❌ Upload failed: No result from Cloudinary');
+          logger.error('❌ Upload failed: No result from Cloudinary');
           reject(new Error('Upload failed: No result from Cloudinary'));
         }
       }

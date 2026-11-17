@@ -3,6 +3,7 @@ import Organization from '@/models/Organization';
 import Workspace from '@/models/Workspace';
 import WorkspaceMember from '@/models/WorkspaceMember';
 import User from '@/models/User';
+import logger from '@/lib/logger';
 
 export interface IdPGroupMapping {
   idpGroup: string;
@@ -161,7 +162,7 @@ export async function syncOktaUsers(params: {
       groupMappings: mappings,
     });
   } catch (error) {
-    console.error('Okta sync error:', error);
+    logger.error({ err: error }, 'Okta sync error:');
     return { synced: 0, errors: [error instanceof Error ? error.message : 'Sync failed'] };
   }
 }
@@ -230,7 +231,7 @@ export async function syncAzureAdUsers(params: {
       groupMappings: mappings,
     });
   } catch (error) {
-    console.error('Azure AD sync error:', error);
+    logger.error({ err: error }, 'Azure AD sync error:');
     return { synced: 0, errors: [error instanceof Error ? error.message : 'Sync failed'] };
   }
 }

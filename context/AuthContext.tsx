@@ -144,7 +144,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await loadUser();
   }
   useEffect(() => {
-    loadUser();
+    const timeoutId = setTimeout(() => {
+      void loadUser();
+    }, 0);
+    return () => clearTimeout(timeoutId);
   }, []);
 
   async function logout() {

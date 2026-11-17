@@ -2,16 +2,19 @@
 import MainLayout from '@/components/layout/MainLayout';
 import { connectDB } from '@/lib/db';
 import { getTaskById } from '@/services/task.service';
+import { requireTaskAccess } from '@/lib/page-guards';
 import TaskDetail from '@/components/task/TaskDetail';
 
 export default async function TaskDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  await connectDB();
+  const { id } = await params;
+  await requireTaskAccess(id);
 
-  const task = await getTaskById(params.id);
+  await connectDB();
+  const task = await getTaskById(id);
 
   return (
     <MainLayout>

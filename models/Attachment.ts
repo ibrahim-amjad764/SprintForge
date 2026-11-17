@@ -35,6 +35,9 @@ const AttachmentSchema = new Schema<IAttachment>(
   { timestamps: true }
 );
 
+// Attachments are always listed per task.
+AttachmentSchema.index({ task: 1 });
+
 const Attachment: Model<IAttachment> =
   mongoose.models.Attachment ||
   mongoose.model<IAttachment>('Attachment', AttachmentSchema);

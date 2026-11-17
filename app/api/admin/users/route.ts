@@ -2,25 +2,39 @@
 import { NextRequest } from 'next/server';
 
 import { connectDB } from '@/lib/db';
-import { getAllUsers } from '@/services/admin.service';
+import { getUsersPaginated } from '@/services/admin.service';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireAdmin } from '@/lib/admin';
+import { rateLimit } from '@/lib/rate-limit';
+import { parsePaginationParams } from '@/lib/pagination';
+import logger from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
     const auth = await requireAdmin(request);
     if (auth.response) return auth.response;
 
+    // Admin endpoints are low-traffic but DB-backed — modest per-admin cap.
+    if (!rateLimit(`admin:${auth.user.userId}`, 120, 60 * 1000)) {
+      return errorResponse('Too many requests', 429);
+    }
+
     await connectDB();
 
-    const users = await getAllUsers();
+    const sp = request.nextUrl.searchParams;
+    const pagination = parsePaginationParams(sp);
+    if ('error' in pagination) {
+      return errorResponse(pagination.error, 400);
+    }
 
-    return successResponse(users);
+    const role = sp.get('role') ?? undefined;
+    const q = sp.get('q') ?? undefined;
+
+    const result = await getUsersPaginated({ ...pagination, q, role });
+
+    return successResponse(result);
   } catch (error) {
-    return errorResponse(
-      'Failed',
-
-      500
-    );
+    logger.error({ err: error }, 'Get admin users error:');
+    return errorResponse('Failed to fetch users', 500);
   }
 }

@@ -5,7 +5,7 @@ import { connectDB } from '@/lib/db';
 import File from '@/models/File';
 import { deleteFile } from '@/services/file.service';
 import { successResponse, errorResponse } from '@/utils/response';
-import { requireAuth } from '@/lib/auth';
+import { requireSession } from '@/lib/session';
 import { getMembershipForTask, canWriteWorkspace } from '@/lib/authorization';
 
 export async function DELETE(
@@ -13,7 +13,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const auth = await requireAuth(req);
+    const auth = await requireSession(req);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 

@@ -5,18 +5,51 @@
 import { useEffect, useState } from 'react';
 import { apiRequest } from '@/lib/api';
 
+const PAGE_SIZE = 20;
+
 export default function NotificationDropdown({ userId }: { userId: string }) {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [markingAllRead, setMarkingAllRead] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     async function load() {
-      const response = await apiRequest(`/api/notifications?user=${userId}`);
-      setNotifications(response.data);
+      const response = await apiRequest(
+        `/api/notifications?user=${userId}&page=1&limit=${PAGE_SIZE}`
+      );
+      const data = response.data;
+      setNotifications(data?.items || []);
+      setPage(1);
+      setHasMore(data?.hasMore || false);
     }
     load();
   }, [userId]);
+
+  async function loadMore() {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const response = await apiRequest(
+        `/api/notifications?user=${userId}&page=${nextPage}&limit=${PAGE_SIZE}`
+      );
+      const data = response.data;
+      const newItems: { _id: string }[] = data?.items || [];
+      setNotifications((prev) => {
+        const seen = new Set(prev.map((n) => n._id));
+        return [...prev, ...newItems.filter((n) => !seen.has(n._id))];
+      });
+      setPage(nextPage);
+      setHasMore(data?.hasMore || false);
+    } catch (error) {
+      console.error('Failed to load more notifications:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   async function markAllAsRead() {
     setMarkingAllRead(true);
@@ -87,6 +120,15 @@ export default function NotificationDropdown({ userId }: { userId: string }) {
                   </div>
                 </div>
               ))}
+              {hasMore && (
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="w-full border-t p-3 text-sm text-blue-600 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  {loadingMore ? 'Loading...' : 'Load more'}
+                </button>
+              )}
             </div>
           )}
         </div>

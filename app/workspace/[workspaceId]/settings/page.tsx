@@ -2,18 +2,21 @@ import { connectDB } from '@/lib/db';
 import { getWorkspaceById } from '@/services/workspace.service';
 import WorkspaceSettings from '@/components/workspace/WorkspaceSettings';
 import WorkspaceMembers from '@/components/workspace/WorkspaceMembers';
+import { requireWorkspaceAccess } from '@/lib/page-guards';
+import logger from '@/lib/logger';
 
 export default async function WorkspaceSettingsPage({
   params,
 }: {
   params: Promise<{ workspaceId: string }>;
 }) {
-  console.log("=== WORKSPACE SETTINGS PAGE INITIALIZED ===");
+  logger.info("=== WORKSPACE SETTINGS PAGE INITIALIZED ===");
   
   const { workspaceId } = await params;
+  await requireWorkspaceAccess(workspaceId);
   await connectDB();
   const workspace = await getWorkspaceById(workspaceId);
-  console.log("Workspace settings page workspaceId:", workspaceId);
+  logger.info({ values: [workspaceId] }, "Workspace settings page workspaceId:");
 
   if (!workspace) {
     return (

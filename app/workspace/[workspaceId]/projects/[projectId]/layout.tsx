@@ -1,4 +1,5 @@
 import ProjectViewSwitcher from '@/components/project/ProjectViewSwitcher';
+import logger from '@/lib/logger';
 
 export default async function ProjectLayout({
   children,
@@ -7,12 +8,12 @@ export default async function ProjectLayout({
   children: React.ReactNode;
   params: Promise<{ workspaceId: string; projectId: string }>;
 }) {
-  console.log("=== PROJECT LAYOUT INITIALIZED ===");
+  logger.info("=== PROJECT LAYOUT INITIALIZED ===");
   
   // Resolve params as a Promise in Next.js 15
   const { workspaceId, projectId } = await params;
   
-  console.log("Resolved params in layout:", { workspaceId, projectId });
+  logger.info({ values: [{ workspaceId, projectId }] }, "Resolved params in layout:");
   
   return (
     <div className="flex flex-col h-full">

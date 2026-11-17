@@ -197,7 +197,6 @@ const OrganizationSchema = new Schema<IOrganization>(
   },
 );
 
-OrganizationSchema.index({ slug: 1 });
 OrganizationSchema.index({ owner: 1 });
 OrganizationSchema.index({ "idpSettings.domain": 1 });
 

@@ -6,9 +6,10 @@ import {
   getWorkspaceById,
 } from '@/services/workspace.service';
 import { successResponse, errorResponse } from '@/utils/response';
-import { requireAuth } from '@/lib/auth';
+import { requireSession } from '@/lib/session';
 import { getWorkspaceMembership } from '@/lib/authorization';
 import type { WorkspaceRole } from '@/models/WorkspaceMember';
+import logger from '@/lib/logger';
 
 const ADMIN_ROLES: WorkspaceRole[] = ['OWNER', 'ADMIN'];
 
@@ -17,7 +18,7 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
@@ -38,7 +39,7 @@ export async function GET(
 
     return successResponse(workspace);
   } catch (error) {
-    console.error('Get workspace error:', error);
+    logger.error({ err: error }, 'Get workspace error:');
     return errorResponse('Error fetching workspace', 500);
   }
 }
@@ -48,7 +49,7 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
@@ -70,7 +71,7 @@ export async function PUT(
 
     return successResponse(workspace, 'Workspace updated');
   } catch (error) {
-    console.error('Update workspace error:', error);
+    logger.error({ err: error }, 'Update workspace error:');
     return errorResponse('Error updating workspace', 500);
   }
 }
@@ -80,7 +81,7 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
@@ -96,7 +97,7 @@ export async function DELETE(
     await deleteWorkspace(id);
     return successResponse(null, 'Workspace deleted');
   } catch (error) {
-    console.error('Delete workspace error:', error);
+    logger.error({ err: error }, 'Delete workspace error:');
     return errorResponse('Error deleting workspace', 500);
   }
 }

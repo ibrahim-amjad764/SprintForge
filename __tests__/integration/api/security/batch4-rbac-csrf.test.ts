@@ -54,6 +54,15 @@ jest.mock('@/models/Team', () => ({
   },
 }));
 
+// requireSession validates tokenVersion against the User document.
+const mockUserFindById = jest.fn();
+jest.mock('@/models/User', () => ({
+  __esModule: true,
+  default: {
+    findById: (...args: unknown[]) => mockUserFindById(...args),
+  },
+}));
+
 jest.mock('@/services/task.service', () => ({
   createTask: jest.fn(async (d: unknown) => ({ _id: 't1', ...(d as object) })),
   getTasks: jest.fn(async () => []),
@@ -137,6 +146,8 @@ beforeAll(async () => {
 beforeEach(() => {
   jest.clearAllMocks();
   mockJwtVerify.mockResolvedValue({ payload: { userId: 'user-1' } });
+  // Session check: JWT has no tokenVersion claim → 0; DB user at 0.
+  mockUserFindById.mockReturnValue(chain({ tokenVersion: 0, role: 'USER' }));
   // Default: project p1 lives in ws-1
   mockProjectFindById.mockReturnValue(chain({ workspace: 'ws-1' }));
 });

@@ -21,6 +21,7 @@ export interface IUser {
   password: string;
   avatar?: string;
   role: 'USER' | 'ADMIN';
+  tokenVersion: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -55,6 +56,14 @@ const UserSchema = new Schema<IUser>(
       type: String,
       enum: ['USER', 'ADMIN'],
       default: 'USER',
+    },
+
+    // Session version — embedded in JWTs and compared against the
+    // database on every authenticated request. Incrementing it
+    // invalidates all previously issued tokens for this user.
+    tokenVersion: {
+      type: Number,
+      default: 0,
     },
   },
 

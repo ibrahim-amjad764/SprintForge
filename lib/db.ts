@@ -1,5 +1,6 @@
 //lib/db.ts
 import mongoose from 'mongoose';
+import logger from '@/lib/logger';
 
 /*
     MongoDB Connection Manager
@@ -61,10 +62,10 @@ export async function connectDB() {
 
     cached.conn = await cached.promise;
 
-    console.log('MongoDB Connected');
+    logger.info('MongoDB Connected');
     return cached.conn;
   } catch (error) {
-    console.log('MongoDB Connection Failed', error);
+    logger.info({ err: error }, 'MongoDB Connection Failed');
 
     // Reset promise on failure to allow retry
     cached.promise = null;

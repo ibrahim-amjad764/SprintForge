@@ -3,9 +3,11 @@
 import { NextRequest } from 'next/server';
 
 import { connectDB } from '@/lib/db';
-import { getUserNotifications, markAllAsRead, getUnreadCount } from '@/services/notification.service';
+import { getUserNotifications, getUserNotificationsPaginated, markAllAsRead, getUnreadCount } from '@/services/notification.service';
 import { successResponse, errorResponse } from '@/utils/response';
-import { requireAuth } from '@/lib/auth';
+import { requireSession } from '@/lib/session';
+import { parsePaginationParams } from '@/lib/pagination';
+import logger from '@/lib/logger';
 
 /*
   Notification APIs:
@@ -20,7 +22,7 @@ import { requireAuth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
@@ -34,17 +36,29 @@ export async function GET(request: NextRequest) {
       return successResponse({ count });
     }
 
+    // Opt-in pagination: only when the client passes page/limit.
+    // Otherwise the legacy full-array response is preserved.
+    const sp = request.nextUrl.searchParams;
+    if (sp.has('page') || sp.has('limit')) {
+      const pagination = parsePaginationParams(sp);
+      if ('error' in pagination) {
+        return errorResponse(pagination.error, 400);
+      }
+      const result = await getUserNotificationsPaginated(userId, pagination);
+      return successResponse(result);
+    }
+
     const notifications = await getUserNotifications(userId);
     return successResponse(notifications);
   } catch (error) {
-    console.error('Get notifications error:', error);
+    logger.error({ err: error }, 'Get notifications error:');
     return errorResponse('Server error', 500);
   }
 }
 
 export async function PATCH(request: NextRequest) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireSession(request);
     if (auth.response) return auth.response;
     const userId = auth.user.userId;
 
@@ -60,7 +74,7 @@ export async function PATCH(request: NextRequest) {
 
     return errorResponse('Invalid endpoint', 404);
   } catch (error) {
-    console.error('Patch notifications error:', error);
+    logger.error({ err: error }, 'Patch notifications error:');
     return errorResponse('Server error', 500);
   }
 }

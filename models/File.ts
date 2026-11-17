@@ -45,6 +45,10 @@ const FileSchema = new Schema<IFile>(
   { timestamps: true }
 );
 
+// Files are looked up by owner and by related task.
+FileSchema.index({ user: 1 });
+FileSchema.index({ task: 1 });
+
 const File: Model<IFile> =
   mongoose.models.File || mongoose.model<IFile>('File', FileSchema);
 

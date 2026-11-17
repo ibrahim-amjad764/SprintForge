@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
 import { EmptyState } from '@/components/dashboard/EmptyState';
 import {
@@ -78,7 +78,12 @@ export default function KanbanBoard({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH'>('MEDIUM');
-  const [projectId, setProjectId] = useState('');
+  const pathname = usePathname();
+  const urlProjectId = pathname?.split('/')[4] || '';
+  const [projectIdOverride, setProjectId] = useState<string | undefined>(
+    undefined
+  );
+  const projectId = projectIdOverride ?? urlProjectId;
   const [assigneeId, setAssigneeId] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [loading, setLoading] = useState(false);
@@ -90,15 +95,6 @@ export default function KanbanBoard({
   // Update browser tab title
   useEffect(() => {
     document.title = 'SprintForge | Kanban Board';
-  }, []);
-
-  // Auto-fill project ID from URL
-  useEffect(() => {
-    const pathParts = window.location.pathname.split('/');
-    const currentProjectId = pathParts[4] || undefined;
-    if (currentProjectId && !projectId) {
-      setProjectId(currentProjectId);
-    }
   }, []);
 
   // Load tasks from API on mount

@@ -53,7 +53,11 @@ export async function POST(request: Request) {
       return errorResponse("Invalid credentials");
     }
 
-    const token = await createToken(user._id.toString());
+    const token = await createToken(
+      user._id.toString(),
+      user.role,
+      user.tokenVersion ?? 0,
+    );
     const response = successResponse(
       {
         id: user._id,

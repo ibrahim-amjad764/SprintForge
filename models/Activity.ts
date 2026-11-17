@@ -33,6 +33,9 @@ const ActivitySchema = new Schema<IActivity>(
   { timestamps: true }
 );
 
+// Activity feeds are per task, newest first.
+ActivitySchema.index({ task: 1, createdAt: -1 });
+
 const Activity: Model<IActivity> =
   mongoose.models.Activity || mongoose.model<IActivity>('Activity', ActivitySchema);
 export default Activity;

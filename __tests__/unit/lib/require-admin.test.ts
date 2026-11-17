@@ -85,16 +85,21 @@ describe('requireAdmin', () => {
     expect(result.response?.status).toBe(403);
   });
 
-  it('returns 403 when the user no longer exists', async () => {
+  it('returns 401 when the user no longer exists', async () => {
+    // Session validation runs before the admin check: a deleted user
+    // cannot produce a valid session, so this is unauthenticated (401),
+    // not forbidden (403) — and does not reveal account existence.
     validTokenFor('ghost');
     mockUserLookup(null);
 
     const result = await requireAdmin(request);
 
-    expect(result.response?.status).toBe(403);
+    expect(result.response?.status).toBe(401);
   });
 
-  it('fails closed (403) when the database check throws', async () => {
+  it('fails closed (401) when the database check throws', async () => {
+    // Session validation cannot reach the DB → session rejected → 401.
+    // Access is still denied (fail closed), never allowed.
     validTokenFor('user-1');
     findByIdMock.mockImplementation(() => {
       throw new Error('db down');
@@ -102,7 +107,7 @@ describe('requireAdmin', () => {
 
     const result = await requireAdmin(request);
 
-    expect(result.response?.status).toBe(403);
+    expect(result.response?.status).toBe(401);
   });
 });
 

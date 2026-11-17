@@ -1,6 +1,7 @@
 // services/data-retention.service.ts
 import Workspace from '@/models/Workspace';
 import mongoose from 'mongoose';
+import logger from '@/lib/logger';
 
 export interface DataRetentionSchedule {
   workspaceId: string;
@@ -37,7 +38,7 @@ export async function executeDataRetentionTasks(): Promise<void> {
     try {
       await processWorkspaceRetention(workspace);
     } catch (error) {
-      console.error(`Failed to process retention for workspace ${workspace._id}:`, error);
+      logger.error({ err: error }, `Failed to process retention for workspace ${workspace._id}:`);
     }
   }
 }

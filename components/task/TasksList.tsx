@@ -34,32 +34,36 @@ export default function TasksList({
 
   // Load workspace members and teams on mount
   useEffect(() => {
-    try {
-      const workspaceId = window.location.pathname.split('/')[2];
-      console.log('TasksList: Loading members for workspaceId:', workspaceId);
-      const storedTeams = localStorage.getItem(`teams_${workspaceId}`);
-      console.log('TasksList: Stored teams data:', storedTeams);
-      if (storedTeams) {
-        const teams = JSON.parse(storedTeams);
-        // Store full teams list for Team dropdown
-        setTeamsList(teams);
-        console.log('TasksList: Loaded teams list:', teams);
+    const timeoutId = setTimeout(() => {
+      try {
+        const workspaceId = window.location.pathname.split('/')[2];
+        console.log('TasksList: Loading members for workspaceId:', workspaceId);
+        const storedTeams = localStorage.getItem(`teams_${workspaceId}`);
+        console.log('TasksList: Stored teams data:', storedTeams);
+        if (storedTeams) {
+          const teams = JSON.parse(storedTeams);
+          // Store full teams list for Team dropdown
+          setTeamsList(teams);
+          console.log('TasksList: Loaded teams list:', teams);
 
-        // Extract members for Assignee dropdown
-        const members: { id: string; name: string; teamId: string }[] = [];
-        teams.forEach((team: any) => {
-          team.members.forEach((member: any) => {
-            members.push({ id: member.id, name: member.name, teamId: team.id });
+          // Extract members for Assignee dropdown
+          const members: { id: string; name: string; teamId: string }[] = [];
+          teams.forEach((team: any) => {
+            team.members.forEach((member: any) => {
+              members.push({ id: member.id, name: member.name, teamId: team.id });
+            });
           });
-        });
-        console.log('TasksList: Loaded members:', members);
-        setAvailableMembers(members);
-      } else {
-        console.log('TasksList: No teams found in LocalStorage');
+          console.log('TasksList: Loaded members:', members);
+          setAvailableMembers(members);
+        } else {
+          console.log('TasksList: No teams found in LocalStorage');
+        }
+      } catch (error) {
+        console.error('Error loading members:', error);
       }
-    } catch (error) {
-      console.error('Error loading members:', error);
-    }
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   // Get team name from teamId
