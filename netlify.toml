@@ -1,0 +1,10 @@
+# Netlify configuration
+# UI-managed build settings (command, publish dir, Next.js runtime plugin)
+# are kept as-is; this file only tunes the secrets scanner.
+
+[build.environment]
+  # These env vars are intentionally non-secret and legitimately appear in
+  # build output — omit them from secrets scanning:
+  #   NEXT_PUBLIC_* are inlined into client bundles by design
+  #   PADDLE_ENV is a sandbox/production flag ('sandbox' matches everywhere)
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_APP_URL,NEXT_PUBLIC_SOCKET_URL,PADDLE_ENV"
