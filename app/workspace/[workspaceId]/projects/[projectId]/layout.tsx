@@ -18,7 +18,7 @@ export default async function ProjectLayout({
   return (
     <div className="flex flex-col h-full">
       {/* Project View Switcher Navigation */}
-      <div className="bg-white border-b border-neutral-200">
+      <div className="bg-card border-b border-border">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex-1">
             <ProjectViewSwitcher workspaceId={workspaceId} projectId={projectId} />

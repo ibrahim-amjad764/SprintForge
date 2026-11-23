@@ -90,14 +90,14 @@ export function DomainTagInput({
     <div className={`w-full ${className}`}>
       <div
         className={`flex flex-wrap items-center gap-2 p-3 border rounded-lg min-h-[50px] cursor-text transition-colors ${
-          error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white hover:border-gray-400'
+          error ? 'border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10' : 'border-border bg-card hover:border-border'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         onClick={disabled ? undefined : handleContainerClick}
       >
         {domains.map((domain) => (
           <span
             key={domain}
-            className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+            className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 rounded-full text-sm"
           >
             @{domain}
             <button
@@ -106,7 +106,7 @@ export function DomainTagInput({
                 e.stopPropagation();
                 removeDomain(domain);
               }}
-              className="hover:text-blue-600 focus:outline-none"
+              className="hover:text-blue-600 dark:text-blue-300 focus:outline-none"
               disabled={disabled}
             >
               <X className="w-3 h-3" />
@@ -128,11 +128,11 @@ export function DomainTagInput({
       </div>
       
       {error && (
-        <p className="mt-1 text-xs text-red-600">{error}</p>
+        <p className="mt-1 text-xs text-red-600 dark:text-red-300">{error}</p>
       )}
       
       {domains.length > 0 && (
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           {domains.length} domain{domains.length !== 1 ? 's' : ''} added
         </p>
       )}

@@ -6,6 +6,7 @@ import { globalSearch } from '@/services/search.service';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
 import { rateLimit } from '@/lib/rate-limit';
+import { apiError } from '@/utils/error-handler';
 
 // Search fans out to 5+ queries incl. regex scans — throttle per user.
 const SEARCH_RATE_LIMIT = 60;
@@ -37,6 +38,6 @@ export async function GET(request: NextRequest) {
 
     return successResponse(result);
   } catch (error) {
-    return errorResponse('Search failed', 500);
+    return apiError(error, 'Search failed');
   }
 }

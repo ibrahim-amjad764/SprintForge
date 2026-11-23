@@ -35,14 +35,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (this.state.hasError) {
       return (
         this.props.fallback || (
-          <div className="p-4 border border-red-200 bg-red-50 rounded-lg">
-            <h3 className="font-medium text-red-800">Something went wrong</h3>
-            <p className="text-sm text-red-600 mt-1">
+          <div className="p-4 rounded-lg border border-destructive/30 bg-destructive/10" role="alert">
+            <h3 className="font-medium text-destructive">Something went wrong</h3>
+            <p className="text-sm text-destructive/80 mt-1">
               {this.state.error?.message || 'An unexpected error occurred'}
             </p>
             <button
               onClick={() => this.setState({ hasError: false, error: null })}
-              className="mt-2 text-sm text-red-700 underline hover:text-red-900"
+              className="mt-2 text-sm text-destructive underline hover:opacity-80"
             >
               Try again
             </button>
@@ -66,12 +66,12 @@ export function PanelErrorBoundary({
   return (
     <ErrorBoundary
       fallback={
-        <div className="p-6 border border-yellow-200 bg-yellow-50 rounded-lg">
+        <div className="p-6 border border-yellow-200 dark:border-yellow-500/40 bg-yellow-50 dark:bg-yellow-500/10 rounded-lg">
           <div className="flex items-center gap-2">
-            <span className="text-yellow-600">⚠️</span>
-            <h3 className="font-medium text-yellow-800">{panelName} temporarily unavailable</h3>
+            <span className="text-yellow-600 dark:text-yellow-300">⚠️</span>
+            <h3 className="font-medium text-yellow-800 dark:text-yellow-300">{panelName} temporarily unavailable</h3>
           </div>
-          <p className="text-sm text-yellow-700 mt-2">
+          <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-2">
             This section encountered an error. You can continue using other parts of the form.
           </p>
         </div>

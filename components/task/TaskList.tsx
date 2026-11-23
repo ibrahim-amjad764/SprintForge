@@ -4,6 +4,9 @@
 import { useEffect, useState, useRef } from "react";
 import TaskCard from "./TaskCard";
 import useSocket from "@/hooks/useSocket";
+import usePolling from "@/hooks/usePolling";
+import { apiRequest } from "@/lib/api";
+import { dedupeById, mergePartialById, pickNewerByTimestamp } from "@/lib/polling";
 
 // 1. Senior Step: 'any' ko hata kar proper interface banayen
 interface TaskType {
@@ -26,6 +29,7 @@ export default function TaskList({
   projectId,
   projects,
   teamMembers,
+  pollUrls,
 }: {
   tasks: TaskType[];
   taskHrefPrefix?: string;
@@ -33,6 +37,12 @@ export default function TaskList({
   projectId?: string;
   projects?: any[];
   teamMembers?: any[];
+  /**
+   * REST endpoints polled every 60s (+ on focus/visibility) as the
+   * Socket.IO-independent refresh path. Each URL must return the
+   * `{ success, data: Task[] }` envelope from GET /api/tasks.
+   */
+  pollUrls?: string[];
 }) {
   console.log("=== TASK LIST COMPONENT INITIALIZED ===");
   console.log("Props received:", { 
@@ -145,7 +155,7 @@ export default function TaskList({
   const highlightText = (text: string, query: string) => {
     if (!query) return text;
     const regex = new RegExp(`(${query})`, 'gi');
-    return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
+    return text.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-500/20">$1</mark>');
   };
 
   // Join the project room so task:updated/task:deleted reach this list.
@@ -200,6 +210,41 @@ export default function TaskList({
     };
   }, [socket]); // socket dependancy add ki hai
 
+  /*
+   * REST polling fallback — primary path on hosts without Socket.IO.
+   * Promise.allSettled: if SOME workspace/project fetches fail, the
+   * successful scopes still merge in and nothing is removed; only a
+   * fully successful poll may replace the list (so remote deletions
+   * propagate). Socket handlers above remain the fast path when a
+   * socket is connected.
+   */
+  const pollTasks = async () => {
+    if (!pollUrls?.length) return;
+    const results = await Promise.allSettled(
+      pollUrls.map((url) =>
+        apiRequest(url).then((res) =>
+          Array.isArray(res?.data) ? (res.data as TaskType[]) : [],
+        ),
+      ),
+    );
+    const succeeded = results.filter(
+      (r): r is PromiseFulfilledResult<TaskType[]> => r.status === "fulfilled",
+    );
+    if (succeeded.length === 0) return;
+
+    const fetched = dedupeById(succeeded.flatMap((r) => r.value));
+    const complete = succeeded.length === results.length;
+
+    setTasks((prev) => {
+      // A socket task:updated may have landed while this poll was in
+      // flight — never let an older fetched row overwrite it.
+      const resolved = pickNewerByTimestamp(prev, fetched);
+      return complete ? resolved : mergePartialById(prev, resolved);
+    });
+  };
+
+  usePolling(pollTasks, 60_000, { enabled: !!pollUrls?.length });
+
   // Filter tasks based on selected filter
   const filteredTasks = tasks.filter((task) => {
     const statusMatch =
@@ -228,8 +273,8 @@ export default function TaskList({
   return (
     <div className="space-y-6">
       {/* Filter Tabs */}
-      <div className="rounded-xl border bg-white p-2 shadow-sm">
-        <div className="flex flex-wrap gap-2">
+      <div className="rounded-2xl border border-border bg-card p-1.5 shadow-card">
+        <div className="flex flex-wrap gap-1.5">
           {(['all', 'high', 'medium', 'low', 'completed', 'pending'] as FilterType[]).map(
             (filterType) => {
               const count =
@@ -250,16 +295,16 @@ export default function TaskList({
                   onClick={() => setFilter(filterType)}
                   className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                     filter === filterType
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
+                      ? 'bg-primary text-primary-foreground shadow-glow'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   }`}
                 >
                   {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${
+                    className={`rounded-full px-2 py-0.5 font-mono text-[11px] tabular-nums ${
                       filter === filterType
-                        ? 'bg-blue-700 text-white'
-                        : 'bg-gray-200 text-gray-700'
+                        ? 'bg-primary-foreground/20 text-primary-foreground'
+                        : 'bg-muted text-muted-foreground'
                     }`}
                   >
                     {count}
@@ -272,27 +317,28 @@ export default function TaskList({
       </div>
 
       {/* Search Bar */}
-      <div className="rounded-xl border bg-white p-4 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
         <input
           type="text"
           placeholder="Search tasks..."
+          aria-label="Search tasks"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 py-2 px-4 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+          className="w-full rounded-lg border border-input bg-muted/50 px-4 py-2 text-sm transition-colors placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
         />
       </div>
 
       {/* Bulk Actions */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">
-          Tasks ({filteredTasks.length})
+        <h2 className="font-mono text-sm font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          Tasks <span className="text-foreground tabular-nums">({filteredTasks.length})</span>
         </h2>
         <button
           onClick={() => {
             setBulkMode(!bulkMode);
             setSelectedTasks(new Set());
           }}
-          className="text-sm text-blue-600 hover:text-blue-800"
+          className="rounded-lg px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
         >
           {bulkMode ? 'Exit Bulk Mode' : 'Bulk Select'}
         </button>
@@ -300,13 +346,13 @@ export default function TaskList({
 
       {/* Bulk Delete Button */}
       {bulkMode && selectedTasks.size > 0 && (
-        <div className="flex items-center gap-4 bg-red-50 border border-red-200 rounded-lg p-3">
-          <span className="text-sm text-red-800">
+        <div className="flex items-center gap-4 rounded-2xl border border-red-500/25 bg-red-500/5 p-3">
+          <span className="text-sm text-red-700 dark:text-red-300">
             {selectedTasks.size} task(s) selected
           </span>
           <button
             onClick={handleBulkDelete}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
+            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
           >
             Delete Selected
           </button>
@@ -315,13 +361,13 @@ export default function TaskList({
 
       {/* Undo Bar */}
       {showUndo && (
-        <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <span className="text-sm text-blue-800">
+        <div className="flex items-center justify-between rounded-2xl border border-primary/25 bg-primary/5 p-3">
+          <span className="text-sm text-primary">
             Task deleted. Undo?
           </span>
           <button
             onClick={handleUndo}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
           >
             Undo
           </button>

@@ -22,10 +22,10 @@ interface Column {
 }
 
 const columns: Column[] = [
-  { id: 'TODO', title: 'To Do', icon: '📝', color: 'bg-gray-100' },
-  { id: 'IN_PROGRESS', title: 'In Progress', icon: '⏳', color: 'bg-blue-100' },
-  { id: 'REVIEW', title: 'In Review', icon: '🔍', color: 'bg-yellow-100' },
-  { id: 'DONE', title: 'Done', icon: '✅', color: 'bg-green-100' },
+  { id: 'TODO', title: 'To Do', icon: '📝', color: 'bg-muted' },
+  { id: 'IN_PROGRESS', title: 'In Progress', icon: '⏳', color: 'bg-blue-100 dark:bg-blue-500/15' },
+  { id: 'REVIEW', title: 'In Review', icon: '🔍', color: 'bg-yellow-100 dark:bg-yellow-500/15' },
+  { id: 'DONE', title: 'Done', icon: '✅', color: 'bg-green-100 dark:bg-green-500/15' },
 ];
 
 export default function AgileKanban({ tasks, onTaskUpdated, filters }: AgileKanbanProps) {
@@ -181,7 +181,7 @@ export default function AgileKanban({ tasks, onTaskUpdated, filters }: AgileKanb
   };
 
   return (
-    <div className="h-full bg-gray-50 p-6">
+    <div className="h-full bg-muted p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 h-full">
         {columns.map((column) => {
           const columnTasks = getTasksByColumn(column.id);
@@ -194,12 +194,12 @@ export default function AgileKanban({ tasks, onTaskUpdated, filters }: AgileKanb
               onDrop={(e) => handleDrop(e, column.id)}
             >
               {/* Column Header */}
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">{column.icon}</span>
-                  <h3 className="font-semibold text-gray-900">{column.title}</h3>
+                  <h3 className="font-semibold text-foreground">{column.title}</h3>
                 </div>
-                <span className="px-3 py-1 bg-white rounded-full text-sm font-medium text-gray-600 shadow-sm">
+                <span className="px-3 py-1 bg-card rounded-full text-sm font-medium text-muted-foreground shadow-sm">
                   {columnTasks.length}
                 </span>
               </div>
@@ -212,11 +212,11 @@ export default function AgileKanban({ tasks, onTaskUpdated, filters }: AgileKanb
                     draggable
                     onDragStart={(e) => handleDragStart(e, task)}
                     onDragEnd={handleDragEnd}
-                    className="bg-white rounded-lg border shadow-sm p-4 hover:shadow-md transition-all cursor-move"
+                    className="bg-card rounded-lg border shadow-sm p-4 hover:shadow-md transition-all cursor-move"
                   >
                     {/* Header */}
                     <div className="flex items-start justify-between mb-3">
-                      <h4 className="font-medium text-gray-900 text-sm flex-1">{task.title}</h4>
+                      <h4 className="font-medium text-foreground text-sm flex-1">{task.title}</h4>
                       <div className="flex items-center gap-2 ml-2">
                         <div
                           className={`w-3 h-3 rounded-full ${getPriorityColor(task.priority)}`}
@@ -224,31 +224,31 @@ export default function AgileKanban({ tasks, onTaskUpdated, filters }: AgileKanb
                         />
                         <button
                           onClick={() => handleDelete(task._id)}
-                          className="p-1 hover:bg-red-50 rounded transition-colors"
+                          className="p-1 hover:bg-red-50 dark:bg-red-500/10 rounded transition-colors"
                           title="Delete"
                         >
-                          <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-600" />
+                          <Trash2 className="w-4 h-4 text-muted-foreground hover:text-red-600 dark:text-red-300" />
                         </button>
                       </div>
                     </div>
 
                     {/* Team Badge */}
                     <div className="mb-3">
-                      <span className="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md font-medium">
+                      <span className="inline-block px-2 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 text-xs rounded-md font-medium">
                         {getTeamName(task.teamId)}
                       </span>
                     </div>
 
                     {/* Description */}
                     {task.description && (
-                      <p className="text-xs text-gray-600 mb-3 line-clamp-2">{task.description}</p>
+                      <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{task.description}</p>
                     )}
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between pt-3 border-t border-border">
                       {/* Due Date */}
                       {task.dueDate && (
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Calendar className="w-3 h-3" />
                           <span>{formatDueDate(task.dueDate)}</span>
                         </div>
@@ -268,7 +268,7 @@ export default function AgileKanban({ tasks, onTaskUpdated, filters }: AgileKanb
                 ))}
 
                 {columnTasks.length === 0 && (
-                  <div className="flex items-center justify-center h-24 text-gray-400 text-sm">
+                  <div className="flex items-center justify-center h-24 text-muted-foreground text-sm">
                     No tasks
                   </div>
                 )}

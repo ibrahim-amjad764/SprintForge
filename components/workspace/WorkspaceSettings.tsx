@@ -463,18 +463,18 @@ export default function WorkspaceSettings({
       <div className="mb-8">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-foreground">
               Workspace Settings
             </h1>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Manage your workspace, preferences,
               notifications, and security.
             </p>
           </div>
 
           {isDirty && (
-            <div className="flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700">
+            <div className="flex items-center gap-2 rounded-full bg-amber-50 dark:bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-700 dark:text-amber-300">
               <span className="h-2 w-2 rounded-full bg-amber-500" />
               Unsaved changes
             </div>
@@ -489,7 +489,7 @@ export default function WorkspaceSettings({
       {message && (
         <div
           role="status"
-          className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+          className="mb-6 rounded-lg border border-green-200 dark:border-green-500/40 bg-green-50 dark:bg-green-500/10 px-4 py-3 text-sm text-green-700 dark:text-green-300"
         >
           {message}
         </div>
@@ -498,7 +498,7 @@ export default function WorkspaceSettings({
       {error && (
         <div
           role="alert"
-          className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="mb-6 rounded-lg border border-red-200 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300"
         >
           {error}
         </div>
@@ -513,7 +513,7 @@ export default function WorkspaceSettings({
             Sidebar
         ==================================================== */}
 
-        <aside className="h-fit rounded-xl border border-gray-200 bg-white p-2">
+        <aside className="h-fit rounded-xl border border-border bg-card p-2">
           <nav className="space-y-1">
             {tabs.map((tab) => {
               const active = activeTab === tab.id;
@@ -533,15 +533,15 @@ export default function WorkspaceSettings({
                   }}
                   className={`w-full rounded-lg px-3 py-3 text-left transition-colors ${
                     active
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-muted text-foreground'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   }`}
                 >
                   <div className="text-sm font-medium">
                     {tab.label}
                   </div>
 
-                  <div className="mt-0.5 text-xs text-gray-400">
+                  <div className="mt-0.5 text-xs text-muted-foreground">
                     {tab.description}
                   </div>
                 </button>
@@ -564,13 +564,13 @@ export default function WorkspaceSettings({
 
           {activeTab === 'general' && (
             <div className="space-y-6">
-              <section className="rounded-xl border border-gray-200 bg-white">
-                <div className="border-b border-gray-200 px-6 py-5">
-                  <h2 className="font-semibold text-gray-900">
+              <section className="rounded-xl border border-border bg-card">
+                <div className="border-b border-border px-6 py-5">
+                  <h2 className="font-semibold text-foreground">
                     General Information
                   </h2>
 
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Update your workspace identity and
                     branding.
                   </p>
@@ -582,7 +582,7 @@ export default function WorkspaceSettings({
                   <div>
                     <label
                       htmlFor="workspace-name"
-                      className="mb-2 block text-sm font-medium text-gray-700"
+                      className="mb-2 block text-sm font-medium text-foreground"
                     >
                       Workspace Name
                     </label>
@@ -600,12 +600,12 @@ export default function WorkspaceSettings({
                         setError('');
                         setMessage('');
                       }}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none transition focus:border-black focus:ring-1 focus:ring-black disabled:bg-gray-100"
+                      className="w-full rounded-lg border border-border px-3 py-2.5 outline-none transition focus:border-foreground/20 focus:ring-1 focus:ring-foreground/40 disabled:bg-muted"
                       placeholder="My Workspace"
                       required
                     />
 
-                    <div className="mt-1 text-right text-xs text-gray-400">
+                    <div className="mt-1 text-right text-xs text-muted-foreground">
                       {name.length}/100
                     </div>
                   </div>
@@ -615,7 +615,7 @@ export default function WorkspaceSettings({
                   <div>
                     <label
                       htmlFor="workspace-description"
-                      className="mb-2 block text-sm font-medium text-gray-700"
+                      className="mb-2 block text-sm font-medium text-foreground"
                     >
                       Description
                     </label>
@@ -633,11 +633,11 @@ export default function WorkspaceSettings({
                         setError('');
                         setMessage('');
                       }}
-                      className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2.5 outline-none transition focus:border-black focus:ring-1 focus:ring-black disabled:bg-gray-100"
+                      className="w-full resize-none rounded-lg border border-border px-3 py-2.5 outline-none transition focus:border-foreground/20 focus:ring-1 focus:ring-foreground/40 disabled:bg-muted"
                       placeholder="Describe what this workspace is used for..."
                     />
 
-                    <div className="mt-1 text-right text-xs text-gray-400">
+                    <div className="mt-1 text-right text-xs text-muted-foreground">
                       {description.length}/1000
                     </div>
                   </div>
@@ -645,7 +645,7 @@ export default function WorkspaceSettings({
                   {/* Logo */}
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                    <label className="mb-2 block text-sm font-medium text-foreground">
                       Workspace Logo
                     </label>
 
@@ -670,20 +670,20 @@ export default function WorkspaceSettings({
 
               {/* Workspace Information */}
 
-              <section className="rounded-xl border border-gray-200 bg-white">
-                <div className="border-b border-gray-200 px-6 py-5">
-                  <h2 className="font-semibold text-gray-900">
+              <section className="rounded-xl border border-border bg-card">
+                <div className="border-b border-border px-6 py-5">
+                  <h2 className="font-semibold text-foreground">
                     Workspace Information
                   </h2>
 
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Technical information about this
                     workspace.
                   </p>
                 </div>
 
                 <div className="p-6">
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                  <label className="mb-2 block text-sm font-medium text-foreground">
                     Workspace ID
                   </label>
 
@@ -692,13 +692,13 @@ export default function WorkspaceSettings({
                       type="text"
                       value={workspaceId}
                       readOnly
-                      className="min-w-0 flex-1 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 font-mono text-sm text-gray-600 outline-none"
+                      className="min-w-0 flex-1 rounded-lg border border-border bg-muted px-3 py-2.5 font-mono text-sm text-muted-foreground outline-none"
                     />
 
                     <button
                       type="button"
                       onClick={handleCopyWorkspaceId}
-                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                      className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
                     >
                       {copied ? 'Copied!' : 'Copy'}
                     </button>
@@ -713,28 +713,28 @@ export default function WorkspaceSettings({
           ================================================== */}
 
           {activeTab === 'preferences' && (
-            <section className="rounded-xl border border-gray-200 bg-white">
-              <div className="border-b border-gray-200 px-6 py-5">
-                <h2 className="font-semibold text-gray-900">
+            <section className="rounded-xl border border-border bg-card">
+              <div className="border-b border-border px-6 py-5">
+                <h2 className="font-semibold text-foreground">
                   Workspace Preferences
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-muted-foreground">
                   Configure default behavior for your
                   workspace and tasks.
                 </p>
               </div>
 
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-border">
                 {/* Theme */}
 
                 <div className="flex flex-col justify-between gap-4 p-6 sm:flex-row sm:items-center">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900">
+                    <h3 className="text-sm font-medium text-foreground">
                       Appearance
                     </h3>
 
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Choose the default workspace theme.
                     </p>
                   </div>
@@ -748,7 +748,7 @@ export default function WorkspaceSettings({
                           .value as WorkspaceSettingsData['theme']
                       )
                     }
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-black"
+                    className="rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-foreground/20"
                   >
                     <option value="system">
                       System
@@ -766,11 +766,11 @@ export default function WorkspaceSettings({
 
                 <div className="flex flex-col justify-between gap-4 p-6 sm:flex-row sm:items-center">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900">
+                    <h3 className="text-sm font-medium text-foreground">
                       Default Task Priority
                     </h3>
 
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Priority automatically selected when
                       creating a new task.
                     </p>
@@ -787,7 +787,7 @@ export default function WorkspaceSettings({
                           .value as WorkspaceSettingsData['defaultTaskPriority']
                       )
                     }
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-black"
+                    className="rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-foreground/20"
                   >
                     <option value="LOW">Low</option>
                     <option value="MEDIUM">
@@ -804,11 +804,11 @@ export default function WorkspaceSettings({
 
                 <div className="flex flex-col justify-between gap-4 p-6 sm:flex-row sm:items-center">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900">
+                    <h3 className="text-sm font-medium text-foreground">
                       Default Task Status
                     </h3>
 
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Status automatically applied to new
                       tasks.
                     </p>
@@ -823,7 +823,7 @@ export default function WorkspaceSettings({
                           .value as WorkspaceSettingsData['defaultTaskStatus']
                       )
                     }
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-black"
+                    className="rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-foreground/20"
                   >
                     <option value="TODO">To Do</option>
                     <option value="IN_PROGRESS">
@@ -840,11 +840,11 @@ export default function WorkspaceSettings({
 
                 <div className="flex flex-col justify-between gap-4 p-6 sm:flex-row sm:items-center">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900">
+                    <h3 className="text-sm font-medium text-foreground">
                       Default Task View
                     </h3>
 
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Choose how tasks should be displayed
                       by default.
                     </p>
@@ -859,7 +859,7 @@ export default function WorkspaceSettings({
                           .value as WorkspaceSettingsData['defaultTaskView']
                       )
                     }
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-black"
+                    className="rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-foreground/20"
                   >
                     <option value="LIST">List</option>
                     <option value="BOARD">Board</option>
@@ -873,11 +873,11 @@ export default function WorkspaceSettings({
 
                 <div className="flex flex-col justify-between gap-4 p-6 sm:flex-row sm:items-center">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900">
+                    <h3 className="text-sm font-medium text-foreground">
                       Week Starts On
                     </h3>
 
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Used by calendar and date-based
                       workspace views.
                     </p>
@@ -892,7 +892,7 @@ export default function WorkspaceSettings({
                           .value as WorkspaceSettingsData['weekStartsOn']
                       )
                     }
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-black"
+                    className="rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-foreground/20"
                   >
                     <option value="MONDAY">
                       Monday
@@ -911,28 +911,28 @@ export default function WorkspaceSettings({
           ================================================== */}
 
           {activeTab === 'notifications' && (
-            <section className="rounded-xl border border-gray-200 bg-white">
-              <div className="border-b border-gray-200 px-6 py-5">
-                <h2 className="font-semibold text-gray-900">
+            <section className="rounded-xl border border-border bg-card">
+              <div className="border-b border-border px-6 py-5">
+                <h2 className="font-semibold text-foreground">
                   Notifications
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-muted-foreground">
                   Control which workspace events generate
                   notifications.
                 </p>
               </div>
 
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-border">
                 {/* Email Notifications */}
 
                 <label className="flex cursor-pointer items-center justify-between gap-4 p-6">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900">
+                    <h3 className="text-sm font-medium text-foreground">
                       Email Notifications
                     </h3>
 
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Receive important workspace updates
                       by email.
                     </p>
@@ -949,7 +949,7 @@ export default function WorkspaceSettings({
                         e.target.checked
                       )
                     }
-                    className="h-5 w-5 rounded border-gray-300 text-black focus:ring-black"
+                    className="h-5 w-5 rounded border-border text-foreground focus:ring-foreground/40"
                   />
                 </label>
 
@@ -957,11 +957,11 @@ export default function WorkspaceSettings({
 
                 <label className="flex cursor-pointer items-center justify-between gap-4 p-6">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900">
+                    <h3 className="text-sm font-medium text-foreground">
                       Task Assignment Notifications
                     </h3>
 
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Notify members when they are assigned
                       a task.
                     </p>
@@ -978,7 +978,7 @@ export default function WorkspaceSettings({
                         e.target.checked
                       )
                     }
-                    className="h-5 w-5 rounded border-gray-300 text-black focus:ring-black"
+                    className="h-5 w-5 rounded border-border text-foreground focus:ring-foreground/40"
                   />
                 </label>
 
@@ -986,11 +986,11 @@ export default function WorkspaceSettings({
 
                 <label className="flex cursor-pointer items-center justify-between gap-4 p-6">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900">
+                    <h3 className="text-sm font-medium text-foreground">
                       Due Date Reminders
                     </h3>
 
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Remind members when assigned tasks are
                       approaching their due date.
                     </p>
@@ -1005,7 +1005,7 @@ export default function WorkspaceSettings({
                         e.target.checked
                       )
                     }
-                    className="h-5 w-5 rounded border-gray-300 text-black focus:ring-black"
+                    className="h-5 w-5 rounded border-border text-foreground focus:ring-foreground/40"
                   />
                 </label>
               </div>
@@ -1017,25 +1017,25 @@ export default function WorkspaceSettings({
           ================================================== */}
 
           {activeTab === 'danger' && (
-            <section className="rounded-xl border border-red-200 bg-white">
+            <section className="rounded-xl border border-red-200 dark:border-red-500/40 bg-card">
               <div className="border-b border-red-100 px-6 py-5">
-                <h2 className="font-semibold text-red-700">
+                <h2 className="font-semibold text-red-700 dark:text-red-300">
                   Danger Zone
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-muted-foreground">
                   These actions can permanently affect your
                   workspace.
                 </p>
               </div>
 
               <div className="p-6">
-                <div className="rounded-lg border border-red-200 bg-red-50 p-5">
-                  <h3 className="font-medium text-red-800">
+                <div className="rounded-lg border border-red-200 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 p-5">
+                  <h3 className="font-medium text-red-800 dark:text-red-300">
                     Delete Workspace
                   </h3>
 
-                  <p className="mt-1 text-sm leading-6 text-red-700">
+                  <p className="mt-1 text-sm leading-6 text-red-700 dark:text-red-300">
                     Permanently delete this workspace,
                     including its projects, tasks, members,
                     and associated data.
@@ -1068,14 +1068,14 @@ export default function WorkspaceSettings({
           ================================================== */}
 
           {activeTab !== 'danger' && (
-            <div className="sticky bottom-4 mt-6 flex flex-col gap-3 rounded-xl border border-gray-200 bg-white/95 p-4 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+            <div className="sticky bottom-4 mt-6 flex flex-col gap-3 rounded-xl border border-border bg-card/95 p-4 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-between">
               <div>
                 {isDirty ? (
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-foreground">
                     You have unsaved changes.
                   </p>
                 ) : (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Your workspace is up to date.
                   </p>
                 )}
@@ -1090,7 +1090,7 @@ export default function WorkspaceSettings({
                     isSaving ||
                     isDeleting
                   }
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Reset
                 </button>
@@ -1102,7 +1102,7 @@ export default function WorkspaceSettings({
                     isSaving ||
                     isDeleting
                   }
-                  className="rounded-lg bg-black px-5 py-2 text-sm font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSaving
                     ? 'Saving...'
@@ -1125,25 +1125,25 @@ export default function WorkspaceSettings({
           aria-modal="true"
           aria-labelledby="delete-workspace-title"
         >
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-2xl">
             <h3
               id="delete-workspace-title"
-              className="text-xl font-semibold text-gray-900"
+              className="text-xl font-semibold text-foreground"
             >
               Delete Workspace?
             </h3>
 
-            <p className="mt-3 text-sm leading-6 text-gray-600">
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
               You are about to permanently delete{' '}
               <strong>{workspace.name}</strong>.
             </p>
 
-            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
-              <p className="text-sm font-medium text-red-800">
+            <div className="mt-4 rounded-lg border border-red-200 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 p-4">
+              <p className="text-sm font-medium text-red-800 dark:text-red-300">
                 This action cannot be undone.
               </p>
 
-              <p className="mt-1 text-sm text-red-700">
+              <p className="mt-1 text-sm text-red-700 dark:text-red-300">
                 All projects, tasks, members, and workspace
                 data associated with this workspace may be
                 permanently removed.
@@ -1159,7 +1159,7 @@ export default function WorkspaceSettings({
                   }
                 }}
                 disabled={isDeleting}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Cancel
               </button>

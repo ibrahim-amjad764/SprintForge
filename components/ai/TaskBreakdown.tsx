@@ -41,7 +41,7 @@ export default function TaskBreakdown() {
       <div className="flex gap-2">
         <button
           onClick={generateTaskBreakdown}
-          className="rounded bg-black px-4 py-2 text-white"
+          className="rounded bg-primary px-4 py-2 text-primary-foreground"
         >
           Generate
         </button>

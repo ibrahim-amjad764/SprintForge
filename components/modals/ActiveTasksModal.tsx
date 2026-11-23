@@ -83,13 +83,13 @@ export default function ActiveTasksModal({ isOpen, onClose, tasks }: ActiveTasks
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[80vh] overflow-hidden">
+      <div className="relative bg-card rounded-xl shadow-xl w-full max-w-3xl max-h-[80vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold">Active Tasks Backlog ({activeTasks.length})</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-muted rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -100,8 +100,8 @@ export default function ActiveTasksModal({ isOpen, onClose, tasks }: ActiveTasks
           {/* Priority Distribution Bar */}
           {total > 0 && (
             <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Priority Distribution</h3>
-              <div className="h-6 bg-gray-200 rounded-full overflow-hidden flex">
+              <h3 className="text-sm font-medium text-foreground mb-3">Priority Distribution</h3>
+              <div className="h-6 bg-muted rounded-full overflow-hidden flex">
                 {highPriorityCount > 0 && (
                   <div
                     className="bg-red-500 transition-all"
@@ -124,7 +124,7 @@ export default function ActiveTasksModal({ isOpen, onClose, tasks }: ActiveTasks
                   />
                 )}
               </div>
-              <div className="flex gap-4 mt-2 text-xs text-gray-600">
+              <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <div className="w-2 h-2 bg-red-500 rounded-full" />
                   High: {highPriorityCount}
@@ -143,7 +143,7 @@ export default function ActiveTasksModal({ isOpen, onClose, tasks }: ActiveTasks
 
           {/* Task List */}
           {activeTasks.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-muted-foreground">
               No active tasks found
             </div>
           ) : (
@@ -151,17 +151,17 @@ export default function ActiveTasksModal({ isOpen, onClose, tasks }: ActiveTasks
               {activeTasks.map((task) => (
                 <div
                   key={task._id}
-                  className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="p-4 bg-muted rounded-lg hover:bg-muted transition-colors"
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-medium text-gray-900 flex-1">{task.title}</h4>
+                    <h4 className="font-medium text-foreground flex-1">{task.title}</h4>
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                         task.priority === 'HIGH' || task.priority === 'URGENT'
-                          ? 'bg-red-100 text-red-800'
+                          ? 'bg-red-100 dark:bg-red-500/15 text-red-800 dark:text-red-300'
                           : task.priority === 'MEDIUM'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-green-100 text-green-800'
+                          ? 'bg-yellow-100 dark:bg-yellow-500/15 text-yellow-800 dark:text-yellow-300'
+                          : 'bg-green-100 dark:bg-green-500/15 text-green-800 dark:text-green-300'
                       }`}
                     >
                       {task.priority}
@@ -170,7 +170,7 @@ export default function ActiveTasksModal({ isOpen, onClose, tasks }: ActiveTasks
 
                   <div className="flex items-center gap-3 text-sm">
                     {/* Team Badge */}
-                    <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md">
+                    <span className="px-2 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 rounded-md">
                       {getTeamName(task.teamId)}
                     </span>
 
@@ -180,13 +180,13 @@ export default function ActiveTasksModal({ isOpen, onClose, tasks }: ActiveTasks
                         <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-medium">
                           {getMemberName(task.assignedToId).charAt(0).toUpperCase()}
                         </div>
-                        <span className="text-gray-600">{getMemberName(task.assignedToId)}</span>
+                        <span className="text-muted-foreground">{getMemberName(task.assignedToId)}</span>
                       </div>
                     )}
 
                     {/* Due Date */}
                     {task.dueDate && (
-                      <span className="text-gray-500">{formatDueDate(task.dueDate)}</span>
+                      <span className="text-muted-foreground">{formatDueDate(task.dueDate)}</span>
                     )}
                   </div>
                 </div>

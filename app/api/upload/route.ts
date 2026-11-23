@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     const folder =
       typeof folderValue === 'string' && folderValue.trim()
         ? folderValue.trim()
-        : 'sprintforge';
+        : process.env.CLOUDINARY_FOLDER || 'sprintforge';
 
     const resourceTypeValue = formData.get('resourceType');
 

@@ -86,7 +86,7 @@ export function VirtualizedIdPGroupList({
       renderItem={(group, index) => (
         <div
           key={group.id}
-          className="flex items-center justify-between p-3 border-b hover:bg-gray-50 cursor-pointer"
+          className="flex items-center justify-between p-3 border-b hover:bg-muted cursor-pointer"
           onClick={() => onToggleGroup(group.id)}
           style={{ height: 60 }}
         >
@@ -95,18 +95,18 @@ export function VirtualizedIdPGroupList({
               type="checkbox"
               checked={selectedGroups.has(group.id)}
               onChange={() => onToggleGroup(group.id)}
-              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+              className="w-4 h-4 text-blue-600 dark:text-blue-300 rounded focus:ring-blue-500"
               onClick={(e) => e.stopPropagation()}
             />
             <div>
               <p className="font-medium text-sm">{group.name}</p>
               {group.description && (
-                <p className="text-xs text-gray-500">{group.description}</p>
+                <p className="text-xs text-muted-foreground">{group.description}</p>
               )}
             </div>
           </div>
           {group.memberCount !== undefined && (
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+            <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
               {group.memberCount} members
             </span>
           )}

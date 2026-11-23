@@ -57,6 +57,8 @@ const WorkspaceMemberSchema = new Schema<IWorkspaceMember>(
 
 WorkspaceMemberSchema.index({ workspace: 1, user: 1 }, { unique: true });
 WorkspaceMemberSchema.index({ user: 1 });
+// Paginated "my workspaces" lists sort memberships by createdAt desc.
+WorkspaceMemberSchema.index({ user: 1, createdAt: -1 });
 
 const WorkspaceMember: Model<IWorkspaceMember> =
   mongoose.models.WorkspaceMember ||

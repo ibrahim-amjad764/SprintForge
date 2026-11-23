@@ -3,18 +3,41 @@
 import { useState, useEffect } from 'react';
 import TeamManagement from './TeamManagement';
 import GlobalFilter, { FilterState } from '../filters/GlobalFilter';
+import Pagination from '../shared/Pagination';
+
+interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'developer' | 'designer' | 'project_manager' | 'viewer';
+  avatar?: string;
+}
 
 interface Team {
   id: string;
   name: string;
   projectId: string;
   projectName: string;
-  members: any[];
+  members: TeamMember[];
   activeTasks: number;
   completedTasks: number;
   status: 'active' | 'archived';
   createdAt: string;
   skills?: string[];
+}
+
+interface DbTeam {
+  _id: string;
+  name: string;
+  workspace: string;
+  members?: Array<{
+    _id: string;
+    name: string;
+    email: string;
+    role: TeamMember['role'];
+    avatar?: string;
+  }>;
+  createdAt: string;
 }
 
 interface TeamsClientProps {
@@ -23,6 +46,8 @@ interface TeamsClientProps {
   workspaceId: string;
 }
 
+const PAGE_SIZE = 20;
+
 export default function TeamsClient({
   projectId,
   projectName,
@@ -30,6 +55,9 @@ export default function TeamsClient({
 }: TeamsClientProps) {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     priority: [],
@@ -37,64 +65,91 @@ export default function TeamsClient({
     assigneeId: [],
   });
 
-  // Load teams from API on mount
+  const search = filters.search?.trim() ?? '';
+
+  // Paginated fetch — search is applied server-side so results stay
+  // correct across pages. `loading` is set by the triggering event
+  // handlers (filter/page change); state updates happen in async
+  // callbacks below.
   useEffect(() => {
-    async function loadTeams() {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/teams?workspace=${workspaceId}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.data) {
-            // Transform DB teams to match Team interface
-            const transformedTeams = data.data.map((dbTeam: any) => ({
-              id: dbTeam._id,
-              name: dbTeam.name,
-              projectId: dbTeam.workspace,
-              projectName: projectName,
-              members: (dbTeam.members || []).map((member: any) => ({
-                id: member._id,
-                name: member.name,
-                email: member.email,
-                role: member.role,
-                avatar: member.avatar,
-              })),
-              activeTasks: 0, // Will be calculated from tasks
-              completedTasks: 0, // Will be calculated from tasks
-              status: 'active',
-              createdAt: dbTeam.createdAt,
-              skills: [],
-            }));
-            setTeams(transformedTeams);
-          }
+    let cancelled = false;
+
+    const params = new URLSearchParams({
+      workspace: workspaceId,
+      page: String(page),
+      limit: String(PAGE_SIZE),
+    });
+    if (search) params.set('search', search);
+
+    fetch(`/api/teams?${params.toString()}`)
+      .then(async (response) => {
+        if (!response.ok || cancelled) return;
+        const data = await response.json();
+        if (cancelled || !data.success || !data.data) return;
+
+        const payload = data.data;
+        const dbTeams: DbTeam[] = Array.isArray(payload)
+          ? payload
+          : payload.items ?? [];
+        const transformedTeams: Team[] = dbTeams.map((dbTeam) => ({
+          id: dbTeam._id,
+          name: dbTeam.name,
+          projectId: dbTeam.workspace,
+          projectName: projectName,
+          members: (dbTeam.members || []).map((member) => ({
+            id: member._id,
+            name: member.name,
+            email: member.email,
+            role: member.role,
+            avatar: member.avatar,
+          })),
+          activeTasks: 0, // Will be calculated from tasks
+          completedTasks: 0, // Will be calculated from tasks
+          status: 'active',
+          createdAt: dbTeam.createdAt,
+          skills: [],
+        }));
+        setTeams(transformedTeams);
+        if (!Array.isArray(payload)) {
+          setTotal(payload.total ?? 0);
+          setHasMore(!!payload.hasMore);
+        } else {
+          setTotal(dbTeams.length);
+          setHasMore(false);
         }
-      } catch (error) {
+      })
+      .catch((error) => {
         console.error('Error loading teams from API:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
-    loadTeams();
-  }, [workspaceId, projectName]);
+    return () => {
+      cancelled = true;
+    };
+  }, [workspaceId, projectName, page, search]);
 
-  const handleTeamsChange = async (updatedTeams: any[]) => {
+  const handleTeamsChange = (updatedTeams: Team[]) => {
     setTeams(updatedTeams);
     // No LocalStorage - data is managed by TeamManagement component via API
   };
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
+    setPage(1);
+    setLoading(true);
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    setPage(nextPage);
+    setLoading(true);
   };
 
   // Extract available assignees from teams
   const availableAssignees = teams.flatMap((team) =>
-    team.members.map((member: any) => ({ id: member.id, name: member.name }))
+    team.members.map((member) => ({ id: member.id, name: member.name }))
   );
-
-  if (loading) {
-    return <div className="p-6">Loading teams...</div>;
-  }
 
   return (
     <div className="space-y-6">
@@ -105,14 +160,28 @@ export default function TeamsClient({
         showPriorityFilter={false}
         showAssigneeFilter={false}
       />
-      <TeamManagement
-        workspaceId={workspaceId}
-        projectId={workspaceId}
-        projectName="Workspace"
-        initialTeams={teams}
-        onTeamsChange={handleTeamsChange}
-        filters={filters}
-      />
+      {loading && teams.length === 0 ? (
+        <div className="p-6">Loading teams...</div>
+      ) : (
+        <>
+          <TeamManagement
+            workspaceId={workspaceId}
+            projectId={workspaceId}
+            projectName="Workspace"
+            initialTeams={teams}
+            onTeamsChange={handleTeamsChange}
+            filters={filters}
+          />
+          <Pagination
+            page={page}
+            limit={PAGE_SIZE}
+            total={total}
+            hasMore={hasMore}
+            loading={loading}
+            onPageChange={handlePageChange}
+          />
+        </>
+      )}
     </div>
   );
 }

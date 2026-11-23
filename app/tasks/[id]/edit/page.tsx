@@ -1,5 +1,6 @@
 // app/tasks/[id]/edit/page.tsx
 import MainLayout from '@/components/layout/MainLayout';
+import { notFound } from 'next/navigation';
 import { connectDB } from '@/lib/db';
 import { getTaskById } from '@/services/task.service';
 import { requireTaskAccess } from '@/lib/page-guards';
@@ -16,9 +17,13 @@ export default async function TaskEditPage({
   await connectDB();
   const task = await getTaskById(id);
 
+  if (!task) {
+    notFound();
+  }
+
   return (
     <MainLayout>
-      <div className="p-10">
+      <div className="py-4 sm:py-6">
         <TaskEditForm task={task} />
       </div>
     </MainLayout>

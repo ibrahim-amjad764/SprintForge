@@ -2,13 +2,22 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Bell } from 'lucide-react';
 import { apiRequest } from '@/lib/api';
 
 const PAGE_SIZE = 20;
 
+interface AppNotification {
+  _id: string;
+  read?: boolean;
+  title?: string;
+  message?: string;
+  createdAt?: string;
+}
+
 export default function NotificationDropdown({ userId }: { userId: string }) {
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [markingAllRead, setMarkingAllRead] = useState(false);
   const [page, setPage] = useState(1);
@@ -37,7 +46,7 @@ export default function NotificationDropdown({ userId }: { userId: string }) {
         `/api/notifications?user=${userId}&page=${nextPage}&limit=${PAGE_SIZE}`
       );
       const data = response.data;
-      const newItems: { _id: string }[] = data?.items || [];
+      const newItems: AppNotification[] = data?.items || [];
       setNotifications((prev) => {
         const seen = new Set(prev.map((n) => n._id));
         return [...prev, ...newItems.filter((n) => !seen.has(n._id))];
@@ -67,30 +76,53 @@ export default function NotificationDropdown({ userId }: { userId: string }) {
   }
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close on outside click / Escape — standard popover behavior.
+  useEffect(() => {
+    if (!isOpen) return;
+    function onPointerDown(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setIsOpen(false);
+    }
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isOpen]);
 
   return (
-    <div className="relative inline-block">
-      <button 
+    <div className="relative inline-block" ref={containerRef}>
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative rounded border px-4 py-2"
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
+        className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
       >
-        🔔 Notifications
+        <Bell className="h-4 w-4" aria-hidden="true" />
         {unreadCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-            {unreadCount}
+          <span className="absolute -right-1.5 -top-1.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white">
+            {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 z-50 w-80 rounded border bg-white shadow-lg">
+        <div className="animate-scale-in absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-popover shadow-popover">
           <div className="flex items-center justify-between border-b p-3">
             <h3 className="font-semibold">Notifications</h3>
             {notifications.length > 0 && (
               <button
                 onClick={markAllAsRead}
                 disabled={markingAllRead || unreadCount === 0}
-                className="text-xs text-blue-600 hover:underline disabled:opacity-50"
+                className="text-xs font-medium text-primary hover:underline disabled:opacity-50"
               >
                 {markingAllRead ? 'Marking...' : 'Mark all as read'}
               </button>
@@ -98,23 +130,23 @@ export default function NotificationDropdown({ userId }: { userId: string }) {
           </div>
           
           {notifications.length === 0 ? (
-            <p className="p-4 text-center text-gray-500">No notifications</p>
+            <p className="p-4 text-center text-muted-foreground">No notifications</p>
           ) : (
             <div className="max-h-96 overflow-y-auto">
               {notifications.map((notification) => (
                 <div 
                   key={notification._id} 
-                  className={`border-b p-3 ${!notification.read ? 'bg-blue-50' : ''}`}
+                  className={`border-b border-border/60 p-3 transition-colors hover:bg-muted/40 ${!notification.read ? 'bg-primary/5' : ''}`}
                 >
                   <div className="flex items-start gap-2">
                     {!notification.read && (
-                      <div className="mt-1 h-2 w-2 rounded-full bg-blue-500"></div>
+                      <div className="mt-1 h-2 w-2 rounded-full bg-primary"></div>
                     )}
                     <div className="flex-1">
                       <p className="font-semibold text-sm">{notification.title}</p>
-                      <p className="text-sm text-gray-600">{notification.message}</p>
-                      <p className="mt-1 text-xs text-gray-400">
-                        {new Date(notification.createdAt).toLocaleDateString()}
+                      <p className="text-sm text-muted-foreground">{notification.message}</p>
+                      <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                        {notification.createdAt ? new Date(notification.createdAt).toLocaleDateString() : ''}
                       </p>
                     </div>
                   </div>
@@ -124,7 +156,7 @@ export default function NotificationDropdown({ userId }: { userId: string }) {
                 <button
                   onClick={loadMore}
                   disabled={loadingMore}
-                  className="w-full border-t p-3 text-sm text-blue-600 hover:bg-gray-50 disabled:opacity-50"
+                  className="w-full border-t border-border/60 p-3 text-sm font-medium text-primary transition-colors hover:bg-muted disabled:opacity-50"
                 >
                   {loadingMore ? 'Loading...' : 'Load more'}
                 </button>

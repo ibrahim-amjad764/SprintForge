@@ -6,6 +6,7 @@ import WorkspaceMember from '@/models/WorkspaceMember';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
 import { getWorkspaceMembership } from '@/lib/authorization';
+import { apiError } from '@/utils/error-handler';
 
 /*
     User lookup for invite/member pickers.
@@ -59,6 +60,6 @@ export async function GET(request: NextRequest) {
 
     return errorResponse('email or workspace parameter required', 400);
   } catch (error) {
-    return errorResponse('Failed to fetch users', 500);
+    return apiError(error, 'Failed to fetch users');
   }
 }

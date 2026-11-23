@@ -1,37 +1,53 @@
-// components/landing/HowItWorks.tsx
+import type { CSSProperties } from 'react';
+import { UserPlus, Rocket, FolderKanban } from 'lucide-react';
 
 const steps = [
   {
-    number: '1',
-    title: 'Create Account',
-    description: 'Sign up in seconds and set up your first workspace.',
+    icon: UserPlus,
+    title: 'Create account',
+    description: 'Sign up in seconds and spin up your first workspace.',
   },
   {
-    number: '2',
-    title: 'Invite Team',
-    description: 'Add your team members and start collaborating instantly.',
+    icon: FolderKanban,
+    title: 'Invite your team',
+    description: 'Add members with role-based access and start collaborating instantly.',
   },
   {
-    number: '3',
-    title: 'Start Sprints',
-    description: 'Create projects, assign tasks, and track progress in real-time.',
+    icon: Rocket,
+    title: 'Run your sprint',
+    description: 'Create projects, assign tasks, and track progress in real time.',
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section className="py-16 bg-gray-50">
-      <h2 className="mb-12 text-center text-3xl font-bold">How It Works</h2>
-      <div className="grid gap-8 md:grid-cols-3 max-w-4xl mx-auto">
-        {steps.map((step) => (
-          <div key={step.number} className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-black text-white text-2xl font-bold">
-              {step.number}
+    <section className="border-y border-border/60 bg-muted/40 py-20">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-primary">
+            How it works
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            Up and running in minutes
+          </h2>
+        </div>
+
+        <div className="stagger relative mx-auto mt-14 grid max-w-4xl gap-10 md:grid-cols-3 md:gap-6">
+          {steps.map((step, i) => (
+            <div key={step.title} style={{ '--i': i } as CSSProperties} className="relative text-center">
+              <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary shadow-card">
+                <step.icon className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <p className="mt-4 font-mono text-xs font-medium text-muted-foreground">
+                STEP {String(i + 1).padStart(2, '0')}
+              </p>
+              <h3 className="mt-1.5 font-semibold tracking-tight">{step.title}</h3>
+              <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">
+                {step.description}
+              </p>
             </div>
-            <h3 className="mb-2 text-xl font-semibold">{step.title}</h3>
-            <p className="text-gray-600">{step.description}</p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );

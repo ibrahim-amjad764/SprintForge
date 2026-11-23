@@ -5,6 +5,7 @@ import { validateSessionToken } from "@/lib/session";
 import { connectDB } from "@/lib/db";
 import { errorResponse, successResponse } from "@/utils/response";
 import User from "@/models/User";
+import { apiError } from '@/utils/error-handler';
 
 /*
     GET CURRENT USER
@@ -44,6 +45,6 @@ export async function GET(request: NextRequest) {
     }
     return successResponse(user, "User fetched");
   } catch (error) {
-    return errorResponse("Server error", 500);
+    return apiError(error, 'Server error');
   }
 }

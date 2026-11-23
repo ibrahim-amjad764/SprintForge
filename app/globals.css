@@ -5,45 +5,70 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-geist-sans: 'Geist Sans', sans-serif;
-  --font-geist-mono: 'Geist Mono', monospace;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  color-scheme: light;
+  /* Typography — Inter (UI) + JetBrains Mono (data/metrics), loaded
+     via next/font in app/layout.tsx as --font-inter /
+     --font-jetbrains-mono. Fallback stacks keep text styled even if
+     font files fail. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --background: oklch(0.985 0.002 280);
+  --foreground: oklch(0.18 0.01 280);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.18 0.01 280);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.18 0.01 280);
+  --primary: oklch(0.55 0.2 262);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.96 0.005 280);
+  --secondary-foreground: oklch(0.25 0.02 280);
+  --muted: oklch(0.96 0.005 280);
+  --muted-foreground: oklch(0.5 0.02 280);
+  --accent: oklch(0.95 0.02 280);
+  --accent-foreground: oklch(0.3 0.05 280);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --border: oklch(0.88 0.006 280);
+  --input: oklch(0.88 0.006 280);
+  --ring: oklch(0.6 0.15 262);
+  --chart-1: oklch(0.62 0.19 259);
+  --chart-2: oklch(0.65 0.18 300);
+  --chart-3: oklch(0.7 0.15 200);
+  --chart-4: oklch(0.65 0.2 150);
+  --chart-5: oklch(0.6 0.2 30);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar: oklch(0.97 0.005 280);
+  --sidebar-foreground: oklch(0.2 0.01 280);
+  --sidebar-primary: oklch(0.55 0.2 262);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-accent: oklch(0.94 0.01 280);
+  --sidebar-accent-foreground: oklch(0.25 0.03 280);
+  --sidebar-border: oklch(0.9 0.005 280);
+  --sidebar-ring: oklch(0.6 0.15 262);
+  --success: oklch(0.62 0.17 155);
+  --warning: oklch(0.72 0.16 75);
+  /* Elevation & glow — light theme: soft, diffuse shadows */
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.06), 0 10px 28px -12px rgb(15 23 42 / 0.16);
+  --shadow-popover: 0 4px 8px rgb(15 23 42 / 0.08), 0 16px 40px -12px rgb(15 23 42 / 0.2);
+  --shadow-glow: 0 0 0 1px rgb(59 130 246 / 0.25), 0 8px 24px -8px rgb(59 130 246 / 0.35);
+  /* Ambient lighting — faint cool wash so light mode shares the
+     dark theme's atmosphere without competing with content */
+  --glow-primary: rgb(99 102 241 / 0.05);
+  --glow-accent: rgb(59 130 246 / 0.04);
+  /* Motion — durations & easing (see Motion system below) */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --stagger-step: 50ms;
 }
 
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --shadow-card: var(--shadow-card);
+  --shadow-popover: var(--shadow-popover);
+  --shadow-glow: var(--shadow-glow);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -85,37 +110,50 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  color-scheme: dark;
+  /* Crypto-dashboard dark: near-black surfaces, cool tint, ambient
+     purple/blue handled by the body::before glow layer below. */
+  --background: oklch(0.14 0.012 280);
+  --foreground: oklch(0.93 0.005 280);
+  --card: oklch(0.185 0.014 280);
+  --card-foreground: oklch(0.93 0.005 280);
+  --popover: oklch(0.19 0.014 280);
+  --popover-foreground: oklch(0.93 0.005 280);
+  --primary: oklch(0.68 0.17 262);
+  --primary-foreground: oklch(0.14 0.02 280);
+  --secondary: oklch(0.24 0.015 280);
+  --secondary-foreground: oklch(0.9 0.01 280);
+  --muted: oklch(0.24 0.015 280);
+  --muted-foreground: oklch(0.66 0.02 280);
+  --accent: oklch(0.27 0.03 285);
+  --accent-foreground: oklch(0.92 0.02 285);
+  --destructive: oklch(0.68 0.19 22);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.68 0.17 262);
+  --chart-1: oklch(0.68 0.17 262);
+  --chart-2: oklch(0.7 0.16 300);
+  --chart-3: oklch(0.72 0.14 200);
+  --chart-4: oklch(0.72 0.17 150);
+  --chart-5: oklch(0.7 0.18 40);
+  --sidebar: oklch(0.16 0.012 280);
+  --sidebar-foreground: oklch(0.9 0.005 280);
+  --sidebar-primary: oklch(0.68 0.17 262);
+  --sidebar-primary-foreground: oklch(0.14 0.02 280);
+  --sidebar-accent: oklch(0.24 0.02 285);
+  --sidebar-accent-foreground: oklch(0.92 0.02 285);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.68 0.17 262);
+  --success: oklch(0.75 0.17 160);
+  --warning: oklch(0.8 0.15 80);
+  /* Elevation & glow — dark theme: deep, layered shadows + brand glow */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.5);
+  --shadow-popover: 0 4px 8px rgb(0 0 0 / 0.35), 0 16px 40px -12px rgb(0 0 0 / 0.6);
+  --shadow-glow: 0 0 0 1px oklch(0.68 0.17 262 / 0.4), 0 8px 28px -8px oklch(0.68 0.17 262 / 0.45);
+  /* Ambient lighting — richer indigo/blue atmosphere */
+  --glow-primary: oklch(0.68 0.17 262 / 0.14);
+  --glow-accent: oklch(0.72 0.15 250 / 0.10);
+  --glow-success: oklch(0.72 0.16 155 / 0.05);
 }
 
 @layer base {
@@ -127,5 +165,265 @@
   }
   html {
     @apply font-sans;
+  }
+
+  /*
+   * Ambient lighting — layered radial atmosphere behind all content
+   * (pointer-events none). Dark mode gets the full indigo/blue/violet
+   * mesh; light mode gets a faint cool wash so both themes share the
+   * same depth language. Intensities live in --glow-* tokens.
+   */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(60rem 40rem at 85% -10%, var(--glow-primary), transparent 60%),
+      radial-gradient(50rem 35rem at -10% 30%, var(--glow-accent), transparent 60%),
+      radial-gradient(45rem 40rem at 60% 110%, var(--glow-primary), transparent 60%);
+  }
+  .dark body::before {
+    background:
+      radial-gradient(60rem 40rem at 85% -10%, var(--glow-primary), transparent 60%),
+      radial-gradient(50rem 35rem at -10% 30%, var(--glow-accent), transparent 60%),
+      radial-gradient(45rem 40rem at 60% 110%, color-mix(in oklch, var(--glow-accent) 60%, var(--glow-primary)), transparent 60%),
+      radial-gradient(40rem 30rem at 50% 50%, oklch(0.5 0.18 300 / 0.05), transparent 65%);
+  }
+
+  /*
+   * Mesh-gradient surface — decorative accent for heroes, empty states
+   * and feature panels. Token-driven so it follows the theme; keep
+   * opacity low and never place behind body text blocks.
+   */
+  .mesh-gradient {
+    background:
+      radial-gradient(30rem 20rem at 20% 0%, color-mix(in oklch, var(--primary) 22%, transparent), transparent 60%),
+      radial-gradient(25rem 18rem at 90% 100%, color-mix(in oklch, var(--accent) 16%, transparent), transparent 60%),
+      radial-gradient(18rem 14rem at 80% 10%, color-mix(in oklch, var(--primary) 10%, transparent), transparent 55%);
+  }
+  .dark .mesh-gradient {
+    background:
+      radial-gradient(30rem 20rem at 20% 0%, color-mix(in oklch, var(--primary) 26%, transparent), transparent 60%),
+      radial-gradient(25rem 18rem at 90% 100%, color-mix(in oklch, var(--accent) 20%, transparent), transparent 60%),
+      radial-gradient(18rem 14rem at 80% 10%, color-mix(in oklch, var(--primary) 14%, transparent), transparent 55%);
+  }
+
+  /*
+   * Motion system — transform/opacity only (GPU-composited).
+   * Durations: --dur-fast 120ms / --dur-base 200ms / --dur-slow 320ms.
+   * Easing: --ease-out (easeOutQuint). Stagger via --i custom property
+   * or .stagger utility (50ms steps, capped visually by list length).
+   * tw-animate-css supplies animate-in/fade-in/zoom-in utilities; these
+   * keyframes add the signature "rise" entrance and shimmer for
+   * skeletons. All are neutralized under prefers-reduced-motion below.
+   */
+  @keyframes sf-rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes sf-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes sf-scale-in {
+    from { opacity: 0; transform: scale(0.97); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes sf-shimmer {
+    from { background-position: 200% 0; }
+    to   { background-position: -200% 0; }
+  }
+  /* Signature entrance: fade + rise + subtle scale (0.98 → 1) */
+  @keyframes sf-enter {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .animate-rise   { animation: sf-rise var(--dur-slow) var(--ease-out) both; }
+  .animate-fade   { animation: sf-fade var(--dur-base) var(--ease-out) both; }
+  .animate-scale-in { animation: sf-scale-in var(--dur-base) var(--ease-out) both; }
+  .animate-rise-slow { animation: sf-rise 480ms var(--ease-out) both; }
+  /* Choreographed entrance — pair with --i custom property for stagger */
+  .animate-enter {
+    animation: sf-enter var(--dur-slow) var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * var(--stagger-step));
+  }
+
+  /*
+   * Premium primary button — gradient fill, inner top highlight,
+   * hover lift + animated sheen sweep, tactile press. Compose with
+   * .btn-sheen on any gradient/primary CTA.
+   */
+  .btn-sheen {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    transition: transform var(--dur-fast) var(--ease-out),
+                box-shadow var(--dur-base) var(--ease-out),
+                filter var(--dur-base) var(--ease-out);
+  }
+  .btn-sheen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgb(255 255 255 / 0.22) 48%,
+      rgb(255 255 255 / 0.32) 52%,
+      transparent 70%
+    );
+    transform: translateX(-120%);
+    transition: transform 600ms var(--ease-out);
+    pointer-events: none;
+  }
+  .btn-sheen:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+  }
+  .btn-sheen:hover::after {
+    transform: translateX(120%);
+  }
+  .btn-sheen:active {
+    transform: translateY(0) scale(0.98);
+    transition-duration: var(--dur-fast);
+  }
+  /* Inner top highlight — gives gradient buttons a lit edge */
+  .btn-sheen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22);
+    pointer-events: none;
+  }
+
+  /*
+   * Fine dot-grid texture — decorative backdrop for hero surfaces.
+   * Fades radially so it never competes with text.
+   */
+  .dot-grid {
+    background-image: radial-gradient(
+      circle,
+      color-mix(in oklch, var(--foreground) 9%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 22px 22px;
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 20%, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 20%, black 30%, transparent 75%);
+  }
+  .dark .dot-grid {
+    background-image: radial-gradient(
+      circle,
+      rgb(255 255 255 / 0.08) 1px,
+      transparent 1px
+    );
+  }
+
+  /* Staggered entrances: apply to a parent; children rise in sequence. */
+  .stagger > * {
+    animation: sf-rise var(--dur-slow) var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * var(--stagger-step));
+  }
+
+  /* Modal/popover entrance — slightly deeper scale for layered surfaces */
+  @keyframes sf-modal-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .animate-modal-in { animation: sf-modal-in var(--dur-base) var(--ease-out) both; }
+
+  /* Route-level page entrance — apply to the top-level page wrapper */
+  .page-enter { animation: sf-enter var(--dur-slow) var(--ease-out) both; }
+
+  /*
+   * Glass surfaces — SELECTIVE use only: navigation, popovers,
+   * command surfaces, floating panels. Never on dense content cards.
+   * Dark: richer translucency; light: crisp with restrained blur.
+   */
+  .glass {
+    background: color-mix(in oklch, var(--card) 72%, transparent);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    border: 1px solid color-mix(in oklch, var(--border) 70%, transparent);
+  }
+  .dark .glass {
+    background: color-mix(in oklch, var(--card) 55%, transparent);
+    border-color: rgb(255 255 255 / 8%);
+  }
+  .glass-strong {
+    background: color-mix(in oklch, var(--popover) 82%, transparent);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
+    box-shadow: var(--shadow-popover);
+  }
+  .dark .glass-strong {
+    background: color-mix(in oklch, var(--popover) 78%, transparent);
+    border-color: rgb(255 255 255 / 10%);
+  }
+
+  /* Consistent keyboard focus ring across interactive elements */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Skeleton shimmer — pair with Skeleton component's bg-muted base. */
+  .skeleton-shimmer {
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklch, var(--foreground) 6%, transparent) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: sf-shimmer 1.6s linear infinite;
+  }
+
+  /*
+   * Reduced motion — collapse all animation/transition to near-instant.
+   * Covers both our keyframes and tw-animate-css utilities.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Restrained positive/negative indicators used by stats and lists. */
+  .text-success { color: var(--success); }
+  .text-warning { color: var(--warning); }
+  .bg-success-soft { background: color-mix(in oklch, var(--success) 12%, transparent); }
+  .bg-warning-soft { background: color-mix(in oklch, var(--warning) 14%, transparent); }
+
+  /*
+   * Recharts renders plain SVG — theme it through CSS since
+   * presentation attributes cannot resolve var() reliably.
+   */
+  .recharts-cartesian-grid line {
+    stroke: var(--border);
+  }
+  .recharts-cartesian-axis-tick text,
+  .recharts-legend-item-text {
+    fill: var(--muted-foreground);
+    color: var(--muted-foreground);
+    font-size: 12px;
+  }
+  .recharts-tooltip-cursor {
+    fill: var(--muted);
+  }
+  .recharts-default-tooltip {
+    background-color: var(--popover) !important;
+    color: var(--popover-foreground);
+    border: 1px solid var(--border) !important;
+    border-radius: 8px;
   }
 }

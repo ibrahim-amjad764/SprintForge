@@ -30,6 +30,7 @@ export interface SessionUser {
   tokenVersion: number;
 }
 
+/** Extracts the tokenVersion claim from a JWT payload, or null if absent/invalid. */
 export function extractTokenVersion(payload: unknown): number | null {
   const v = (payload as { tokenVersion?: unknown } | null)?.tokenVersion;
   // Missing claim → legacy token → version 0 (backward compatible).
@@ -46,6 +47,7 @@ export function extractTokenVersion(payload: unknown): number | null {
     token is invalid, expired, revoked (version mismatch), or the
     user no longer exists.
 */
+/** Validates a session JWT and the DB-backed tokenVersion — returns null when revoked/expired. */
 export async function validateSessionToken(
   token: string,
 ): Promise<SessionUser | null> {
@@ -94,6 +96,7 @@ export async function validateSessionToken(
     Drop-in replacement for requireAuth() — same AuthResult shape,
     plus DB-backed tokenVersion enforcement and CSRF protection.
 */
+/** API guard: resolves the session user or returns a 401 Response in auth.response. */
 export async function requireSession(
   request: NextRequest,
 ): Promise<AuthResult> {
@@ -126,6 +129,7 @@ export async function requireSession(
     auth, Authorization header, or cookie) against the session
     version. Used by server/socket.ts after JWT signature checks.
 */
+/** Throws/returns error when the presented tokenVersion is stale (post-logout/password change). */
 export async function assertTokenVersion(
   userId: string,
   tokenVersion: number,
@@ -152,6 +156,7 @@ export async function assertTokenVersion(
     ever issued for this account. Atomic $inc; only call after the
     token has been verified and the user confirmed to exist.
 */
+/** Increments User.tokenVersion, invalidating every outstanding session token. */
 export async function bumpTokenVersion(userId: string): Promise<void> {
   await User.updateOne({ _id: userId }, { $inc: { tokenVersion: 1 } });
 }

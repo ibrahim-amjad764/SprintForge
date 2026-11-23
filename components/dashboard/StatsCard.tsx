@@ -1,5 +1,3 @@
-// components/dashboard/StatsCard.tsx
-
 interface Props {
   title: string;
   value: number;
@@ -7,14 +5,14 @@ interface Props {
 
 export default function StatsCard({
   title,
-
   value,
 }: Props) {
   return (
-    <div className="rounded border bg-white p-6 shadow">
-      <h3 className="text-gray-500">{title}</h3>
-
-      <p className="text-3xl font-bold">{value}</p>
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+      <p className="text-sm text-muted-foreground">{title}</p>
+      <p className="mt-2 font-mono text-3xl font-semibold tracking-tight tabular-nums">
+        {value}
+      </p>
     </div>
   );
 }

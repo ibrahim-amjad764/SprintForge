@@ -20,8 +20,16 @@ export default async function TasksPage() {
   return (
     <MainLayout>
       <div>
-        <h1 className="mb-8 text-3xl font-bold">Tasks</h1>
-        <TaskList tasks={JSON.parse(JSON.stringify(tasks))} />
+        <div className="mb-8">
+          <p className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-primary">
+            Work
+          </p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Tasks</h1>
+        </div>
+        <TaskList
+          tasks={JSON.parse(JSON.stringify(tasks))}
+          pollUrls={workspaceIds.map((id) => `/api/tasks?workspace=${id}`)}
+        />
       </div>
     </MainLayout>
   );

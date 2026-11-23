@@ -33,7 +33,7 @@ export default function FileUploader({ taskId }: { taskId: string }) {
 
       <button
         onClick={upload}
-        className="rounded bg-black px-4 py-2 text-white"
+        className="rounded bg-primary px-4 py-2 text-primary-foreground"
       >
         {' '}
         Upload

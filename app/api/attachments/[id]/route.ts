@@ -7,6 +7,7 @@ import { deleteAttachment } from '@/services/attachment.service';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
 import { getMembershipForTask, canWriteWorkspace } from '@/lib/authorization';
+import { apiError } from '@/utils/error-handler';
 
 export async function DELETE(
   request: NextRequest,
@@ -44,6 +45,6 @@ export async function DELETE(
 
     return successResponse(null, 'Deleted');
   } catch (error) {
-    return errorResponse('Delete failed', 500);
+    return apiError(error, 'Delete failed');
   }
 }

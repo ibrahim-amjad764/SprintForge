@@ -87,6 +87,8 @@ const TeamSchema = new Schema<ITeam>(
 
 // Teams are always listed per workspace.
 TeamSchema.index({ workspace: 1 });
+// Paginated team lists sort by createdAt desc within a workspace.
+TeamSchema.index({ workspace: 1, createdAt: -1 });
 
 const Team: Model<ITeam> =  mongoose.models.Team || mongoose.model<ITeam>("Team", TeamSchema);
 

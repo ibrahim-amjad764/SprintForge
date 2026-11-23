@@ -1,4 +1,3 @@
-// components/dashboard/MetricCards.tsx
 "use client";
 
 import { FolderKanban, CheckSquare, Users, Plus } from "lucide-react";
@@ -7,40 +6,42 @@ interface MetricCardProps {
   title: string;
   count: number;
   icon: React.ElementType;
-  color: string;
+  accent: 'primary' | 'success' | 'accent';
   actionLabel?: string;
   onAction?: () => void;
+  index?: number;
 }
 
-function MetricCard({ title, count, icon: Icon, color, actionLabel, onAction }: MetricCardProps) {
-  const colorClasses = {
-    blue: "bg-blue-50 text-blue-600 border-blue-200",
-    green: "bg-green-50 text-green-600 border-green-200",
-    purple: "bg-purple-50 text-purple-600 border-purple-200",
-  };
+const accentStyles = {
+  primary: 'border-primary/20 bg-primary/10 text-primary',
+  success: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  accent: 'border-violet-500/25 bg-violet-500/10 text-violet-600 dark:text-violet-400',
+};
 
+function MetricCard({ title, count, icon: Icon, accent, actionLabel, onAction, index = 0 }: MetricCardProps) {
   return (
-    <div className="bg-white rounded-xl border shadow-sm p-6 hover:shadow-md transition-shadow h-full flex flex-col">
-      <div className="flex items-start justify-between flex-1">
-        <div className="flex items-center gap-3">
-          <div className={`p-3 rounded-lg ${colorClasses[color as keyof typeof colorClasses]}`}>
-            <Icon className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">{title}</p>
-            <p className="text-2xl font-bold text-gray-900">{count}</p>
-          </div>
-        </div>
+    <div
+      className="animate-enter flex h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-popover"
+      style={{ '--i': index } as React.CSSProperties}
+    >
+      <div className="flex items-start justify-between">
+        <span className={`flex h-10 w-10 items-center justify-center rounded-xl border ${accentStyles[accent]}`}>
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </span>
         {actionLabel && onAction && (
           <button
             onClick={onAction}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            title={actionLabel}
+            aria-label={actionLabel}
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
           >
-            <Plus className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+            <Plus className="h-4 w-4" aria-hidden="true" />
           </button>
         )}
       </div>
+      <p className="mt-4 font-mono text-3xl font-semibold tracking-tight tabular-nums">
+        {count}
+      </p>
+      <p className="mt-1 text-sm text-muted-foreground">{title}</p>
     </div>
   );
 }
@@ -63,30 +64,33 @@ export function MetricCards({
   onInviteMember,
 }: MetricCardsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-5">
       <MetricCard
         title="Active Projects"
         count={projectsCount}
         icon={FolderKanban}
-        color="blue"
+        accent="primary"
         actionLabel="Create Project"
         onAction={onCreateProject}
+        index={0}
       />
       <MetricCard
         title="Pending Tasks"
         count={tasksCount}
         icon={CheckSquare}
-        color="green"
+        accent="success"
         actionLabel="Assign Task"
         onAction={onCreateTask}
+        index={1}
       />
       <MetricCard
         title="Team Members"
         count={membersCount}
         icon={Users}
-        color="purple"
+        accent="accent"
         actionLabel="Invite Member"
         onAction={onInviteMember}
+        index={2}
       />
     </div>
   );

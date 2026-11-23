@@ -3,14 +3,17 @@
 import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db";
 import { validateSessionToken } from "@/lib/session";
-import { createWorkspace, getUserWorkspaces } from "@/services/workspace.service";
+import { createWorkspace, getUserWorkspaces, getUserWorkspacesPaginated } from "@/services/workspace.service";
+import { parsePaginationParams } from "@/lib/pagination";
 import { dispatchWorkspaceCreatedEvent } from "@/services/webhook.service";
 import { autoProvisionRepository } from "@/services/vcs-provisioning.service";
 import { autoSyncIdpGroups } from "@/services/idp-mapping.service";
 import { scheduleDataRetention } from "@/services/data-retention.service";
 import { successResponse, errorResponse } from "@/utils/response";
 import { getWorkspaceMembership } from "@/lib/authorization";
-import logger from '@/lib/logger';
+
+import { apiError } from '@/utils/error-handler';
+import { PlanLimitError } from '@/services/billing.service';
 
 /*
     Workspace API
@@ -54,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Transform integrations from simple booleans to schema-expected structure
-    const transformedIntegrations: any = {};
+    const transformedIntegrations: Record<string, { enabled: boolean }> = {};
     if (body.integrations) {
       if (body.integrations.slack !== undefined) transformedIntegrations.slack = { enabled: body.integrations.slack };
       if (body.integrations.teams !== undefined) transformedIntegrations.teams = { enabled: body.integrations.teams };
@@ -106,9 +109,11 @@ export async function POST(request: NextRequest) {
     await dispatchWorkspaceCreatedEvent(workspace);
 
     return successResponse(workspace, "Workspace created");
-  } catch (error: any) {
-    logger.error({ err: error }, "Workspace creation error:");
-    return errorResponse(error.message || "Server error", 500);
+  } catch (error) {
+    if (error instanceof PlanLimitError) {
+      return errorResponse(error.message, error.status, error.code);
+    }
+    return apiError(error, "Server error");
   }
 }
 
@@ -122,10 +127,20 @@ export async function GET(request: NextRequest) {
       return errorResponse("Unauthorized", 401);
     }
 
+    // Opt-in pagination — same contract as the other list endpoints.
+    if (request.nextUrl.searchParams.has("page") || request.nextUrl.searchParams.has("limit")) {
+      const parsed = parsePaginationParams(request.nextUrl.searchParams);
+      if ("error" in parsed) {
+        return errorResponse(parsed.error, 400);
+      }
+      const result = await getUserWorkspacesPaginated(userId, parsed);
+      return successResponse(result);
+    }
+
     const workspaces = await getUserWorkspaces(userId);
 
     return successResponse(workspaces);
   } catch (error) {
-    return errorResponse("Server error", 500);
+    return apiError(error, 'Server error');
   }
 }

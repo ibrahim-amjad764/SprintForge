@@ -4,17 +4,21 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Menu, Zap } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import NotificationDropdown from '@/components/notifications/NotificationDropdown';
 import SearchBox from '@/components/search/SearchBox';
+import ThemeToggle from '@/components/theme/ThemeToggle';
 
 interface NavbarProps {
   onMenuToggle?: () => void;
+  sidebarOpen?: boolean;
 }
 
-export default function Navbar({ onMenuToggle }: NavbarProps) {
+export default function Navbar({ onMenuToggle, sidebarOpen = false }: NavbarProps) {
   const { user } = useAuth();
   const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
   const [workspaceInfo, setWorkspaceInfo] = useState<{
     id: string;
     logo: string | null;
@@ -24,6 +28,14 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
   const match = pathname?.match(/^\/workspace\/([^/]+)(?:\/|$)/);
   const workspaceId = match?.[1];
   const isWorkspaceDetail = Boolean(workspaceId && workspaceId !== 'new');
+
+  // Scroll-aware border — navbar gains a hairline once content scrolls under it.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     if (!isWorkspaceDetail || !workspaceId) return;
@@ -59,45 +71,52 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
   const isWorkspaceCreationPage = pathname === '/workspace/new';
 
   return (
-    <nav className="border-b bg-white">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3">
+    <nav
+      className={`sticky top-0 z-40 border-b bg-card/80 backdrop-blur-md transition-shadow duration-200 ${
+        scrolled ? 'border-border shadow-card' : 'border-transparent'
+      }`}
+    >
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center gap-3">
           {/* Hamburger Menu Button - Mobile Only */}
           <button
             onClick={onMenuToggle}
-            className="lg:hidden rounded p-2 hover:bg-gray-100"
+            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring lg:hidden"
             aria-label="Toggle menu"
+            aria-expanded={sidebarOpen}
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            <Menu className="h-5 w-5" aria-hidden="true" />
           </button>
 
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex min-w-0 items-center gap-3">
             {(() => {
-              const logoSrc = activeWorkspace?.logo || '/file.svg';
+              const logoSrc = activeWorkspace?.logo || null;
               // Only http(s) raster images go through the optimizer —
               // local SVGs and data: URLs must render unoptimized.
               const optimizable =
-                /^https?:\/\//.test(logoSrc) && !logoSrc.endsWith('.svg');
-              return (
+                logoSrc && /^https?:\/\//.test(logoSrc) && !logoSrc.endsWith('.svg');
+              return logoSrc ? (
                 <Image
                   src={logoSrc}
-                  alt="Workspace logo"
-                  width={40}
-                  height={40}
+                  alt=""
+                  width={36}
+                  height={36}
                   priority
                   unoptimized={!optimizable}
-                  className="h-10 w-10 rounded-md border border-slate-200 bg-slate-50 object-cover"
+                  className="h-9 w-9 shrink-0 rounded-lg border border-border bg-muted object-cover"
                 />
+              ) : (
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <Zap className="h-4 w-4" aria-hidden="true" />
+                </span>
               );
             })()}
-            <div>
-              <p className="text-lg font-semibold text-slate-900">
+            <div className="min-w-0">
+              <p className="truncate text-base font-bold tracking-tight text-foreground">
                 SprintForge
               </p>
               {activeWorkspace?.name && (
-                <p className="text-sm text-slate-500">{activeWorkspace.name}</p>
+                <p className="truncate text-xs text-muted-foreground">{activeWorkspace.name}</p>
               )}
             </div>
           </Link>
@@ -109,15 +128,16 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
           </div>
         )}
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2">
+          <ThemeToggle />
           {user ? (
             <NotificationDropdown userId={user._id} />
           ) : (
             <Link
               href="/login"
-              className="rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-100"
+              className="rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-glow transition-all hover:brightness-110"
             >
-              Login
+              Sign in
             </Link>
           )}
         </div>

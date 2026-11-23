@@ -5,7 +5,8 @@ import { validateSessionToken } from "@/lib/session";
 import { generateWorkspaceDescription } from "@/services/ai-description.service";
 import { successResponse, errorResponse } from "@/utils/response";
 import { rateLimit } from "@/lib/rate-limit";
-import logger from '@/lib/logger';
+
+import { apiError } from '@/utils/error-handler';
 
 // AI calls cost real money — cap per user per hour.
 const AI_RATE_LIMIT = 20;
@@ -45,7 +46,6 @@ export async function POST(request: NextRequest) {
 
     return successResponse({ description }, "Description generated successfully");
   } catch (error) {
-    logger.error({ err: error }, "AI description generation error:");
-    return errorResponse("Failed to generate description", 500);
+    return apiError(error, 'Failed to generate description');
   }
 }

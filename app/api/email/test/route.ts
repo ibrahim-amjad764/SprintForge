@@ -1,8 +1,9 @@
 // app/api/email/test/route.ts
 import { NextRequest } from 'next/server';
 import { sendEmail } from '@/services/email.service';
-import { successResponse, errorResponse } from '@/utils/response';
+import { successResponse } from '@/utils/response';
 import { requireAdmin } from '@/lib/admin';
+import { apiError } from '@/utils/error-handler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,6 +29,6 @@ Email system working.
     });
     return successResponse(null, 'Email sent');
   } catch (error) {
-    return errorResponse('Email failed', 500);
+    return apiError(error, 'Email failed');
   }
 }

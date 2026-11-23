@@ -87,12 +87,12 @@ export default function TaskForm({ projectId, onTaskCreated }: Props) {
 
   return (
     <form onSubmit={submit} className="mb-8 max-w-md space-y-4">
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-300">{error}</p>}
 
       <div className="space-y-2">
         <input
           type="text"
-          className="w-full rounded-md border border-gray-300 p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+          className="w-full rounded-md border border-border p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
           placeholder="Task title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -102,13 +102,13 @@ export default function TaskForm({ projectId, onTaskCreated }: Props) {
           disabled={loading}
         />
         {/* Dynamic character counter */}
-        <div className="text-xs text-gray-500 text-right">
+        <div className="text-xs text-muted-foreground text-right">
           {title.length} / {MAX_TITLE_LENGTH} characters
         </div>
       </div>
 
       <select
-        className="w-full rounded-md border border-gray-300 p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+        className="w-full rounded-md border border-border p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
         value={priority}
         onChange={(e) => setPriority(e.target.value)}
         disabled={loading}
@@ -122,7 +122,7 @@ export default function TaskForm({ projectId, onTaskCreated }: Props) {
       <div className="space-y-2">
         <input
           type="date"
-          className="w-full rounded-md border border-gray-300 p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+          className="w-full rounded-md border border-border p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
           disabled={loading}
@@ -132,7 +132,7 @@ export default function TaskForm({ projectId, onTaskCreated }: Props) {
           <button
             type="button"
             onClick={() => setQuickDate(0)}
-            className="text-blue-600 hover:text-blue-800 hover:underline"
+            className="text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:text-blue-300 hover:underline"
             disabled={loading}
           >
             Today
@@ -140,7 +140,7 @@ export default function TaskForm({ projectId, onTaskCreated }: Props) {
           <button
             type="button"
             onClick={() => setQuickDate(1)}
-            className="text-blue-600 hover:text-blue-800 hover:underline"
+            className="text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:text-blue-300 hover:underline"
             disabled={loading}
           >
             Tomorrow
@@ -148,7 +148,7 @@ export default function TaskForm({ projectId, onTaskCreated }: Props) {
           <button
             type="button"
             onClick={() => setQuickDate(7)}
-            className="text-blue-600 hover:text-blue-800 hover:underline"
+            className="text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:text-blue-300 hover:underline"
             disabled={loading}
           >
             Next Week

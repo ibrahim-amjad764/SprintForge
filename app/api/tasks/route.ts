@@ -17,6 +17,7 @@ import {
 import { revalidatePath } from 'next/cache';
 import Team from '@/models/Team';
 import logger from '@/lib/logger';
+import { apiError } from '@/utils/error-handler';
 
 /*
  Task API
@@ -179,10 +180,7 @@ export async function POST(request: NextRequest) {
 
     return successResponse(task, 'Task created');
   } catch (error) {
-    logger.error({ err: error }, '❌ Create Task Error:');
-    
-    // Don't expose internal error details to client
-    return errorResponse('Failed to create task', 500);
+    return apiError(error, 'Failed to create task');
   }
 }
 
@@ -249,8 +247,6 @@ export async function GET(request: NextRequest) {
 
     return successResponse(tasks);
   } catch (error) {
-    logger.error({ err: error }, '❌ Get Tasks Error:');
-
-    return errorResponse('Server error', 500);
+    return apiError(error, 'Server error');
   }
 }

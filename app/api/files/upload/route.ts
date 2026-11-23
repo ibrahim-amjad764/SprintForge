@@ -6,6 +6,7 @@ import { uploadFile } from '@/services/file.service';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
 import { validateAttachmentFile } from '@/lib/file-validation';
+import { apiError } from '@/utils/error-handler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,10 +38,6 @@ export async function POST(request: NextRequest) {
 
     return successResponse(result);
   } catch (error) {
-    return errorResponse(
-      'Upload failed',
-
-      500
-    );
+    return apiError(error, 'Upload failed');
   }
 }

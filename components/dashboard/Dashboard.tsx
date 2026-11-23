@@ -52,7 +52,7 @@ export default function Dashboard({ stats, workspaceId }: { stats: any; workspac
       <div className="space-y-6">
         <button
           onClick={() => setShowEmptyState(null)}
-          className="text-sm text-blue-600 hover:text-blue-800"
+          className="text-sm text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:text-blue-300"
         >
           ← Back to Dashboard
         </button>

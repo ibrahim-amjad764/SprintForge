@@ -46,7 +46,7 @@ export function IndustryTags({ selectedTags, onTagsChange, disabled = false }: I
               px-4 py-2 rounded-full text-sm font-medium transition-all
               ${selectedTags.includes(industry)
                 ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-muted text-foreground hover:bg-muted'
               }
               ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
             `}
@@ -57,7 +57,7 @@ export function IndustryTags({ selectedTags, onTagsChange, disabled = false }: I
       </div>
       
       {selectedTags.length > 0 && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           {selectedTags.length} tag{selectedTags.length !== 1 ? 's' : ''} selected
         </p>
       )}

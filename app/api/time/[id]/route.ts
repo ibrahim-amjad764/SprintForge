@@ -6,6 +6,7 @@ import { stopTimer } from '@/services/time.service';
 import TimeEntry from '@/models/TimeEntry';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
+import { apiError } from '@/utils/error-handler';
 
 export async function PUT(
   request: NextRequest,
@@ -37,9 +38,6 @@ export async function PUT(
       'Timer stopped'
     );
   } catch (error) {
-    return errorResponse(
-      'Failed',
-      500
-    );
+    return apiError(error, 'Failed');
   }
 }

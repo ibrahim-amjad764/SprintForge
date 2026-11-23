@@ -597,15 +597,15 @@ export default function TeamManagement({
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'admin':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 dark:bg-purple-500/15 text-purple-800 dark:text-purple-300';
       case 'developer':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300';
       case 'designer':
-        return 'bg-pink-100 text-pink-800';
+        return 'bg-pink-100 dark:bg-pink-500/15 text-pink-800 dark:text-pink-300';
       case 'project_manager':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 dark:bg-green-500/15 text-green-800 dark:text-green-300';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-muted text-foreground';
     }
   };
 
@@ -672,13 +672,13 @@ export default function TeamManagement({
   return (
     <div className="space-y-6">
       {/* Create Team Form */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <input
           type="text"
           placeholder="Enter team name..."
           value={newTeamName}
           onChange={(e) => setNewTeamName(e.target.value)}
-          className="h-10 flex-1 rounded-lg border border-neutral-200 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          className="h-10 flex-1 rounded-lg border border-border px-4 py-2 focus:border-primary/60 focus:ring-2 focus:ring-primary/25 focus:outline-none"
         />
         <button
           onClick={() => {
@@ -688,7 +688,7 @@ export default function TeamManagement({
             setSkillsInput('');
             setNewTeamSkills([]);
           }}
-          className="flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-6 text-white transition-colors hover:bg-blue-700"
+          className="flex h-10 items-center gap-2 rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-glow active:scale-[0.98]"
         >
           <Plus className="h-4 w-4" />
           Create Team
@@ -696,11 +696,11 @@ export default function TeamManagement({
       </div>
 
       {showCreateForm && (
-        <div className="rounded-lg border bg-white p-6 shadow-sm">
+        <div className="rounded-lg border bg-card p-6 shadow-sm">
           <h3 className="mb-4 text-lg font-bold">Create New Team</h3>
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Team Name
               </label>
               <input
@@ -708,11 +708,11 @@ export default function TeamManagement({
                 placeholder="Team name"
                 value={newTeamName}
                 onChange={(e) => setNewTeamName(e.target.value)}
-                className="h-10 w-full rounded-lg border border-neutral-200 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="h-10 w-full rounded-lg border border-border px-4 py-2 focus:border-primary/60 focus:ring-2 focus:ring-primary/25 focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Skills (optional)
               </label>
               <input
@@ -731,14 +731,14 @@ export default function TeamManagement({
 
                   setNewTeamSkills(skillsArray);
                 }}
-                className="h-10 w-full rounded-lg border border-neutral-200 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="h-10 w-full rounded-lg border border-border px-4 py-2 focus:border-primary/60 focus:ring-2 focus:ring-primary/25 focus:outline-none"
               />
             </div>
 
             <div className="flex gap-3">
               <button
                 onClick={handleCreateTeam}
-                className="h-10 rounded-lg bg-blue-600 px-6 text-white hover:bg-blue-700"
+                className="h-10 rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
               >
                 Create
               </button>
@@ -750,7 +750,7 @@ export default function TeamManagement({
                   setSkillsInput('');
                   setNewTeamSkills([]);
                 }}
-                className="h-10 rounded-lg border border-neutral-200 px-6 hover:bg-gray-100"
+                className="h-10 rounded-lg border border-border px-6 hover:bg-muted"
               >
                 Cancel
               </button>
@@ -763,42 +763,42 @@ export default function TeamManagement({
       <div className="grid grid-cols-3 gap-4">
         <div
           onClick={() => setIsMembersModalOpen(true)}
-          className="cursor-pointer rounded-lg border bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+          className="cursor-pointer rounded-lg border bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-              <Users className="h-5 w-5 text-blue-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-500/15">
+              <Users className="h-5 w-5 text-blue-600 dark:text-blue-300" />
             </div>
             <div>
-              <div className="text-sm text-gray-600">Total Members</div>
+              <div className="text-sm text-muted-foreground">Total Members</div>
               <div className="text-2xl font-bold">{totalMembers}</div>
             </div>
           </div>
         </div>
         <div
           onClick={() => setIsTasksModalOpen(true)}
-          className="cursor-pointer rounded-lg border bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+          className="cursor-pointer rounded-lg border bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100">
-              <Zap className="h-5 w-5 text-orange-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-500/15">
+              <Zap className="h-5 w-5 text-orange-600 dark:text-orange-300" />
             </div>
             <div>
-              <div className="text-sm text-gray-600">Active Tasks</div>
+              <div className="text-sm text-muted-foreground">Active Tasks</div>
               <div className="text-2xl font-bold">{totalActiveTasks}</div>
             </div>
           </div>
         </div>
         <div
           onClick={() => setIsMostActiveModalOpen(true)}
-          className="cursor-pointer rounded-lg border bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+          className="cursor-pointer rounded-lg border bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
-              <TrendingUp className="h-5 w-5 text-green-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-500/15">
+              <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-300" />
             </div>
             <div>
-              <div className="text-sm text-gray-600">Most Active</div>
+              <div className="text-sm text-muted-foreground">Most Active</div>
               <div className="truncate text-sm font-bold">
                 {mostActiveTeam?.name || 'N/A'}
               </div>
@@ -808,16 +808,16 @@ export default function TeamManagement({
       </div>
 
       {/* Search and Filters */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
           {(['all', 'active', 'archived'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setFilterTab(tab)}
               className={`rounded-lg px-4 py-2 capitalize transition-colors ${
                 filterTab === tab
-                  ? 'bg-blue-600 text-white'
-                  : 'border bg-white hover:bg-gray-100'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'border bg-card hover:bg-muted'
               }`}
             >
               {tab} (
@@ -825,26 +825,26 @@ export default function TeamManagement({
             </button>
           ))}
         </div>
-        <div className="relative">
-          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search teams..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="rounded-lg border py-2 pr-4 pl-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-border bg-background py-2 pr-4 pl-10 text-sm transition-colors placeholder:text-muted-foreground/70 focus:border-primary/60 focus:ring-2 focus:ring-primary/25 focus:outline-none"
           />
         </div>
       </div>
 
       {/* Teams Grid */}
       {filteredTeams.length === 0 ? (
-        <div className="rounded-lg border bg-white py-16 text-center">
+        <div className="rounded-lg border bg-card py-16 text-center">
           <Users className="mx-auto mb-4 h-16 w-16 text-gray-300" />
-          <h3 className="mb-2 text-xl font-semibold text-gray-700">
+          <h3 className="mb-2 text-xl font-semibold text-foreground">
             No teams created yet
           </h3>
-          <p className="text-gray-500">
+          <p className="text-muted-foreground">
             Start by creating your first squad above!
           </p>
         </div>
@@ -861,17 +861,17 @@ export default function TeamManagement({
               <div
                 key={team.id}
                 onClick={() => handleCardClick(team)}
-                className={`cursor-pointer rounded-lg border bg-white p-6 shadow-sm transition-shadow hover:shadow-md ${
+                className={`cursor-pointer rounded-lg border bg-card p-6 shadow-sm transition-shadow hover:shadow-md ${
                   team.status === 'archived' ? 'opacity-60' : ''
                 }`}
               >
                 {/* Header */}
                 <div className="mb-4 flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900">
+                    <h3 className="text-lg font-bold text-foreground">
                       {team.name}
                     </h3>
-                    <span className="mt-1 inline-block rounded bg-blue-100 px-2 py-1 text-xs text-blue-800">
+                    <span className="mt-1 inline-block rounded bg-blue-100 dark:bg-blue-500/15 px-2 py-1 text-xs text-blue-800 dark:text-blue-300">
                       {team.projectName}
                     </span>
                   </div>
@@ -881,18 +881,18 @@ export default function TeamManagement({
                         e.stopPropagation();
                         handleMenuToggle(team.id);
                       }}
-                      className="rounded p-1 hover:bg-gray-100"
+                      className="rounded p-1 hover:bg-muted"
                     >
-                      <MoreVertical className="h-4 w-4 text-gray-500" />
+                      <MoreVertical className="h-4 w-4 text-muted-foreground" />
                     </button>
                     {showMenu === team.id && (
-                      <div className="absolute top-8 right-0 z-50 w-48 rounded-lg border bg-white shadow-lg">
+                      <div className="absolute top-8 right-0 z-50 w-48 rounded-lg border bg-card shadow-lg">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEditTeam(team);
                           }}
-                          className="flex w-full items-center gap-2 px-4 py-2 text-left hover:bg-gray-100"
+                          className="flex w-full items-center gap-2 px-4 py-2 text-left hover:bg-muted"
                         >
                           <Edit2 className="h-4 w-4" />
                           Edit Team
@@ -903,7 +903,7 @@ export default function TeamManagement({
                             handleArchiveTeam(team.id);
                             setShowMenu(null);
                           }}
-                          className="flex w-full items-center gap-2 px-4 py-2 text-left hover:bg-gray-100"
+                          className="flex w-full items-center gap-2 px-4 py-2 text-left hover:bg-muted"
                         >
                           <Archive className="h-4 w-4" />
                           {team.status === 'active' ? 'Archive' : 'Unarchive'}
@@ -916,8 +916,8 @@ export default function TeamManagement({
                 {/* Members */}
                 <div className="mb-4">
                   <div className="mb-2 flex items-center gap-2">
-                    <Users className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
                       {team.members.length} members
                     </span>
                   </div>
@@ -932,7 +932,7 @@ export default function TeamManagement({
                       </div>
                     ))}
                     {team.members.length > 4 && (
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-200 text-xs font-medium text-gray-600">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-muted text-xs font-medium text-muted-foreground">
                         +{team.members.length - 4}
                       </div>
                     )}
@@ -945,13 +945,13 @@ export default function TeamManagement({
                     {team.skills.slice(0, 3).map((skill) => (
                       <span
                         key={skill}
-                        className="rounded-full bg-blue-50 px-2 py-1 text-xs text-blue-700"
+                        className="rounded-full bg-blue-50 dark:bg-blue-500/10 px-2 py-1 text-xs text-blue-700 dark:text-blue-300"
                       >
                         {skill}
                       </span>
                     ))}
                     {team.skills.length > 3 && (
-                      <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
+                      <span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
                         +{team.skills.length - 3}
                       </span>
                     )}
@@ -961,8 +961,8 @@ export default function TeamManagement({
                 {/* Task Counter */}
                 <div className="mb-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-orange-500" />
-                    <span className="text-sm text-gray-600">
+                    <Zap className="h-4 w-4 text-orange-500 dark:text-orange-400" />
+                    <span className="text-sm text-muted-foreground">
                       {memberActiveTasks} active tasks
                     </span>
                   </div>
@@ -972,17 +972,17 @@ export default function TeamManagement({
                       e.stopPropagation();
                       handleCalendarClick(team.name, team.id);
                     }}
-                    className="rounded-lg p-1.5 transition-colors hover:bg-blue-50"
+                    className="rounded-lg p-1.5 transition-colors hover:bg-blue-50 dark:bg-blue-500/10"
                     title="View Team Calendar"
                   >
-                    <CalendarDays className="h-4 w-4 text-blue-600" />
+                    <CalendarDays className="h-4 w-4 text-blue-600 dark:text-blue-300" />
                   </button>
                 </div>
 
                 {/* Progress Bar */}
                 {taskCounts.total > 0 && (
                   <div className="mb-4">
-                    <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                       <div
                         className="h-full bg-blue-500 transition-all"
                         style={{
@@ -991,10 +991,10 @@ export default function TeamManagement({
                       />
                     </div>
                     <div className="mt-1 flex justify-between">
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-muted-foreground">
                         {taskCounts.completed} completed
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-muted-foreground">
                         {taskCounts.total} total
                       </span>
                     </div>
@@ -1009,7 +1009,7 @@ export default function TeamManagement({
                       setSelectedTeam(team);
                       setShowMemberModal(true);
                     }}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 transition-colors hover:bg-gray-100"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 transition-colors hover:bg-muted"
                   >
                     <Plus className="h-4 w-4" />
                     Add Member
@@ -1022,10 +1022,10 @@ export default function TeamManagement({
                       setQuickTaskTitle('');
                       setQuickTaskAssigneeId(undefined);
                     }}
-                    className="rounded-lg border px-3 py-2 hover:bg-gray-100"
+                    className="rounded-lg border px-3 py-2 hover:bg-muted"
                     title="Quick Add Task"
                   >
-                    <FileText className="h-4 w-4 text-gray-600" />
+                    <FileText className="h-4 w-4 text-muted-foreground" />
                   </button>
                   {/* Direct Team Calendar Navigation */}
                   <button
@@ -1033,7 +1033,7 @@ export default function TeamManagement({
                       e.stopPropagation();
                       handleTeamCalendarDirect(team.id);
                     }}
-                    className="flex items-center gap-1.5 rounded-lg bg-neutral-100 px-3 py-1.5 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-200"
+                    className="flex items-center gap-1.5 rounded-lg bg-muted px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-muted"
                     title="View Team Calendar"
                   >
                     <CalendarDays className="h-3.5 w-3.5" />
@@ -1044,27 +1044,27 @@ export default function TeamManagement({
                       e.stopPropagation();
                       handleCommunicationClick('chat');
                     }}
-                    className="rounded-lg border px-3 py-2 hover:bg-gray-100"
+                    className="rounded-lg border px-3 py-2 hover:bg-muted"
                     title="Team Chat"
                   >
-                    <MessageSquare className="h-4 w-4 text-gray-600" />
+                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
                   </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleCommunicationClick('video');
                     }}
-                    className="rounded-lg border px-3 py-2 hover:bg-gray-100"
+                    className="rounded-lg border px-3 py-2 hover:bg-muted"
                     title="Video Call"
                   >
-                    <Video className="h-4 w-4 text-gray-600" />
+                    <Video className="h-4 w-4 text-muted-foreground" />
                   </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleArchiveTeam(team.id);
                     }}
-                    className="rounded-lg border px-3 py-2 hover:bg-gray-100"
+                    className="rounded-lg border px-3 py-2 hover:bg-muted"
                     title={team.status === 'active' ? 'Archive' : 'Unarchive'}
                   >
                     <Archive className="h-4 w-4" />
@@ -1074,7 +1074,7 @@ export default function TeamManagement({
                       e.stopPropagation();
                       handleDeleteTeam(team.id);
                     }}
-                    className="rounded-lg border px-3 py-2 text-red-600 hover:bg-red-50"
+                    className="rounded-lg border px-3 py-2 text-red-600 dark:text-red-300 hover:bg-red-50 dark:bg-red-500/10"
                     title="Delete"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -1089,13 +1089,13 @@ export default function TeamManagement({
       {/* Add Member Modal */}
       {showMemberModal && selectedTeam && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6">
+          <div className="w-full max-w-md rounded-lg bg-card p-6">
             <h3 className="mb-4 text-xl font-bold">
               Add Member to {selectedTeam.name}
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-foreground">
                   Name
                 </label>
                 <input
@@ -1107,7 +1107,7 @@ export default function TeamManagement({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-foreground">
                   Email
                 </label>
                 <input
@@ -1119,7 +1119,7 @@ export default function TeamManagement({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-foreground">
                   Role
                 </label>
                 <select
@@ -1140,7 +1140,7 @@ export default function TeamManagement({
                     setShowMemberModal(false);
                     setSelectedTeam(null);
                   }}
-                  className="rounded-lg border px-4 py-2 hover:bg-gray-100"
+                  className="rounded-lg border px-4 py-2 hover:bg-muted"
                 >
                   Cancel
                 </button>
@@ -1163,12 +1163,12 @@ export default function TeamManagement({
             className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setShowTeamDetails(false)}
           />
-          <div className="relative ml-auto h-full w-full max-w-md overflow-y-auto bg-white shadow-xl">
-            <div className="sticky top-0 flex items-center justify-between border-b bg-white p-6">
+          <div className="relative ml-auto h-full w-full max-w-md overflow-y-auto bg-card shadow-xl">
+            <div className="sticky top-0 flex items-center justify-between border-b bg-card p-6">
               <h2 className="text-xl font-bold">{selectedTeam.name}</h2>
               <button
                 onClick={() => setShowTeamDetails(false)}
-                className="rounded-lg p-2 transition-colors hover:bg-gray-100"
+                className="rounded-lg p-2 transition-colors hover:bg-muted"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1176,26 +1176,26 @@ export default function TeamManagement({
             <div className="space-y-6 p-6">
               {/* Team Info */}
               <div>
-                <h3 className="mb-2 text-sm font-semibold text-gray-500">
+                <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
                   Team Information
                 </h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Project:</span>
+                    <span className="text-muted-foreground">Project:</span>
                     <span className="font-medium">
                       {selectedTeam.projectName}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Status:</span>
+                    <span className="text-muted-foreground">Status:</span>
                     <span
-                      className={`rounded px-2 py-1 text-xs ${selectedTeam.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
+                      className={`rounded px-2 py-1 text-xs ${selectedTeam.status === 'active' ? 'bg-green-100 dark:bg-green-500/15 text-green-800 dark:text-green-300' : 'bg-muted text-foreground'}`}
                     >
                       {selectedTeam.status}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Created:</span>
+                    <span className="text-muted-foreground">Created:</span>
                     <span className="font-medium">
                       {new Date(selectedTeam.createdAt).toLocaleDateString()}
                     </span>
@@ -1206,14 +1206,14 @@ export default function TeamManagement({
               {/* Skills */}
               {selectedTeam.skills && selectedTeam.skills.length > 0 && (
                 <div>
-                  <h3 className="mb-2 text-sm font-semibold text-gray-500">
+                  <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
                     Skills
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedTeam.skills.map((skill) => (
                       <span
                         key={skill}
-                        className="rounded-full bg-blue-50 px-3 py-1 text-sm text-blue-700"
+                        className="rounded-full bg-blue-50 dark:bg-blue-500/10 px-3 py-1 text-sm text-blue-700 dark:text-blue-300"
                       >
                         {skill}
                       </span>
@@ -1224,11 +1224,11 @@ export default function TeamManagement({
 
               {/* Members */}
               <div>
-                <h3 className="mb-2 text-sm font-semibold text-gray-500">
+                <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
                   Members ({selectedTeam.members.length})
                 </h3>
                 {selectedTeam.members.length === 0 ? (
-                  <p className="text-sm text-gray-500">No members yet</p>
+                  <p className="text-sm text-muted-foreground">No members yet</p>
                 ) : (
                   <div className="space-y-3">
                     {selectedTeam.members.map((member) => {
@@ -1239,22 +1239,22 @@ export default function TeamManagement({
                       return (
                         <div
                           key={member.id}
-                          className="flex items-center gap-3 rounded-lg bg-gray-50 p-3"
+                          className="flex items-center gap-3 rounded-lg bg-muted p-3"
                         >
                           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 font-medium text-white">
                             {member.name.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex-1">
                             <div className="font-medium">{member.name}</div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-muted-foreground">
                               {member.email}
                             </div>
                             {taskCounts.total > 0 && (
                               <div className="mt-1 flex items-center gap-2 text-xs">
-                                <span className="text-yellow-600">
+                                <span className="text-yellow-600 dark:text-yellow-300">
                                   🟡 {taskCounts.inProgress} In Progress
                                 </span>
-                                <span className="text-green-600">
+                                <span className="text-green-600 dark:text-green-300">
                                   🟢 {taskCounts.completed} Completed
                                 </span>
                               </div>
@@ -1274,7 +1274,7 @@ export default function TeamManagement({
 
               {/* Team Tasks */}
               <div>
-                <h3 className="mb-2 text-sm font-semibold text-gray-500">
+                <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
                   Team Tasks
                 </h3>
                 {(() => {
@@ -1287,16 +1287,16 @@ export default function TeamManagement({
                   return (
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Total Tasks:</span>
+                        <span className="text-muted-foreground">Total Tasks:</span>
                         <span className="font-medium">{total}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Completed:</span>
+                        <span className="text-muted-foreground">Completed:</span>
                         <span className="font-medium">{completed}</span>
                       </div>
                       {total > 0 && (
                         <div className="mt-2">
-                          <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+                          <div className="h-2 overflow-hidden rounded-full bg-muted">
                             <div
                               className="h-full bg-blue-500 transition-all"
                               style={{
@@ -1304,13 +1304,13 @@ export default function TeamManagement({
                               }}
                             />
                           </div>
-                          <div className="mt-1 text-right text-xs text-gray-500">
+                          <div className="mt-1 text-right text-xs text-muted-foreground">
                             {Math.round((completed / total) * 100)}% complete
                           </div>
                         </div>
                       )}
                       {/* Quick Add Task Input */}
-                      <div className="mt-4 space-y-2 rounded-xl border border-neutral-200 bg-neutral-50 p-3">
+                      <div className="mt-4 space-y-2 rounded-xl border border-border bg-muted p-3">
                         {/* Row 1: Task Title */}
                         <input
                           type="text"
@@ -1325,7 +1325,7 @@ export default function TeamManagement({
                               setTaskPriority('MEDIUM');
                             }
                           }}
-                          className="h-10 w-full rounded-lg border border-neutral-200 bg-white px-3 text-sm focus:border-blue-500 focus:outline-none"
+                          className="h-10 w-full rounded-lg border border-border bg-card px-3 text-sm focus:border-blue-500 focus:outline-none"
                         />
 
                         {/* Row 2: Date Picker & Priority Selection */}
@@ -1334,12 +1334,12 @@ export default function TeamManagement({
                             type="date"
                             value={taskDueDate}
                             onChange={(e) => setTaskDueDate(e.target.value)}
-                            className="h-10 w-full rounded-lg border border-neutral-200 bg-white px-2 text-sm focus:border-blue-500 focus:outline-none"
+                            className="h-10 w-full rounded-lg border border-border bg-card px-2 text-sm focus:border-blue-500 focus:outline-none"
                           />
                           <select
                             value={taskPriority}
                             onChange={(e) => setTaskPriority(e.target.value)}
-                            className="h-10 w-full rounded-lg border border-neutral-200 bg-white px-2 text-sm focus:border-blue-500 focus:outline-none"
+                            className="h-10 w-full rounded-lg border border-border bg-card px-2 text-sm focus:border-blue-500 focus:outline-none"
                           >
                             <option value="LOW">Low</option>
                             <option value="MEDIUM">Medium</option>
@@ -1357,7 +1357,7 @@ export default function TeamManagement({
                                 e.target.value || undefined
                               )
                             }
-                            className="h-10 flex-1 rounded-lg border border-neutral-200 bg-white px-2 text-sm focus:border-blue-500 focus:outline-none"
+                            className="h-10 flex-1 rounded-lg border border-border bg-card px-2 text-sm focus:border-blue-500 focus:outline-none"
                           >
                             <option value="">Assign to...</option>
                             {selectedTeam.members?.map((member) => (
@@ -1383,13 +1383,13 @@ export default function TeamManagement({
                       {/* Task List with Checkboxes */}
                       {teamTasks.length > 0 && (
                         <div className="mt-4 space-y-2">
-                          <h4 className="text-xs font-medium text-gray-500 uppercase">
+                          <h4 className="text-xs font-medium text-muted-foreground uppercase">
                             Task List
                           </h4>
                           {teamTasks.map((task) => (
                             <div
                               key={task._id}
-                              className="flex items-center gap-2 rounded-lg border p-2 hover:bg-gray-50"
+                              className="flex items-center gap-2 rounded-lg border p-2 hover:bg-muted"
                             >
                               <input
                                 type="checkbox"
@@ -1400,21 +1400,21 @@ export default function TeamManagement({
                                 onChange={() =>
                                   handleTaskStatusToggle(task._id)
                                 }
-                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                className="h-4 w-4 rounded border-border text-blue-600 dark:text-blue-300 focus:ring-blue-500"
                               />
                               <div className="flex-1">
                                 <div
                                   className={`text-sm ${
                                     task.status === 'DONE' ||
                                     task.status === 'COMPLETED'
-                                      ? 'text-gray-400 line-through'
-                                      : 'text-gray-700'
+                                      ? 'text-muted-foreground line-through'
+                                      : 'text-foreground'
                                   }`}
                                 >
                                   {task.title}
                                 </div>
                                 {task.assignedTo && (
-                                  <div className="text-xs text-gray-500">
+                                  <div className="text-xs text-muted-foreground">
                                     Assigned to: {task.assignedTo}
                                   </div>
                                 )}
@@ -1423,8 +1423,8 @@ export default function TeamManagement({
                                 className={`rounded px-2 py-0.5 text-xs ${
                                   task.status === 'DONE' ||
                                   task.status === 'COMPLETED'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-yellow-100 text-yellow-800'
+                                    ? 'bg-green-100 dark:bg-green-500/15 text-green-800 dark:text-green-300'
+                                    : 'bg-yellow-100 dark:bg-yellow-500/15 text-yellow-800 dark:text-yellow-300'
                                 }`}
                               >
                                 {task.status === 'DONE' ||

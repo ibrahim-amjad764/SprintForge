@@ -7,6 +7,7 @@ import { createAudit } from '@/services/audit.service';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireAdmin } from '@/lib/admin';
 import logger from '@/lib/logger';
+import { apiError } from '@/utils/error-handler';
 
 const STATUS_TO_HTTP: Record<string, number> = {
   not_found: 404,
@@ -67,7 +68,6 @@ export async function PATCH(
 
     return successResponse({ user: result.user });
   } catch (error) {
-    logger.error({ err: error }, 'Admin role update error:');
-    return errorResponse('Failed to update user role', 500);
+    return apiError(error, 'Failed to update user role');
   }
 }

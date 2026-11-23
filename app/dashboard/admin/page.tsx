@@ -38,8 +38,13 @@ export default async function AdminPage() {
     <MainLayout>
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-primary">
+            Administration
+          </p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Admin Panel
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
             Manage users and review platform activity.
           </p>
         </div>

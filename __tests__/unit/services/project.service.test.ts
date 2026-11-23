@@ -18,6 +18,7 @@ jest.mock('@/models/Project', () => ({
     findByIdAndUpdate: jest.fn(),
     findByIdAndDelete: jest.fn(),
     create: jest.fn(),
+    countDocuments: jest.fn(),
   },
 }));
 
@@ -32,17 +33,20 @@ jest.mock('@/models/Task', () => ({
 type ProjectService = typeof import('@/services/project.service');
 
 let getProjectsWithProgress: ProjectService['getProjectsWithProgress'];
+let getProjectsPaginated: ProjectService['getProjectsPaginated'];
 let getProjectWithProgress: ProjectService['getProjectWithProgress'];
 let unarchiveProject: ProjectService['unarchiveProject'];
 let mockProjectFind: jest.Mock;
 let mockProjectFindById: jest.Mock;
 let mockProjectUpdate: jest.Mock;
+let mockProjectCount: jest.Mock;
 let mockTaskAggregate: jest.Mock;
 let mockTaskCount: jest.Mock;
 
 beforeAll(async () => {
   const service = await import('@/services/project.service');
   getProjectsWithProgress = service.getProjectsWithProgress;
+  getProjectsPaginated = service.getProjectsPaginated;
   getProjectWithProgress = service.getProjectWithProgress;
   unarchiveProject = service.unarchiveProject;
 
@@ -52,6 +56,7 @@ beforeAll(async () => {
     find: jest.Mock;
     findById: jest.Mock;
     findByIdAndUpdate: jest.Mock;
+    countDocuments: jest.Mock;
   };
   const taskMock = taskModule.default as unknown as {
     aggregate: jest.Mock;
@@ -60,6 +65,7 @@ beforeAll(async () => {
   mockProjectFind = projectMock.find;
   mockProjectFindById = projectMock.findById;
   mockProjectUpdate = projectMock.findByIdAndUpdate;
+  mockProjectCount = projectMock.countDocuments;
   mockTaskAggregate = taskMock.aggregate;
   mockTaskCount = taskMock.countDocuments;
 });
@@ -227,5 +233,81 @@ describe('project.service progress stats', () => {
       { status: 'ACTIVE' },
       { new: true },
     );
+  });
+});
+
+
+describe('getProjectsPaginated', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  function pagedFind(docs: unknown[]) {
+    const chain: Record<string, unknown> = {};
+    chain.sort = jest.fn(() => chain);
+    chain.skip = jest.fn(() => chain);
+    chain.limit = jest.fn(() => chain);
+    chain.lean = jest.fn(async () => docs);
+    return chain;
+  }
+
+  it('returns the paginated contract with progress computed per page', async () => {
+    const p1 = projectDoc('aaaaaaaaaaaaaaaaaaaaaaaa');
+    const p2 = projectDoc('bbbbbbbbbbbbbbbbbbbbbbbb');
+    mockProjectFind.mockReturnValue(pagedFind([p1, p2]));
+    mockProjectCount.mockResolvedValue(7); // Project.countDocuments
+    mockTaskAggregate.mockResolvedValue([
+      { _id: p1._id, total: 4, completed: 2 }, // 50%
+    ]);
+
+    const result = await getProjectsPaginated('ws-1', {
+      page: 2,
+      limit: 2,
+      skip: 2,
+    });
+
+    expect(result.total).toBe(7);
+    expect(result.page).toBe(2);
+    expect(result.limit).toBe(2);
+    expect(result.hasMore).toBe(true); // skip(2)+2 items = 4 < total 7
+    expect(result.items).toHaveLength(2);
+    expect(result.items[0].progress).toBe(50);
+    expect(result.items[0].status).toBe('ACTIVE');
+    expect(result.items[1].progress).toBe(0);
+    // Aggregation scoped to page items only — still a single $group.
+    expect(mockTaskAggregate).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports hasMore correctly on a middle page', async () => {
+    const p1 = projectDoc('aaaaaaaaaaaaaaaaaaaaaaaa');
+    mockProjectFind.mockReturnValue(pagedFind([p1]));
+    mockProjectCount.mockResolvedValue(50);
+    mockTaskAggregate.mockResolvedValue([]);
+
+    const result = await getProjectsPaginated('ws-1', {
+      page: 1,
+      limit: 20,
+      skip: 0,
+    });
+
+    expect(result.hasMore).toBe(true);
+    expect(result.items[0].status).toBe('ACTIVE');
+  });
+
+  it('handles an empty page', async () => {
+    mockProjectFind.mockReturnValue(pagedFind([]));
+    mockProjectCount.mockResolvedValue(0);
+
+    const result = await getProjectsPaginated('ws-1', {
+      page: 5,
+      limit: 20,
+      skip: 80,
+    });
+
+    expect(result.items).toEqual([]);
+    expect(result.total).toBe(0);
+    expect(result.hasMore).toBe(false);
+    // No projects on the page -> no aggregation needed.
+    expect(mockTaskAggregate).not.toHaveBeenCalled();
   });
 });

@@ -8,6 +8,8 @@ import Organization from '@/models/Organization';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 import logger from '@/lib/logger';
+import { getEffectivePlan, assertPlanLimit, PlanLimitError } from '@/services/billing.service';
+import { limitsForPlan } from '@/lib/plans';
 
 /*
   Workspace Service Layer
@@ -329,6 +331,27 @@ export async function createWorkspace(data: {
     }
 
     // --------------------------------------------------------
+    // Plan enforcement: cap owned workspaces per user.
+    // --------------------------------------------------------
+
+    const ownedCount = await Workspace.countDocuments({
+      owner: data.owner,
+    }).session(session);
+
+    const planCheck = await assertPlanLimit({
+      userId: data.owner,
+      resource: 'workspaces',
+      currentCount: ownedCount,
+    });
+    if (!planCheck.ok) {
+      throw new PlanLimitError(
+        planCheck.error,
+        planCheck.status,
+        planCheck.code ?? 'WORKSPACE_LIMIT_REACHED',
+      );
+    }
+
+    // --------------------------------------------------------
     // Create workspace
     // --------------------------------------------------------
 
@@ -562,6 +585,53 @@ export async function getUserWorkspaces(
 
     throw error;
   }
+}
+
+interface PaginationInput {
+  page: number;
+  limit: number;
+  skip: number;
+}
+
+interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+/*
+ * Paginated variant of getUserWorkspaces — same membership→workspace
+ * resolution, deterministic ordering, bounded page size.
+ */
+export async function getUserWorkspacesPaginated(
+  userId: string,
+  pagination: PaginationInput,
+): Promise<PaginatedResult<unknown>> {
+  const { page, limit, skip } = pagination;
+
+  const [memberships, total] = await Promise.all([
+    WorkspaceMember.find({ user: userId })
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('workspace')
+      .lean(),
+    WorkspaceMember.countDocuments({ user: userId }),
+  ]);
+
+  const items = memberships
+    .map((item) => item.workspace)
+    .filter(Boolean);
+
+  return {
+    items,
+    total,
+    page,
+    limit,
+    hasMore: skip + items.length < total,
+  };
 }
 
 // ============================================================
@@ -885,7 +955,11 @@ export async function addWorkspaceMember(data: {
 // --------------------------------------------------------
 
 const currentMembers = workspace.currentMembers ?? 0;
-const maxMembers = workspace.maxMembers ?? 50;
+// Effective cap = min(workspace setting, plan limit). Plan is
+// resolved from the workspace owner's subscription scope.
+const ownerPlan = await getEffectivePlan(String(workspace.owner), String(workspace._id));
+const planMemberCap = limitsForPlan(ownerPlan).maxMembersPerWorkspace;
+const maxMembers = Math.min(workspace.maxMembers ?? 50, planMemberCap);
 
 logger.info({ values: [{
   workspaceId: data.workspace,
@@ -900,8 +974,10 @@ if (currentMembers >= maxMembers) {
       maxMembers,
     }] }, 'Workspace member limit reached:');
 
-  throw new Error(
-    'Workspace member limit reached'
+  throw new PlanLimitError(
+    'Workspace member limit reached',
+    403,
+    'MEMBER_LIMIT_REACHED',
   );
 }
 

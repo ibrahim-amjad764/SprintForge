@@ -174,12 +174,12 @@ export default function ImageUpload({
             className="rounded-lg object-cover"
           />
         ) : (
-          <div className="flex h-32 w-full items-center justify-center rounded-lg bg-gray-200">
-            <span className="text-gray-500">No image</span>
+          <div className="flex h-32 w-full items-center justify-center rounded-lg bg-muted">
+            <span className="text-muted-foreground">No image</span>
           </div>
         )}
 
-        <label className="absolute right-2 bottom-2 cursor-pointer rounded bg-black px-3 py-1 text-sm text-white hover:bg-gray-800">
+        <label className="absolute right-2 bottom-2 cursor-pointer rounded bg-primary px-3 py-1 text-sm text-primary-foreground hover:bg-primary/90">
           {uploading ? 'Uploading...' : 'Change'}
 
           <input

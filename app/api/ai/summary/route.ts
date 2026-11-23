@@ -6,6 +6,7 @@ import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
 import { getMembershipForProject } from '@/lib/authorization';
 import { rateLimit } from '@/lib/rate-limit';
+import { apiError } from '@/utils/error-handler';
 
 // AI calls cost real money — cap per user per hour.
 const AI_RATE_LIMIT = 20;
@@ -33,6 +34,6 @@ export async function POST(request: NextRequest) {
 
     return successResponse(result);
   } catch (error) {
-    return errorResponse('AI failed', 500);
+    return apiError(error, 'AI failed');
   }
 }

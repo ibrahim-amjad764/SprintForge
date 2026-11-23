@@ -18,15 +18,15 @@ export type ViewType = 'month' | 'week' | 'day' | 'agenda';
 const getCategoryColor = (category?: string) => {
   switch (category) {
     case 'bug':
-      return 'bg-red-100 text-red-800 border-red-300';
+      return 'bg-red-100 dark:bg-red-500/15 text-red-800 dark:text-red-300 border-red-300 dark:border-red-500/40';
     case 'milestone':
-      return 'bg-purple-100 text-purple-800 border-purple-300';
+      return 'bg-purple-100 dark:bg-purple-500/15 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-500/40';
     case 'deployment':
-      return 'bg-blue-100 text-blue-800 border-blue-300';
+      return 'bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-500/40';
     case 'meeting':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      return 'bg-yellow-100 dark:bg-yellow-500/15 text-yellow-800 dark:text-yellow-300 border-yellow-300 dark:border-yellow-500/40';
     default:
-      return 'bg-green-100 text-green-800 border-green-300';
+      return 'bg-green-100 dark:bg-green-500/15 text-green-800 dark:text-green-300 border-green-300 dark:border-green-500/40';
   }
 };
 
@@ -533,7 +533,7 @@ export default function Calendar({
       days.push(
         <div
           key={`empty-${i}`}
-          className="min-h-24 border border-gray-200 bg-gray-50"
+          className="min-h-24 border border-border bg-muted"
         ></div>
       );
     }
@@ -554,21 +554,21 @@ export default function Calendar({
             setSelectedDate(date);
             setShowModal(true);
           }}
-          className={`min-h-24 cursor-pointer border border-gray-200 p-2 transition-colors hover:bg-gray-50 ${
+          className={`min-h-24 cursor-pointer border border-border p-1.5 transition-colors hover:bg-muted/60 ${
             today
-              ? 'border-blue-300 bg-blue-50/30'
+              ? 'border-primary/30 bg-primary/5'
               : weekend
-                ? 'bg-neutral-50/50'
-                : 'bg-white'
+                ? 'bg-muted/30'
+                : 'bg-card'
           }`}
         >
           <div className="mb-1 flex items-center justify-between">
             {today ? (
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary font-mono text-xs font-semibold text-primary-foreground tabular-nums">
                 {day}
               </span>
             ) : (
-              <span className="text-sm font-medium text-gray-700">{day}</span>
+              <span className="text-sm font-medium text-foreground">{day}</span>
             )}
           </div>
           <div className="space-y-1">
@@ -591,10 +591,10 @@ export default function Calendar({
                     handleTaskClick(task);
                   }}
                   style={{ borderLeft: `4px solid ${taskTeamColor}` }}
-                  className="mb-1 p-1.5 bg-white text-gray-900 rounded border border-neutral-100 shadow-sm flex flex-col justify-between min-h-[45px] pl-2 relative group cursor-pointer hover:shadow-md transition-shadow"
+                  className="task-pill mb-1 flex min-h-[45px] cursor-pointer flex-col justify-between rounded-md border border-border bg-card p-1.5 pl-2 text-foreground shadow-card transition-all duration-150 hover:-translate-y-0.5 hover:shadow-popover"
                   title={task.title}
                 >
-                  <div className="font-medium text-[11px] text-neutral-800 truncate pr-4">
+                  <div className="font-medium text-[11px] text-foreground truncate pr-4">
                     {task.title}
                   </div>
                   <div className="flex items-center justify-between mt-1 text-[9px]">
@@ -625,7 +625,7 @@ export default function Calendar({
                   e.stopPropagation();
                   handleOverflowClick(date);
                 }}
-                className="cursor-pointer text-xs text-blue-600 hover:underline"
+                className="cursor-pointer text-xs font-medium text-primary transition-colors hover:text-primary/80 hover:underline"
               >
                 +{dayTasks.length - 3} more
               </div>
@@ -659,30 +659,30 @@ export default function Calendar({
             setSelectedDate(date);
             setShowModal(true);
           }}
-          className={`min-h-96 cursor-pointer border border-gray-200 p-4 transition-colors hover:bg-gray-50 ${
+          className={`min-h-96 cursor-pointer border border-border p-4 transition-colors hover:bg-muted/60 ${
             today
-              ? 'border-blue-300 bg-blue-50/30'
+              ? 'border-primary/30 bg-primary/5'
               : weekend
-                ? 'bg-neutral-50/50'
-                : 'bg-white'
+                ? 'bg-muted/30'
+                : 'bg-card'
           }`}
         >
           <div className="mb-3 flex items-center justify-between">
             <div>
               {today ? (
                 <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-mono text-sm font-semibold text-primary-foreground tabular-nums">
                     {date.getDate()}
                   </span>
-                  <span className="text-lg font-medium text-gray-700">
+                  <span className="text-lg font-medium text-foreground">
                     {date.toLocaleDateString('en-US', { weekday: 'short' })}
                   </span>
-                  <span className="text-xs font-medium text-blue-600">
+                  <span className="text-xs font-medium text-primary">
                     (Today)
                   </span>
                 </div>
               ) : (
-                <span className="text-lg font-medium text-gray-700">
+                <span className="text-lg font-medium text-foreground">
                   {date.toLocaleDateString('en-US', {
                     weekday: 'short',
                     day: 'numeric',
@@ -756,30 +756,30 @@ export default function Calendar({
     const today = isToday(currentDate);
 
     return (
-      <div className="overflow-hidden rounded-lg border border-gray-200">
+      <div className="overflow-hidden rounded-lg border border-border">
         <div
-          className={`p-4 ${today ? 'border-blue-300 bg-blue-50/30' : 'bg-gray-50'} border-b`}
+          className={`border-b p-4 ${today ? 'border-primary/30 bg-primary/5' : 'border-border bg-muted/50'}`}
         >
           <div className="flex items-center justify-between">
             {today ? (
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-mono text-lg font-semibold text-primary-foreground tabular-nums">
                   {currentDate.getDate()}
                 </span>
                 <div>
-                  <span className="text-xl font-medium text-gray-700">
+                  <span className="text-xl font-medium text-foreground">
                     {currentDate.toLocaleDateString('en-US', {
                       weekday: 'long',
                       month: 'long',
                     })}
                   </span>
-                  <span className="ml-2 text-sm font-medium text-blue-600">
+                  <span className="ml-2 text-sm font-medium text-primary">
                     (Today)
                   </span>
                 </div>
               </div>
             ) : (
-              <span className="text-xl font-medium text-gray-700">
+              <span className="text-xl font-medium text-foreground">
                 {currentDate.toLocaleDateString('en-US', {
                   weekday: 'long',
                   month: 'long',
@@ -791,7 +791,7 @@ export default function Calendar({
         </div>
         <div className="space-y-3 p-4">
           {dayTasks.length === 0 ? (
-            <div className="py-8 text-center text-gray-500">
+            <div className="py-8 text-center text-muted-foreground">
               No tasks for this day
             </div>
           ) : (
@@ -819,10 +819,10 @@ export default function Calendar({
                         </div>
                       )}
                       <div className="mt-2 flex items-center gap-2">
-                        <span className="rounded bg-white/50 px-2 py-1 text-xs">
+                        <span className="rounded bg-card/50 px-2 py-1 text-xs">
                           {task.priority}
                         </span>
-                        <span className="rounded bg-white/50 px-2 py-1 text-xs">
+                        <span className="rounded bg-card/50 px-2 py-1 text-xs">
                           {task.status}
                         </span>
                       </div>
@@ -873,7 +873,7 @@ export default function Calendar({
     return (
       <div className="space-y-3">
         {sortedTasks.length === 0 ? (
-          <div className="py-8 text-center text-gray-500">
+          <div className="py-8 text-center text-muted-foreground">
             No upcoming tasks
           </div>
         ) : (
@@ -907,10 +907,10 @@ export default function Calendar({
                           {new Date(task.dueDate).toLocaleDateString()}
                         </span>
                       )}
-                      <span className="rounded bg-white/50 px-2 py-1 text-xs">
+                      <span className="rounded bg-card/50 px-2 py-1 text-xs">
                         {task.priority}
                       </span>
-                      <span className="rounded bg-white/50 px-2 py-1 text-xs">
+                      <span className="rounded bg-card/50 px-2 py-1 text-xs">
                         {task.status}
                       </span>
                     </div>
@@ -952,48 +952,51 @@ export default function Calendar({
   return (
     <div className="space-y-4">
       {/* Header with Navigation */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
             {currentDate.toLocaleDateString('en-US', {
               month: 'long',
               year: 'numeric',
             })}
           </h2>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={goToToday}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
+              className="rounded-lg bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground shadow-glow transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
             >
               Today
             </button>
             <button
               onClick={goToPrevious}
-              className="rounded-lg p-2 transition-colors hover:bg-gray-100"
+              aria-label="Previous period"
+              className="rounded-lg border border-border bg-card p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
             </button>
             <button
               onClick={goToNext}
-              className="rounded-lg p-2 transition-colors hover:bg-gray-100"
+              aria-label="Next period"
+              className="rounded-lg border border-border bg-card p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           {/* View Toggle */}
-          <div className="flex items-center gap-1 overflow-hidden rounded-lg border">
+          <div className="flex items-center gap-0.5 rounded-lg border border-border bg-muted/50 p-0.5">
             {(['month', 'week', 'day', 'agenda'] as ViewType[]).map(
               (viewType) => (
                 <button
                   key={viewType}
                   onClick={() => setView(viewType)}
-                  className={`px-4 py-2 capitalize transition-colors ${
+                  aria-pressed={view === viewType}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
                     view === viewType
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white hover:bg-gray-100'
+                      ? 'bg-card text-foreground shadow-card'
+                      : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   {viewType}
@@ -1005,11 +1008,15 @@ export default function Calendar({
           {/* Filter Button */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`rounded-lg p-2 transition-colors ${
-              showFilters ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
+            aria-label="Toggle filters"
+            aria-expanded={showFilters}
+            className={`rounded-lg border p-2 transition-colors ${
+              showFilters
+                ? 'border-primary/30 bg-primary/10 text-primary'
+                : 'border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
-            <Filter className="h-5 w-5" />
+            <Filter className="h-4 w-4" aria-hidden="true" />
           </button>
 
           {/* Add Task Button */}
@@ -1018,9 +1025,9 @@ export default function Calendar({
               setSelectedDate(new Date());
               setShowModal(true);
             }}
-            className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700"
+            className="btn-sheen flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 px-3.5 py-1.5 text-sm font-semibold text-white shadow-glow transition-all duration-150"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4" aria-hidden="true" />
             Add Task
           </button>
         </div>
@@ -1028,19 +1035,20 @@ export default function Calendar({
 
       {/* Filters Panel */}
       {showFilters && (
-        <div className="fixed top-0 right-0 z-50 h-full w-80 overflow-y-auto bg-white p-6 shadow-xl">
+        <div className="animate-scale-in fixed top-0 right-0 z-50 h-full w-80 overflow-y-auto border-l border-border bg-card p-6 shadow-popover">
           <div className="mb-6 flex items-center justify-between">
-            <h3 className="text-lg font-bold">Filters</h3>
+            <h3 className="text-lg font-bold tracking-tight">Filters</h3>
             <button
               onClick={() => setShowFilters(false)}
-              className="rounded-lg p-2 hover:bg-gray-100"
+              aria-label="Close filters"
+              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               ✕
             </button>
           </div>
           <div className="space-y-6">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label className="mb-2 block text-sm font-medium text-foreground">
                 Status
               </label>
               <select
@@ -1048,7 +1056,7 @@ export default function Calendar({
                 onChange={(e) =>
                   setFilters({ ...filters, status: e.target.value })
                 }
-                className="w-full rounded-lg border px-3 py-2"
+                className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
               >
                 <option value="all">All</option>
                 <option value="TODO">To Do</option>
@@ -1058,7 +1066,7 @@ export default function Calendar({
               </select>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label className="mb-2 block text-sm font-medium text-foreground">
                 Priority
               </label>
               <select
@@ -1066,7 +1074,7 @@ export default function Calendar({
                 onChange={(e) =>
                   setFilters({ ...filters, priority: e.target.value })
                 }
-                className="w-full rounded-lg border px-3 py-2"
+                className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
               >
                 <option value="all">All</option>
                 <option value="LOW">Low</option>
@@ -1076,7 +1084,7 @@ export default function Calendar({
               </select>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label className="mb-2 block text-sm font-medium text-foreground">
                 Assignee
               </label>
               <select
@@ -1084,7 +1092,7 @@ export default function Calendar({
                 onChange={(e) =>
                   setFilters({ ...filters, assignee: e.target.value })
                 }
-                className="w-full rounded-lg border px-3 py-2"
+                className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
               >
                 <option value="all">All Members</option>
                 {assigneesList.map((assignee) => (
@@ -1095,7 +1103,7 @@ export default function Calendar({
               </select>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label className="mb-2 block text-sm font-medium text-foreground">
                 Team
               </label>
               <select
@@ -1103,7 +1111,7 @@ export default function Calendar({
                 onChange={(e) =>
                   setFilters({ ...filters, team: e.target.value })
                 }
-                className="w-full rounded-lg border px-3 py-2"
+                className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
               >
                 <option value="all">All Teams</option>
                 {dbTeams.map((team) => (
@@ -1122,7 +1130,7 @@ export default function Calendar({
                   team: 'all',
                 })
               }
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 hover:bg-gray-50"
+              className="w-full rounded-lg border border-border px-4 py-2 hover:bg-muted"
             >
               Clear Filters
             </button>
@@ -1134,25 +1142,25 @@ export default function Calendar({
       {view === 'month' && (
         <div>
           {/* Day Headers */}
-          <div className="grid grid-cols-7 gap-px border border-gray-200 bg-gray-200">
+          <div className="grid grid-cols-7 gap-px border border-border bg-muted">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
               <div
                 key={day}
-                className="bg-gray-50 p-2 text-center text-sm font-medium text-gray-700"
+                className="bg-muted p-2 text-center text-sm font-medium text-foreground"
               >
                 {day}
               </div>
             ))}
           </div>
           {/* Calendar Grid */}
-          <div className="grid grid-cols-7 gap-px border border-gray-200 bg-gray-200">
+          <div className="grid grid-cols-7 gap-px border border-border bg-muted">
             {renderMonthView()}
           </div>
         </div>
       )}
 
       {view === 'week' && (
-        <div className="grid grid-cols-7 gap-px border border-gray-200 bg-gray-200">
+        <div className="grid grid-cols-7 gap-px border border-border bg-muted">
           {renderWeekView()}
         </div>
       )}
@@ -1340,13 +1348,13 @@ function TaskDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-lg bg-white p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="w-full max-w-md animate-modal-in rounded-2xl border border-border bg-card p-6 shadow-popover">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-xl font-bold">Task Details</h3>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 hover:bg-gray-100"
+            className="rounded-lg p-2 hover:bg-muted"
           >
             ✕
           </button>
@@ -1355,7 +1363,7 @@ function TaskDetailModal({
         {isEditing ? (
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Title
               </label>
               <input
@@ -1364,11 +1372,11 @@ function TaskDetailModal({
                 onChange={(e) =>
                   setEditedTask({ ...editedTask, title: e.target.value })
                 }
-                className="w-full rounded-lg border px-3 py-2"
+                className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Description
               </label>
               <textarea
@@ -1376,12 +1384,12 @@ function TaskDetailModal({
                 onChange={(e) =>
                   setEditedTask({ ...editedTask, description: e.target.value })
                 }
-                className="w-full rounded-lg border px-3 py-2"
+                className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
                 rows={3}
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 Priority
               </label>
               <select
@@ -1389,7 +1397,7 @@ function TaskDetailModal({
                 onChange={(e) =>
                   setEditedTask({ ...editedTask, priority: e.target.value })
                 }
-                className="w-full rounded-lg border px-3 py-2"
+                className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
               >
                 <option value="LOW">Low</option>
                 <option value="MEDIUM">Medium</option>
@@ -1400,13 +1408,13 @@ function TaskDetailModal({
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setIsEditing(false)}
-                className="rounded-lg border px-4 py-2 hover:bg-gray-100"
+                className="rounded-lg border px-4 py-2 hover:bg-muted"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
               >
                 Save
               </button>
@@ -1417,31 +1425,31 @@ function TaskDetailModal({
             <div>
               <h4 className="text-lg font-semibold">{task.title}</h4>
               {task.description && (
-                <p className="mt-2 text-gray-600">{task.description}</p>
+                <p className="mt-2 text-muted-foreground">{task.description}</p>
               )}
             </div>
             <div className="flex items-center gap-4 text-sm">
-              <span className="rounded-full bg-gray-100 px-3 py-1">
+              <span className="rounded-full bg-muted px-3 py-1">
                 {task.priority}
               </span>
-              <span className="rounded-full bg-gray-100 px-3 py-1">
+              <span className="rounded-full bg-muted px-3 py-1">
                 {task.status}
               </span>
               {task.category && (
-                <span className="rounded-full bg-gray-100 px-3 py-1 capitalize">
+                <span className="rounded-full bg-muted px-3 py-1 capitalize">
                   {task.category}
                 </span>
               )}
             </div>
             {task.dueDate && (
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-muted-foreground">
                 Due: {new Date(task.dueDate).toLocaleDateString()}
               </div>
             )}
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setIsEditing(true)}
-                className="rounded-lg border px-4 py-2 hover:bg-gray-100"
+                className="rounded-lg border px-4 py-2 hover:bg-muted"
               >
                 Edit
               </button>
@@ -1468,13 +1476,13 @@ interface OverflowModalProps {
 
 function OverflowModal({ tasks, onClose, onTaskClick }: OverflowModalProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="max-h-96 w-full max-w-md overflow-y-auto rounded-lg bg-white p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="max-h-96 w-full max-w-md animate-modal-in overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-popover">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-xl font-bold">All Tasks ({tasks.length})</h3>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 hover:bg-gray-100"
+            className="rounded-lg p-2 hover:bg-muted"
           >
             ✕
           </button>
@@ -1637,54 +1645,54 @@ function EventModal({ date, onClose, onTaskCreated, teamId }: EventModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-lg bg-white p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="w-full max-w-md animate-modal-in rounded-2xl border border-border bg-card p-6 shadow-popover">
         <h3 className="mb-4 text-xl font-bold">Create Task</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-foreground">
               Title *
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2"
+              className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
               placeholder="Task title"
               required
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-foreground">
               Description
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2"
+              className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
               rows={3}
               placeholder="Task description"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-foreground">
               Due Date
             </label>
             <input
               type="date"
               value={date.toISOString().split('T')[0]}
-              className="w-full rounded-lg border bg-gray-100 px-3 py-2"
+              className="w-full rounded-lg border bg-muted px-3 py-2"
               disabled
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-foreground">
               Priority
             </label>
             <select
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2"
+              className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
             >
               <option value="LOW">Low</option>
               <option value="MEDIUM">Medium</option>
@@ -1693,13 +1701,13 @@ function EventModal({ date, onClose, onTaskCreated, teamId }: EventModalProps) {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-foreground">
               Category
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as any)}
-              className="w-full rounded-lg border px-3 py-2"
+              className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
             >
               <option value="task">Task</option>
               <option value="bug">Bug</option>
@@ -1709,13 +1717,13 @@ function EventModal({ date, onClose, onTaskCreated, teamId }: EventModalProps) {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-foreground">
               Assign To
             </label>
             <select
               value={assignedToId || ''}
               onChange={(e) => handleMemberChange(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2"
+              className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
             >
               <option value="">Unassigned</option>
               {availableMembers.map((member) => (
@@ -1729,14 +1737,14 @@ function EventModal({ date, onClose, onTaskCreated, teamId }: EventModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border px-4 py-2 hover:bg-gray-100"
+              className="rounded-lg border px-4 py-2 hover:bg-muted"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+              className="btn-sheen rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-glow transition-all duration-150 disabled:opacity-50"
             >
               {loading ? 'Creating...' : 'Create'}
             </button>

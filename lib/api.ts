@@ -105,6 +105,7 @@ export async function apiRequest(url: string, options: RequestInit = {}) {
      */
     const contentType = response.headers.get('content-type') || '';
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- loose API payload; callers narrow fields themselves
     let data: any = null;
 
     if (contentType.includes('application/json')) {
@@ -153,15 +154,28 @@ export async function apiRequest(url: string, options: RequestInit = {}) {
         data?.error ||
         `Request failed with status ${response.status}`;
 
-      console.error('API Request Failed:', {
-        url,
-        status: response.status,
-        statusText: response.statusText,
-        message,
-        response: data,
-      });
+      /*
+       * 4xx responses are expected application outcomes (auth checks,
+       * validation, not-found) — callers handle them via the thrown
+       * Error. Only server errors (5xx) are logged as errors.
+       */
+      if (response.status >= 500) {
+        console.error('API Request Failed:', {
+          url,
+          status: response.status,
+          statusText: response.statusText,
+          message,
+          response: data,
+        });
+      }
 
-      throw new Error(message);
+      const httpError = new Error(message) as Error & {
+        status?: number;
+        code?: string;
+      };
+      httpError.status = response.status;
+      httpError.code = typeof data?.code === 'string' ? data.code : undefined;
+      throw httpError;
     }
 
     /*
@@ -169,12 +183,14 @@ export async function apiRequest(url: string, options: RequestInit = {}) {
      * Successful request
      * --------------------------------------------------------
      */
-    console.log('API Request Successful:', {
-      url,
-      method: options.method || 'GET',
-      status: response.status,
-      isFormData,
-    });
+    if (process.env.NODE_ENV !== 'production') {
+      console.debug('API Request Successful:', {
+        url,
+        method: options.method || 'GET',
+        status: response.status,
+        isFormData,
+      });
+    }
 
     return data;
   } catch (error) {
@@ -182,11 +198,17 @@ export async function apiRequest(url: string, options: RequestInit = {}) {
      * --------------------------------------------------------
      * Centralized error logging
      * --------------------------------------------------------
+     *
+     * HTTP errors (4xx/5xx) already carry `status` and were logged
+     * above when appropriate — don't double-log them here. Only
+     * network failures and unexpected exceptions reach this branch.
      */
-    console.error('apiRequest Error:', {
-      url,
-      error: error instanceof Error ? error.message : error,
-    });
+    if (!(error instanceof Error && 'status' in error)) {
+      console.error('apiRequest Error:', {
+        url,
+        error: error instanceof Error ? error.message : error,
+      });
+    }
 
     throw error;
   }

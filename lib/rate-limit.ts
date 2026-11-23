@@ -62,6 +62,7 @@ function evictIfNeeded() {
     Returns true when the request is allowed, false when limited.
     Timestamps older than windowMs are discarded before counting.
 */
+/** In-memory fixed-window rate limiter keyed per client; returns false when over limit. NOTE: per-process — see AGENTS.md scaling notes. */
 export function rateLimit(
   key: string,
   limit: number = DEFAULT_RATE_LIMIT,
@@ -100,6 +101,7 @@ export function rateLimit(
     can be bypassed. Per-account limits (e.g. login:email:*) remain
     effective regardless. Do not rely on IP limiting alone.
 */
+/** Best-effort client IP from proxy headers (x-forwarded-for first hop). */
 export function getClientIP(request: { headers: Headers }): string {
   const vercelIp = request.headers.get('x-vercel-forwarded-for');
   if (vercelIp) {

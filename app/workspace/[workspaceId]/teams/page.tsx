@@ -15,7 +15,12 @@ export default async function TeamsPage({
 
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-bold">Teams</h1>
+      <div className="mb-6">
+        <p className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-primary">
+          Workspace
+        </p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Teams</h1>
+      </div>
       <TeamsClient projectId={workspaceId} projectName="Default Project" workspaceId={workspaceId} />
     </div>
   );

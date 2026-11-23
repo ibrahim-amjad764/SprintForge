@@ -31,7 +31,7 @@ export default function ProjectViewSwitcher({ workspaceId, projectId }: ProjectV
   console.log("Available tabs configuration:", tabs);
 
   return (
-    <div className="flex border-b border-neutral-200 bg-white px-6 py-2 gap-4">
+    <div className="flex border-b border-border bg-card px-6 py-2 gap-4">
       {tabs.map((tab) => {
         // Check active route state layout safely
         const isActive = pathname.endsWith(tab.path) || pathname.includes(tab.id);
@@ -55,8 +55,8 @@ export default function ProjectViewSwitcher({ workspaceId, projectId }: ProjectV
             }}
             className={`flex items-center gap-2 pb-3 pt-2 text-sm font-medium border-b-2 transition-all px-1
               ${isActive 
-                ? 'border-blue-600 text-blue-600 font-semibold' 
-                : 'border-transparent text-neutral-500 hover:text-neutral-800 hover:border-neutral-300'
+                ? 'border-blue-600 text-blue-600 dark:text-blue-300 font-semibold' 
+                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
               }`}
           >
             <Icon className="w-4 h-4" />

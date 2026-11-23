@@ -30,7 +30,7 @@ export async function uploadFile(
   options: UploadOptions = {}
 ): Promise<UploadResult> {
   const {
-    folder = 'sprintforge',
+    folder = process.env.CLOUDINARY_FOLDER || 'sprintforge',
     transformation,
     resourceType = 'image',
     maxFileSize = 5 * 1024 * 1024, // 5MB default

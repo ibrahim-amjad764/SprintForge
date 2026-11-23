@@ -16,6 +16,7 @@ export interface PaginationParams {
 
 export type PaginationResult = PaginationParams | { error: string };
 
+/** Parses/validates page & limit query params; clamps limit to MAX_PAGE_SIZE. */
 export function parsePaginationParams(
   searchParams: URLSearchParams,
 ): PaginationResult {

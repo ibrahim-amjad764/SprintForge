@@ -7,7 +7,7 @@ import { getUserNotifications, getUserNotificationsPaginated, markAllAsRead, get
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
 import { parsePaginationParams } from '@/lib/pagination';
-import logger from '@/lib/logger';
+import { apiError } from '@/utils/error-handler';
 
 /*
   Notification APIs:
@@ -51,8 +51,7 @@ export async function GET(request: NextRequest) {
     const notifications = await getUserNotifications(userId);
     return successResponse(notifications);
   } catch (error) {
-    logger.error({ err: error }, 'Get notifications error:');
-    return errorResponse('Server error', 500);
+    return apiError(error, 'Server error');
   }
 }
 
@@ -74,7 +73,6 @@ export async function PATCH(request: NextRequest) {
 
     return errorResponse('Invalid endpoint', 404);
   } catch (error) {
-    logger.error({ err: error }, 'Patch notifications error:');
-    return errorResponse('Server error', 500);
+    return apiError(error, 'Server error');
   }
 }

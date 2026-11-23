@@ -6,7 +6,8 @@ import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
 import { getWorkspaceMembership } from '@/lib/authorization';
 import type { WorkspaceRole } from '@/models/WorkspaceMember';
-import logger from '@/lib/logger';
+import { apiError } from '@/utils/error-handler';
+import { PlanLimitError } from '@/services/billing.service';
 
 const VALID_ROLES: WorkspaceRole[] = ['OWNER', 'ADMIN', 'EDITOR', 'COMMENTER', 'VIEWER'];
 const ADMIN_ROLES: WorkspaceRole[] = ['OWNER', 'ADMIN'];
@@ -32,8 +33,7 @@ export async function GET(
     const members = await getWorkspaceMembers(id);
     return successResponse(members);
   } catch (error) {
-    logger.error({ err: error }, 'Get members error:');
-    return errorResponse('Server error', 500);
+    return apiError(error, 'Server error');
   }
 }
 
@@ -74,7 +74,9 @@ export async function POST(
 
     return successResponse(member, 'Member added');
   } catch (error) {
-    logger.error({ err: error }, 'Add member error:');
-    return errorResponse('Server error', 500);
+    if (error instanceof PlanLimitError) {
+      return errorResponse(error.message, error.status, error.code);
+    }
+    return apiError(error, 'Server error');
   }
 }

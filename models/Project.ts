@@ -61,6 +61,8 @@ const ProjectSchema = new Schema<IProject>(
 
 // Projects are always listed per workspace.
 ProjectSchema.index({ workspace: 1 });
+// Paginated project lists sort by createdAt desc within a workspace.
+ProjectSchema.index({ workspace: 1, createdAt: -1 });
 
 const Project: Model<IProject> =
   mongoose.models.Project || mongoose.model<IProject>('Project', ProjectSchema);

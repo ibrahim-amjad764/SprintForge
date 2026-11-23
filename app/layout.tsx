@@ -2,10 +2,24 @@
 
 
 import type { Metadata } from 'next';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+});
 
 import { AuthProvider } from '@/context/AuthContext';
 import { WorkspaceProvider } from '@/context/WorkspaceContext';
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { seo } from '@/lib/seo';
 
 export const metadata: Metadata = {
@@ -20,11 +34,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${jetbrainsMono.variable}`}
+    >
+      <head>
+        {/* Anti-flash: apply persisted/system theme before first paint.
+            Mirrors components/theme/ThemeProvider.tsx logic. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('sprintforge-theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}var r=document.documentElement;r.classList.toggle('dark',t==='dark');r.style.colorScheme=t}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body>
-        <AuthProvider>
-          <WorkspaceProvider>{children}</WorkspaceProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <WorkspaceProvider>{children}</WorkspaceProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

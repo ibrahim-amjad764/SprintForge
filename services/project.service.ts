@@ -84,6 +84,55 @@ export async function getProjects(workspace: string) {
   return Project.find({ workspace });
 }
 
+interface PaginationInput {
+  page: number;
+  limit: number;
+  skip: number;
+}
+
+interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+/*
+ * Paginated project list with progress — deterministic
+ * createdAt-desc ordering, progress aggregation scoped to the
+ * page's project IDs only (getTaskStats is a single $group, so
+ * cost scales with page size, not workspace size).
+ */
+export async function getProjectsPaginated(
+  workspace: string,
+  pagination: PaginationInput,
+): Promise<PaginatedResult<ReturnType<typeof withProgress>>> {
+  const { page, limit, skip } = pagination;
+
+  const [projects, total] = await Promise.all([
+    Project.find({ workspace })
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Project.countDocuments({ workspace }),
+  ]);
+
+  const stats = await getTaskStats(projects.map((p) => p._id));
+  const items = projects.map((project) =>
+    withProgress(project, stats.get(project._id.toString())),
+  );
+
+  return {
+    items,
+    total,
+    page,
+    limit,
+    hasMore: skip + items.length < total,
+  };
+}
+
 export async function getProjectsWithProgress(workspace: string) {
   const projects = await Project.find({ workspace }).lean();
 

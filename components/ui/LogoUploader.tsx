@@ -94,7 +94,7 @@ export function LogoUploader({ logoUrl, onLogoChange, workspaceName, disabled = 
       <div
         className={`
           relative w-32 h-32 rounded-lg border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all
-          ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
+          ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10' : 'border-border hover:border-border'}
           ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
           ${preview ? 'border-solid' : ''}
         `}
@@ -128,16 +128,16 @@ export function LogoUploader({ logoUrl, onLogoChange, workspaceName, disabled = 
           </>
         ) : (
           <>
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-2">
-              <span className="text-2xl font-bold text-blue-600">{getInitials()}</span>
+            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-500/15 rounded-full flex items-center justify-center mb-2">
+              <span className="text-2xl font-bold text-blue-600 dark:text-blue-300">{getInitials()}</span>
             </div>
             <div className="text-center">
               {uploading ? (
                 <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
               ) : (
                 <>
-                  <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1" />
-                  <p className="text-xs text-gray-500">Drop or click</p>
+                  <Upload className="w-6 h-6 text-muted-foreground mx-auto mb-1" />
+                  <p className="text-xs text-muted-foreground">Drop or click</p>
                 </>
               )}
             </div>
@@ -154,7 +154,7 @@ export function LogoUploader({ logoUrl, onLogoChange, workspaceName, disabled = 
         />
       </div>
 
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted-foreground">
         Recommended: Square image, max 2MB
       </p>
     </div>

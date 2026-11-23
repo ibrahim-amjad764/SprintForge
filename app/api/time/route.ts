@@ -6,6 +6,7 @@ import { startTimer, getTaskTime } from '@/services/time.service';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
 import { getMembershipForTask, canWriteWorkspace } from '@/lib/authorization';
+import { apiError } from '@/utils/error-handler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     return successResponse(timer, 'Timer started');
   } catch (error) {
-    return errorResponse('Timer failed', 500);
+    return apiError(error, 'Timer failed');
   }
 }
 
@@ -58,10 +59,6 @@ export async function GET(request: NextRequest) {
 
     return successResponse(result);
   } catch (error) {
-    return errorResponse(
-      'Failed',
-
-      500
-    );
+    return apiError(error, 'Failed');
   }
 }

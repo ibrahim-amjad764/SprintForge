@@ -7,6 +7,7 @@ import { successResponse, errorResponse } from "@/utils/response";
 import { requireSession } from "@/lib/session";
 import { getWorkspaceMembership } from "@/lib/authorization";
 import type { WorkspaceRole } from "@/models/WorkspaceMember";
+import { apiError } from '@/utils/error-handler';
 
 const ADMIN_ROLES: WorkspaceRole[] = ["OWNER", "ADMIN"];
 
@@ -38,7 +39,7 @@ export async function GET(
 
     return successResponse(workspace);
   } catch (error) {
-    return errorResponse("Error fetching workspace", 500);
+    return apiError(error, 'Error fetching workspace');
   }
 }
 
@@ -67,7 +68,7 @@ export async function PUT(
 
     return successResponse(workspace, "Workspace updated");
   } catch (error) {
-    return errorResponse("Error updating workspace", 500);
+    return apiError(error, 'Error updating workspace');
   }
 }
 
@@ -94,6 +95,6 @@ export async function DELETE(
     await deleteWorkspace(id);
     return successResponse(null, "Workspace deleted");
   } catch (error) {
-    return errorResponse("Error deleting workspace", 500);
+    return apiError(error, 'Error deleting workspace');
   }
 }

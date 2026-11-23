@@ -3,9 +3,10 @@ import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 
 import Task from '@/models/Task';
-import { errorResponse } from '@/utils/response';
+
 import { requireSession } from '@/lib/session';
 import { getUserProjectIds } from '@/lib/authorization';
+import { apiError } from '@/utils/error-handler';
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,10 +20,21 @@ export async function GET(request: NextRequest) {
     const projectIds = await getUserProjectIds(userId);
     const tasks = await Task.find({ project: { $in: projectIds } });
 
-    const csv = [
-      'title,status,priority',
+    // RFC 4180 escaping + spreadsheet formula-injection guard
+    const cell = (value: unknown): string => {
+      let s = String(value ?? '');
+      if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+      return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
 
-      ...tasks.map((task) => `${task.title},${task.status},${task.priority}`),
+    const csv = [
+      'title,status,priority,dueDate',
+
+      ...tasks.map((task) =>
+        [task.title, task.status, task.priority, task.dueDate ?? '']
+          .map(cell)
+          .join(',')
+      ),
     ].join('\n');
 
     return new Response(
@@ -36,6 +48,6 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (error) {
-    return errorResponse('Export failed', 500);
+    return apiError(error, 'Export failed');
   }
 }

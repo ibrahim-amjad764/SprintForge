@@ -5,6 +5,7 @@ import { updateTeam, deleteTeam } from "@/services/team.service";
 import { successResponse, errorResponse } from "@/utils/response";
 import { requireSession } from "@/lib/session";
 import { getMembershipForTeam, canWriteWorkspace } from "@/lib/authorization";
+import { apiError } from '@/utils/error-handler';
 
 export async function PUT(
   request: NextRequest,
@@ -34,7 +35,7 @@ export async function PUT(
 
     return successResponse(team, "Team updated");
   } catch (error) {
-    return errorResponse("Update failed", 500);
+    return apiError(error, 'Update failed');
   }
 }
 
@@ -63,6 +64,6 @@ export async function DELETE(
 
     return successResponse(null, "Team deleted");
   } catch (error) {
-    return errorResponse("Delete failed", 500);
+    return apiError(error, 'Delete failed');
   }
 }

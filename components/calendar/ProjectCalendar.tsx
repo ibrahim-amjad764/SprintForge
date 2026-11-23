@@ -27,7 +27,7 @@ export default function ProjectCalendar({ tasks }: { tasks: any[] }) {
   }));
 
   return (
-    <div className="rounded bg-white p-5">
+    <div className="rounded bg-card p-5">
       <Calendar
         localizer={localizer}
         events={events}

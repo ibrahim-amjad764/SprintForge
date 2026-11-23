@@ -7,6 +7,7 @@ import { successResponse, errorResponse } from "@/utils/response";
 import { requireSession } from "@/lib/session";
 import { getMembershipForTask, canWriteWorkspace } from "@/lib/authorization";
 import { revalidatePath } from "next/cache";
+import { apiError } from '@/utils/error-handler';
 
 export async function PUT(
   request: NextRequest,
@@ -43,7 +44,7 @@ export async function PUT(
 
     return successResponse(task, "Task updated");
   } catch (error) {
-    return errorResponse("Update failed", 500);
+    return apiError(error, 'Update failed');
   }
 }
 
@@ -77,6 +78,6 @@ export async function DELETE(
 
     return successResponse(null, "Task deleted");
   } catch (error) {
-    return errorResponse("Delete failed", 500);
+    return apiError(error, 'Delete failed');
   }
 }

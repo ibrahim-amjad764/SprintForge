@@ -10,7 +10,7 @@ export default function AttachmentList({ files }: { files: any[] }) {
           key={file._id}
           href={file.url}
           target="_blank"
-          className="block text-blue-600"
+          className="block text-blue-600 dark:text-blue-300"
         >
           {file.name}
         </a>

@@ -6,7 +6,8 @@ import { successResponse, errorResponse } from '@/utils/response';
 import { requireAdmin } from '@/lib/admin';
 import { rateLimit } from '@/lib/rate-limit';
 import { parsePaginationParams } from '@/lib/pagination';
-import logger from '@/lib/logger';
+
+import { apiError } from '@/utils/error-handler';
 
 export async function GET(request: NextRequest) {
   try {
@@ -35,7 +36,6 @@ export async function GET(request: NextRequest) {
 
     return successResponse(result);
   } catch (error) {
-    logger.error({ err: error }, 'Get admin logs error:');
-    return errorResponse('Failed to fetch logs', 500);
+    return apiError(error, 'Failed to fetch logs');
   }
 }

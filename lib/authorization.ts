@@ -42,10 +42,12 @@ const COMMENT_ROLES: WorkspaceRole[] = [
   "COMMENTER",
 ];
 
+/** OWNER/ADMIN/EDITOR roles may mutate workspace content. */
 export function canWriteWorkspace(role: WorkspaceRole): boolean {
   return WRITE_ROLES.includes(role);
 }
 
+/** COMMENTER and above may comment; VIEWER is read-only. */
 export function canCommentWorkspace(role: WorkspaceRole): boolean {
   return COMMENT_ROLES.includes(role);
 }
@@ -62,6 +64,7 @@ function toId(value: unknown): string | null {
     Resolve a user's membership in a workspace.
     Returns null when the user is not a member and is not the owner.
 */
+/** Resolves the user's WorkspaceMember role; falls back to OWNER when they own the workspace. */
 export async function getWorkspaceMembership(
   workspaceId: string,
   userId: string,
@@ -90,6 +93,7 @@ export async function getWorkspaceMembership(
   return null;
 }
 
+/** True when the user has any membership (or ownership) in the workspace. */
 export async function isWorkspaceMember(
   workspaceId: string,
   userId: string,
@@ -101,6 +105,7 @@ export async function isWorkspaceMember(
     All workspace IDs a user can access:
     WorkspaceMember rows + workspaces they own.
 */
+/** All workspace ids the user can access (memberships + owned). */
 export async function getUserWorkspaceIds(userId: string): Promise<string[]> {
   await connectDB();
 
@@ -118,6 +123,7 @@ export async function getUserWorkspaceIds(userId: string): Promise<string[]> {
 /*
     All project IDs inside the user's accessible workspaces.
 */
+/** All project ids inside the user's accessible workspaces — the standard data-scope filter. */
 export async function getUserProjectIds(userId: string): Promise<string[]> {
   const workspaceIds = await getUserWorkspaceIds(userId);
   if (workspaceIds.length === 0) return [];
@@ -134,6 +140,7 @@ export async function getUserProjectIds(userId: string): Promise<string[]> {
     Returns null when the project does not exist or the user
     is not a member of its workspace.
 */
+/** Membership for the workspace owning a project; null when inaccessible. */
 export async function getMembershipForProject(
   projectId: string,
   userId: string,
@@ -151,6 +158,7 @@ export async function getMembershipForProject(
     Membership for the workspace that owns a task
     (task → project → workspace).
 */
+/** Membership for the workspace owning a task; null when inaccessible. */
 export async function getMembershipForTask(
   taskId: string,
   userId: string,
@@ -172,6 +180,7 @@ export async function getMembershipForTask(
 /*
     Membership for the workspace that owns a team.
 */
+/** Membership for the workspace owning a team; null when inaccessible. */
 export async function getMembershipForTeam(
   teamId: string,
   userId: string,

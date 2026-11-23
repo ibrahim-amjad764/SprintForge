@@ -2,9 +2,9 @@
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { getUnreadCount } from '@/services/notification.service';
-import { successResponse, errorResponse } from '@/utils/response';
+import { successResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
-import logger from '@/lib/logger';
+import { apiError } from '@/utils/error-handler';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +18,6 @@ export async function GET(request: NextRequest) {
     const count = await getUnreadCount(userId);
     return successResponse({ count });
   } catch (error) {
-    logger.error({ err: error }, 'Get unread count error:');
-    return errorResponse('Server error', 500);
+    return apiError(error, 'Server error');
   }
 }

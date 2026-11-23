@@ -54,6 +54,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { MailCheck, Zap } from 'lucide-react';
+import { authInputClass, authLabelClass, authPrimaryButtonClass } from './auth-styles';
 
 export default function PasswordResetForm() {
   const [email, setEmail] = useState('');
@@ -65,35 +68,54 @@ export default function PasswordResetForm() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-md">
-      <h1 className="mb-6 text-3xl font-bold">Reset Password</h1>
+    <div className="w-full font-sans animate-scale-in">
+      <Link href="/" className="mb-8 flex items-center gap-2.5 lg:hidden">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <Zap className="h-4 w-4" aria-hidden="true" />
+        </span>
+        <span className="text-lg font-bold tracking-tight">SprintForge</span>
+      </Link>
+
+      <h1 className="text-2xl font-bold tracking-tight">Reset your password</h1>
+      <p className="mt-1.5 mb-6 text-sm text-muted-foreground">
+        Enter your account email and we&apos;ll send you a reset link.
+      </p>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label
-            htmlFor="email"
-            className="mb-2 block text-sm font-medium text-gray-700"
-          >
+          <label htmlFor="email" className={authLabelClass}>
             Email
           </label>
           <input
             id="email"
             name="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder="you@company.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded border p-3"
+            className={authInputClass}
+            autoComplete="email"
             required
           />
         </div>
-        <button
-          type="submit"
-          className="w-full rounded bg-black p-3 text-white"
-        >
+        <button type="submit" className={authPrimaryButtonClass}>
           Send reset link
         </button>
       </form>
-      {message && <p className="mt-4 text-sm text-gray-600">{message}</p>}
+
+      {message && (
+        <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-primary/25 bg-primary/10 px-3.5 py-3 text-sm text-foreground">
+          <MailCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+          <p>{message}</p>
+        </div>
+      )}
+
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        Remember your password?{' '}
+        <Link href="/login" className="font-semibold text-primary hover:underline">
+          Sign in
+        </Link>
+      </p>
     </div>
   );
 }

@@ -16,11 +16,11 @@ interface ActivityStreamProps {
 }
 
 const activityIcons = {
-  workspace_created: { icon: CheckCircle, color: 'text-green-600 bg-green-50' },
-  integration_connected: { icon: Plug, color: 'text-blue-600 bg-blue-50' },
-  repo_provisioned: { icon: Package, color: 'text-purple-600 bg-purple-50' },
-  task_completed: { icon: CheckCircle, color: 'text-green-600 bg-green-50' },
-  member_joined: { icon: User, color: 'text-blue-600 bg-blue-50' },
+  workspace_created: { icon: CheckCircle, color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/25' },
+  integration_connected: { icon: Plug, color: 'text-primary bg-primary/10 border-primary/25' },
+  repo_provisioned: { icon: Package, color: 'text-violet-600 dark:text-violet-400 bg-violet-500/10 border-violet-500/25' },
+  task_completed: { icon: CheckCircle, color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/25' },
+  member_joined: { icon: User, color: 'text-primary bg-primary/10 border-primary/25' },
 };
 
 const defaultActivities: ActivityItem[] = [
@@ -57,32 +57,41 @@ export function ActivityStream({ activities = defaultActivities }: ActivityStrea
   };
 
   return (
-    <div className="bg-white rounded-xl border shadow-sm p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-900">Recent Activity</h3>
-        <button className="text-sm text-blue-600 hover:text-blue-800">View All</button>
+    <div className="animate-enter rounded-2xl border border-border bg-card p-5 shadow-card sm:p-6" style={{ '--i': 3 } as React.CSSProperties}>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h3 className="font-semibold tracking-tight text-foreground">Recent Activity</h3>
+          <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">LIVE FEED</p>
+        </div>
+        <button className="rounded-md px-2 py-1 text-sm font-medium text-primary transition-colors hover:bg-primary/10">
+          View all
+        </button>
       </div>
-      
-      <div className="space-y-4">
-        {activities.map((activity) => {
+
+      <div className="space-y-1">
+        {activities.map((activity, i) => {
           const { icon: Icon, color } = activityIcons[activity.type];
-          
+
           return (
-            <div key={activity.id} className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-              <div className={`p-2 rounded-lg ${color} flex-shrink-0`}>
-                <Icon className="w-4 h-4" />
+            <div
+              key={activity.id}
+              className="animate-enter flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50"
+              style={{ '--i': 4 + i } as React.CSSProperties}
+            >
+              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${color}`}>
+                <Icon className="h-4 w-4" aria-hidden="true" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-900">{activity.message}</p>
-                <div className="flex items-center gap-2 mt-1">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-foreground">{activity.message}</p>
+                <div className="mt-1 flex items-center gap-2">
                   {activity.user && (
                     <>
-                      <span className="text-xs text-gray-500">by {activity.user}</span>
-                      <span className="text-xs text-gray-300">•</span>
+                      <span className="text-xs text-muted-foreground">by {activity.user}</span>
+                      <span className="text-xs text-border" aria-hidden="true">•</span>
                     </>
                   )}
-                  <span className="text-xs text-gray-400 flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
+                  <span className="flex items-center gap-1 font-mono text-[11px] text-muted-foreground">
+                    <Clock className="h-3 w-3" aria-hidden="true" />
                     {formatTime(activity.timestamp)}
                   </span>
                 </div>

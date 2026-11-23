@@ -48,6 +48,7 @@ export default async function TaskListPage({
       tasks={JSON.parse(JSON.stringify(tasks))}
       projects={JSON.parse(JSON.stringify(projects))}
       teamMembers={JSON.parse(JSON.stringify(teamMembers))}
+      pollUrls={[`/api/tasks?project=${projectId}`]}
     />
   );
 }

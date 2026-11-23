@@ -5,7 +5,7 @@ import { connectDB } from "@/lib/db";
 import { validateSessionToken } from "@/lib/session";
 import Workspace from "@/models/Workspace";
 import { successResponse, errorResponse } from "@/utils/response";
-import logger from '@/lib/logger';
+import { apiError } from '@/utils/error-handler';
 
 async function getUserId(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
@@ -57,7 +57,6 @@ export async function POST(request: NextRequest) {
       available ? "Slug is available" : "Slug is already taken"
     );
   } catch (error) {
-    logger.error({ err: error }, "Slug validation error:");
-    return errorResponse("Server error", 500);
+    return apiError(error, 'Server error');
   }
 }

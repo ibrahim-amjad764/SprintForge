@@ -77,7 +77,7 @@ export function MemberInviteCard({ members, onMembersChange, disabled = false }:
             }}
             onKeyDown={handleKeyDown}
             placeholder="Enter email address"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+            className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
             disabled={disabled}
           />
         </div>
@@ -85,7 +85,7 @@ export function MemberInviteCard({ members, onMembersChange, disabled = false }:
         <select
           value={roleInput}
           onChange={(e) => setRoleInput(e.target.value as any)}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+          className="rounded-md border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
           disabled={disabled}
         >
           <option value="ADMIN">Admin</option>
@@ -105,7 +105,7 @@ export function MemberInviteCard({ members, onMembersChange, disabled = false }:
       </div>
 
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-red-600 dark:text-red-300">{error}</p>
       )}
 
       {/* Members List */}
@@ -114,11 +114,11 @@ export function MemberInviteCard({ members, onMembersChange, disabled = false }:
           {members.map((member) => (
             <div
               key={member.email}
-              className="flex items-center justify-between p-3 bg-gray-50"
+              className="flex items-center justify-between p-3 bg-muted"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-blue-600">
+                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-500/15 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-medium text-blue-600 dark:text-blue-300">
                     {member.email.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -129,7 +129,7 @@ export function MemberInviteCard({ members, onMembersChange, disabled = false }:
                 <select
                   value={member.role}
                   onChange={(e) => updateMemberRole(member.email, e.target.value as any)}
-                  className="text-xs rounded border border-gray-300 px-2 py-1 focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                  className="text-xs rounded border border-border px-2 py-1 focus:border-blue-500 focus:outline-none disabled:opacity-50"
                   disabled={disabled}
                 >
                   <option value="ADMIN">Admin</option>
@@ -141,7 +141,7 @@ export function MemberInviteCard({ members, onMembersChange, disabled = false }:
                   type="button"
                   onClick={() => removeMember(member.email)}
                   disabled={disabled}
-                  className="text-gray-400 hover:text-red-600 disabled:opacity-50"
+                  className="text-muted-foreground hover:text-red-600 dark:text-red-300 disabled:opacity-50"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -152,7 +152,7 @@ export function MemberInviteCard({ members, onMembersChange, disabled = false }:
       )}
 
       {members.length === 0 && (
-        <p className="text-sm text-gray-500 text-center py-4">
+        <p className="text-sm text-muted-foreground text-center py-4">
           No members added yet. Add team members above.
         </p>
       )}

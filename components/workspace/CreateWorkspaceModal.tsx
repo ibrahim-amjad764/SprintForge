@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
+import UpgradePrompt from '@/components/billing/UpgradePrompt';
 import { useIsClient } from '@/hooks/useIsClient';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 
@@ -70,6 +71,7 @@ export default function CreateWorkspaceModal({
   }>({});
 
   const [isDirty, setIsDirty] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   // --------------------------------------------------------
   // Portal mounting.
@@ -279,12 +281,17 @@ export default function CreateWorkspaceModal({
     } catch (error) {
       console.error('Workspace creation request failed:', error);
 
-      setErrors({
-        name:
-          error instanceof Error
-            ? error.message
-            : 'An error occurred while creating workspace',
-      });
+      const apiErr = error as { status?: number; code?: string };
+      if (apiErr.code === 'WORKSPACE_LIMIT_REACHED' || apiErr.status === 403) {
+        setShowUpgrade(true);
+      } else {
+        setErrors({
+          name:
+            error instanceof Error
+              ? error.message
+              : 'An error occurred while creating workspace',
+        });
+      }
     } finally {
       setLoading(false);
       isSubmittingRef.current = false;
@@ -350,6 +357,7 @@ export default function CreateWorkspaceModal({
   // This prevents parent layout/z-index issues.
   // --------------------------------------------------------
   return createPortal(
+    <>
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4 backdrop-blur-md"
       role="dialog"
@@ -359,7 +367,7 @@ export default function CreateWorkspaceModal({
     >
       <div
         ref={modalRef}
-        className="relative max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/10"
+        className="relative max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-2xl bg-card shadow-2xl ring-1 ring-foreground/10"
         onMouseDown={(event) => {
           // Stop clicks inside the modal from reaching the backdrop.
           event.stopPropagation();
@@ -373,7 +381,7 @@ export default function CreateWorkspaceModal({
           onClick={handleCancel}
           disabled={loading}
           aria-label="Close create workspace modal"
-          className="absolute top-4 right-4 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 shadow-sm transition hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+          className="absolute top-4 right-4 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span className="text-xl leading-none">×</span>
         </button>
@@ -388,12 +396,12 @@ export default function CreateWorkspaceModal({
               <div className="mb-6 pr-10">
                 <h2
                   id="create-workspace-title"
-                  className="text-2xl font-semibold text-gray-900"
+                  className="text-2xl font-semibold text-foreground"
                 >
                   Create New Workspace
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-muted-foreground">
                   Set up your workspace and invite your team.
                 </p>
               </div>
@@ -405,7 +413,7 @@ export default function CreateWorkspaceModal({
                 <div>
                   <label
                     htmlFor="name"
-                    className="mb-1.5 block text-sm font-medium text-gray-700"
+                    className="mb-1.5 block text-sm font-medium text-foreground"
                   >
                     Workspace Name
                   </label>
@@ -415,7 +423,7 @@ export default function CreateWorkspaceModal({
                     type="text"
                     value={name}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-gray-100"
+                    className="w-full rounded-lg border border-border px-3 py-2.5 text-sm transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-muted"
                     placeholder="e.g. Project Alpha"
                     required
                     disabled={!isOnline || loading}
@@ -423,14 +431,14 @@ export default function CreateWorkspaceModal({
                   />
 
                   {errors.name && (
-                    <p className="mt-1.5 text-sm text-red-600">{errors.name}</p>
+                    <p className="mt-1.5 text-sm text-red-600 dark:text-red-300">{errors.name}</p>
                   )}
 
                   {/* URL Preview */}
                   {slug && (
-                    <p className="mt-2 text-xs break-all text-gray-500">
+                    <p className="mt-2 text-xs break-all text-muted-foreground">
                       URL:{' '}
-                      <span className="text-gray-700">
+                      <span className="text-foreground">
                         {appUrl}/workspace/{slug}
                       </span>
                     </p>
@@ -441,7 +449,7 @@ export default function CreateWorkspaceModal({
                     Visibility
                 ------------------------------------------------- */}
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                  <label className="mb-2 block text-sm font-medium text-foreground">
                     Visibility
                   </label>
 
@@ -453,11 +461,11 @@ export default function CreateWorkspaceModal({
                         value="private"
                         checked={visibility === 'private'}
                         onChange={() => setVisibility('private')}
-                        className="text-blue-600 focus:ring-blue-500"
+                        className="text-blue-600 dark:text-blue-300 focus:ring-blue-500"
                         disabled={loading}
                       />
 
-                      <span className="text-sm text-gray-700">
+                      <span className="text-sm text-foreground">
                         Private (invite only)
                       </span>
                     </label>
@@ -469,11 +477,11 @@ export default function CreateWorkspaceModal({
                         value="organization"
                         checked={visibility === 'organization'}
                         onChange={() => setVisibility('organization')}
-                        className="text-blue-600 focus:ring-blue-500"
+                        className="text-blue-600 dark:text-blue-300 focus:ring-blue-500"
                         disabled={loading}
                       />
 
-                      <span className="text-sm text-gray-700">
+                      <span className="text-sm text-foreground">
                         Organization-wide
                       </span>
                     </label>
@@ -486,7 +494,7 @@ export default function CreateWorkspaceModal({
                 <div>
                   <label
                     htmlFor="template"
-                    className="mb-1.5 block text-sm font-medium text-gray-700"
+                    className="mb-1.5 block text-sm font-medium text-foreground"
                   >
                     Default Template
                   </label>
@@ -500,7 +508,7 @@ export default function CreateWorkspaceModal({
                           'kanban' | 'scrum' | 'bug-tracker' | 'blank'
                       )
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:bg-gray-100"
+                    className="w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:bg-muted"
                     disabled={loading}
                   >
                     <option value="blank">Blank Project</option>
@@ -519,7 +527,7 @@ export default function CreateWorkspaceModal({
                 <div>
                   <label
                     htmlFor="email"
-                    className="mb-1.5 block text-sm font-medium text-gray-700"
+                    className="mb-1.5 block text-sm font-medium text-foreground"
                   >
                     Team Members
                   </label>
@@ -536,7 +544,7 @@ export default function CreateWorkspaceModal({
                           addEmail();
                         }
                       }}
-                      className="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:bg-gray-100"
+                      className="min-w-0 flex-1 rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:bg-muted"
                       placeholder="Enter email"
                       disabled={!isOnline || loading}
                     />
@@ -552,7 +560,7 @@ export default function CreateWorkspaceModal({
                   </div>
 
                   {errors.emails && (
-                    <p className="mt-1.5 text-sm text-red-600">
+                    <p className="mt-1.5 text-sm text-red-600 dark:text-red-300">
                       {errors.emails}
                     </p>
                   )}
@@ -563,14 +571,14 @@ export default function CreateWorkspaceModal({
                       {emails.map((email) => (
                         <span
                           key={email}
-                          className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700"
+                          className="flex items-center gap-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 px-3 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-300"
                         >
                           {email}
 
                           <button
                             type="button"
                             onClick={() => removeEmail(email)}
-                            className="text-blue-400 transition hover:text-red-500"
+                            className="text-blue-400 transition hover:text-red-500 dark:text-red-400"
                             disabled={loading}
                             aria-label={`Remove ${email}`}
                           >
@@ -586,7 +594,7 @@ export default function CreateWorkspaceModal({
                     Offline Alert
                 ------------------------------------------------- */}
                 {!isOnline && (
-                  <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800">
+                  <div className="rounded-lg border border-yellow-200 dark:border-yellow-500/40 bg-yellow-50 dark:bg-yellow-500/10 p-3 text-sm text-yellow-800 dark:text-yellow-300">
                     ⚠️ Internet disconnected. Please check your connection.
                   </div>
                 )}
@@ -594,11 +602,11 @@ export default function CreateWorkspaceModal({
                 {/* ------------------------------------------------
                     Action Buttons
                 ------------------------------------------------- */}
-                <div className="flex justify-end gap-3 border-t border-gray-100 pt-5">
+                <div className="flex justify-end gap-3 border-t border-border pt-5">
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={loading}
                   >
                     Cancel
@@ -622,22 +630,22 @@ export default function CreateWorkspaceModal({
             {/* =================================================
                 RIGHT COLUMN - LIVE PREVIEW
             ================================================== */}
-            <div className="hidden border-l border-gray-100 bg-gray-50 p-8 lg:block">
-              <h3 className="mb-4 font-semibold text-gray-700">Live Preview</h3>
+            <div className="hidden border-l border-border bg-muted p-8 lg:block">
+              <h3 className="mb-4 font-semibold text-foreground">Live Preview</h3>
 
-              <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
                 {/* Workspace Header */}
                 <div className="mb-5 flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-blue-100 font-semibold text-blue-600">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-500/15 font-semibold text-blue-600 dark:text-blue-300">
                     {name.charAt(0).toUpperCase() || 'W'}
                   </div>
 
                   <div className="min-w-0">
-                    <p className="truncate font-semibold text-gray-900">
+                    <p className="truncate font-semibold text-foreground">
                       {name || 'Workspace Name'}
                     </p>
 
-                    <p className="mt-0.5 text-xs text-gray-500">
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       {visibility === 'private'
                         ? '🔒 Private'
                         : '🌐 Organization'}
@@ -647,7 +655,7 @@ export default function CreateWorkspaceModal({
 
                 {/* Workspace Details */}
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <span>📋</span>
 
                     <span>
@@ -658,7 +666,7 @@ export default function CreateWorkspaceModal({
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <span>👥</span>
 
                     <span>
@@ -667,7 +675,7 @@ export default function CreateWorkspaceModal({
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <span>🔗</span>
 
                     <span className="truncate text-xs">
@@ -678,26 +686,26 @@ export default function CreateWorkspaceModal({
 
                 {/* Team Members */}
                 {emails.length > 0 && (
-                  <div className="mt-5 border-t border-gray-100 pt-5">
-                    <p className="mb-3 text-xs font-medium tracking-wide text-gray-400 uppercase">
+                  <div className="mt-5 border-t border-border pt-5">
+                    <p className="mb-3 text-xs font-medium tracking-wide text-muted-foreground uppercase">
                       Team Members
                     </p>
 
                     <div className="space-y-2">
                       {emails.slice(0, 3).map((email) => (
                         <div key={email} className="flex items-center gap-2">
-                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-medium text-gray-500">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
                             {email.charAt(0).toUpperCase()}
                           </div>
 
-                          <span className="truncate text-xs text-gray-600">
+                          <span className="truncate text-xs text-muted-foreground">
                             {email}
                           </span>
                         </div>
                       ))}
 
                       {emails.length > 3 && (
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-muted-foreground">
                           +{emails.length - 3} more
                         </p>
                       )}
@@ -709,7 +717,13 @@ export default function CreateWorkspaceModal({
           </div>
         </div>
       </div>
-    </div>,
+    </div>
+    <UpgradePrompt
+      open={showUpgrade}
+      onClose={() => setShowUpgrade(false)}
+      returnTo="/workspace/new"
+    />
+    </>,
     document.body
   );
 }

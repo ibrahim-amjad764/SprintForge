@@ -8,6 +8,7 @@ import cloudinary from '@/lib/cloudinary';
 import { requireSession } from '@/lib/session';
 import { validateAttachmentFile } from '@/lib/file-validation';
 import { getMembershipForTask, canWriteWorkspace } from '@/lib/authorization';
+import { apiError } from '@/utils/error-handler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -70,6 +71,6 @@ export async function POST(request: NextRequest) {
 
     return successResponse(attachment, 'File uploaded');
   } catch (error) {
-    return errorResponse('Upload failed', 500);
+    return apiError(error, 'Upload failed');
   }
 }

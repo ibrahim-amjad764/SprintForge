@@ -38,6 +38,7 @@ async function requirePageSession() {
   return session;
 }
 
+/** SSR guard: redirects unless the session user can access the workspace. */
 export async function requireWorkspaceAccess(
   workspaceId: string
 ): Promise<Membership> {
@@ -54,6 +55,7 @@ export async function requireWorkspaceAccess(
   return membership;
 }
 
+/** SSR guard: redirects unless the session user can access the task's workspace. */
 export async function requireTaskAccess(taskId: string): Promise<Membership> {
   const session = await requirePageSession();
   if (!mongoose.isValidObjectId(taskId)) {
@@ -73,6 +75,7 @@ could view workspace B's project by crafting
 /workspace/A/projects/<B-project-id>. Membership in the URL
 workspace alone is not sufficient.
 */
+/** SSR guard: redirects when the project does not belong to the workspace. */
 export async function requireProjectInWorkspace(
   projectId: string,
   workspaceId: string
@@ -90,6 +93,7 @@ export async function requireProjectInWorkspace(
 
 // For pages that need the userId but no resource membership check
 // (e.g. scoping a global list to the user's own workspaces).
+/** SSR guard returning the session userId for pages needing user scope only. */
 export async function requirePageUserId(): Promise<string> {
   const session = await requirePageSession();
   return session.userId;

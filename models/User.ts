@@ -22,6 +22,8 @@ export interface IUser {
   avatar?: string;
   role: 'USER' | 'ADMIN';
   tokenVersion: number;
+  stripeCustomerId?: string;
+  paddleCustomerId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -64,6 +66,16 @@ const UserSchema = new Schema<IUser>(
     tokenVersion: {
       type: Number,
       default: 0,
+    },
+
+    // Stripe customer for user-level (personal) billing scope.
+    // Workspace-scoped billing stores its customer on Workspace.
+    stripeCustomerId: {
+      type: String,
+    },
+    // Paddle customer (ctm_…) for user-level billing scope.
+    paddleCustomerId: {
+      type: String,
     },
   },
 

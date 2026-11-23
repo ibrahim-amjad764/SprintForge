@@ -28,13 +28,13 @@ export default function MembersRosterModal({ isOpen, onClose, members }: Members
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+      <div className="relative bg-card rounded-xl shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold">Workspace Roster ({members.length} Members)</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-muted rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -43,7 +43,7 @@ export default function MembersRosterModal({ isOpen, onClose, members }: Members
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[60vh]">
           {members.length === 0 ? (
-            < div className="text-center py-12 text-gray-500">
+            < div className="text-center py-12 text-muted-foreground">
               No members found
             </div>
           ) : (
@@ -51,7 +51,7 @@ export default function MembersRosterModal({ isOpen, onClose, members }: Members
               {members.map((member) => (
                 <div
                   key={member.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-4 bg-muted rounded-lg hover:bg-muted transition-colors"
                 >
                   {/* Left: Avatar and Info */}
                   <div className="flex items-center gap-4">
@@ -59,19 +59,19 @@ export default function MembersRosterModal({ isOpen, onClose, members }: Members
                       {member.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <div className="font-medium text-gray-900">{member.name}</div>
-                      <div className="text-sm text-gray-500">{member.email}</div>
+                      <div className="font-medium text-foreground">{member.name}</div>
+                      <div className="text-sm text-muted-foreground">{member.email}</div>
                     </div>
                   </div>
 
                   {/* Center: Role Badge */}
-                  <div className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium capitalize">
+                  <div className="px-3 py-1 bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium capitalize">
                     {member.role}
                   </div>
 
                   {/* Right: Team Assignment */}
-                  <div className="text-sm text-gray-600">
-                    <span className="text-gray-500">Team:</span> {member.teamName}
+                  <div className="text-sm text-muted-foreground">
+                    <span className="text-muted-foreground">Team:</span> {member.teamName}
                   </div>
                 </div>
               ))}

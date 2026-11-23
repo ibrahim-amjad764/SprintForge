@@ -1,8 +1,10 @@
 // app/api/teams/route.ts
 import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db";
-import { createTeam, getTeams } from "@/services/team.service";
+import { createTeam, getTeams, getTeamsPaginated } from "@/services/team.service";
+import { parsePaginationParams } from "@/lib/pagination";
 import { successResponse, errorResponse } from "@/utils/response";
+import { apiError } from "@/utils/error-handler";
 import { requireSession } from "@/lib/session";
 import { getWorkspaceMembership, canWriteWorkspace } from "@/lib/authorization";
 
@@ -46,11 +48,7 @@ export async function POST(request: NextRequest) {
       "Team created",
     );
   } catch (error) {
-    return errorResponse(
-      "Server error",
-
-      500,
-    );
+    return apiError(error, "Server error");
   }
 }
 
@@ -73,14 +71,24 @@ export async function GET(request: NextRequest) {
       return errorResponse("Forbidden", 403);
     }
 
+    // Opt-in pagination — same contract as /api/tasks and /api/projects.
+    if (request.nextUrl.searchParams.has("page") || request.nextUrl.searchParams.has("limit")) {
+      const parsed = parsePaginationParams(request.nextUrl.searchParams);
+      if ("error" in parsed) {
+        return errorResponse(parsed.error, 400);
+      }
+      const result = await getTeamsPaginated(
+        workspace,
+        parsed,
+        request.nextUrl.searchParams.get("search") ?? undefined,
+      );
+      return successResponse(result);
+    }
+
     const teams = await getTeams(workspace);
 
     return successResponse(teams);
   } catch (error) {
-    return errorResponse(
-      "Server error",
-
-      500,
-    );
+    return apiError(error, "Server error");
   }
 }

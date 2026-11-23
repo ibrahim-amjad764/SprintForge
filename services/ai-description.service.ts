@@ -4,6 +4,7 @@ import logger from '@/lib/logger';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL || undefined,
 });
 
 export async function generateWorkspaceDescription(params: {

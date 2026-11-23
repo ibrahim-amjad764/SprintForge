@@ -2,9 +2,9 @@
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { markAllAsRead } from '@/services/notification.service';
-import { successResponse, errorResponse } from '@/utils/response';
+import { successResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
-import logger from '@/lib/logger';
+import { apiError } from '@/utils/error-handler';
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -18,7 +18,6 @@ export async function PATCH(request: NextRequest) {
     await markAllAsRead(userId);
     return successResponse(null, 'All notifications marked as read');
   } catch (error) {
-    logger.error({ err: error }, 'Mark all as read error:');
-    return errorResponse('Server error', 500);
+    return apiError(error, 'Server error');
   }
 }

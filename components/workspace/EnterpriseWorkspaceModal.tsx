@@ -257,27 +257,27 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-6xl rounded-lg bg-white shadow-xl max-h-[95vh] overflow-hidden">
+      <div className="w-full max-w-6xl rounded-lg bg-card shadow-xl max-h-[95vh] overflow-hidden">
         <div className="grid lg:grid-cols-3 h-full">
           {/* Left Column - Form */}
           <div className="lg:col-span-2 overflow-y-auto">
             {/* Header */}
-            <div className="sticky top-0 bg-white border-b px-6 py-4 z-10">
+            <div className="sticky top-0 bg-card border-b px-6 py-4 z-10">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold">Create Enterprise Workspace</h2>
-                <button onClick={onClose} className="rounded p-1 hover:bg-gray-100">
+                <button onClick={onClose} className="rounded p-1 hover:bg-muted">
                   <X className="w-5 h-5" />
                 </button>
               </div>
               
               {/* Draft Alert */}
               {showDraftAlert && (
-                <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg mb-4">
-                  <AlertCircle className="w-4 h-4 text-yellow-600" />
-                  <span className="text-sm text-yellow-800">Draft recovered from previous session</span>
+                <div className="flex items-center gap-2 p-3 bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-200 dark:border-yellow-500/40 rounded-lg mb-4">
+                  <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-300" />
+                  <span className="text-sm text-yellow-800 dark:text-yellow-300">Draft recovered from previous session</span>
                   <button
                     onClick={clearDraft}
-                    className="ml-auto text-xs text-yellow-700 underline hover:text-yellow-900"
+                    className="ml-auto text-xs text-yellow-700 dark:text-yellow-300 underline hover:text-yellow-900 dark:text-yellow-300"
                   >
                     Clear
                   </button>
@@ -296,16 +296,16 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                     <div key={step.id} className="flex items-center flex-1">
                       <div className="flex flex-col items-center">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          isActive ? 'bg-blue-600 text-white' : isCompleted ? 'bg-green-600 text-white' : canAccess ? 'bg-gray-200 text-gray-600' : 'bg-gray-100 text-gray-400'
+                          isActive ? 'bg-blue-600 text-white' : isCompleted ? 'bg-green-600 text-white' : canAccess ? 'bg-muted text-muted-foreground' : 'bg-muted text-muted-foreground'
                         }`}>
                           {isCompleted ? '✓' : <Icon className="w-5 h-5" />}
                         </div>
-                        <span className={`text-xs mt-1 ${isActive ? 'text-blue-600 font-medium' : canAccess ? 'text-gray-500' : 'text-gray-300'}`}>
+                        <span className={`text-xs mt-1 ${isActive ? 'text-blue-600 dark:text-blue-300 font-medium' : canAccess ? 'text-muted-foreground' : 'text-gray-300'}`}>
                           {step.label}
                         </span>
                       </div>
                       {index < steps.length - 1 && (
-                        <div className={`flex-1 h-1 mx-2 ${isCompleted ? 'bg-green-600' : canAccess ? 'bg-gray-200' : 'bg-gray-100'}`} />
+                        <div className={`flex-1 h-1 mx-2 ${isCompleted ? 'bg-green-600' : canAccess ? 'bg-muted' : 'bg-muted'}`} />
                       )}
                     </div>
                   );
@@ -318,19 +318,19 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
               {/* Workspace Quota Display */}
               {userQuota && (
                 <PanelErrorBoundary panelName="Quota Display">
-                  <div className="bg-blue-50 rounded-lg p-4">
+                  <div className="bg-blue-50 dark:bg-blue-500/10 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-blue-900">Workspace Quota</span>
-                      <span className="text-sm text-blue-700">{userQuota.used} / {userQuota.max} used</span>
+                      <span className="text-sm font-medium text-blue-900 dark:text-blue-300">Workspace Quota</span>
+                      <span className="text-sm text-blue-700 dark:text-blue-300">{userQuota.used} / {userQuota.max} used</span>
                     </div>
-                    <div className="w-full bg-blue-200 rounded-full h-2">
+                    <div className="w-full bg-blue-200 dark:bg-blue-500/20 rounded-full h-2">
                       <div 
                         className={`h-2 rounded-full transition-all ${userQuota.used >= userQuota.max ? 'bg-red-500' : 'bg-blue-600'}`}
                         style={{ width: `${Math.min((userQuota.used / userQuota.max) * 100, 100)}%` }}
                       />
                     </div>
                     {userQuota.used >= userQuota.max && (
-                      <p className="text-xs text-red-600 mt-2">Workspace limit reached. Upgrade your plan to create more workspaces.</p>
+                      <p className="text-xs text-red-600 dark:text-red-300 mt-2">Workspace limit reached. Upgrade your plan to create more workspaces.</p>
                     )}
                   </div>
                 </PanelErrorBoundary>
@@ -357,13 +357,13 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-md border border-border px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         placeholder="e.g., Project Alpha"
                         required
                         disabled={!isOnline || loading}
                         maxLength={100}
                       />
-                      {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
+                      {errors.name && <p className="text-sm text-red-600 dark:text-red-300">{errors.name}</p>}
                     </div>
                   </div>
 
@@ -371,9 +371,9 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                   <PanelErrorBoundary panelName="Slug Validation">
                     <div className="space-y-2">
                       <label className="block text-sm font-medium">Workspace URL</label>
-                      <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
-                        <span className="text-sm text-gray-500">{appUrl}/workspace/</span>
-                        <span className={`font-medium ${validation.isAvailable ? 'text-green-600' : 'text-red-600'}`}>
+                      <div className="flex items-center gap-2 p-3 bg-muted rounded-lg border">
+                        <span className="text-sm text-muted-foreground">{appUrl}/workspace/</span>
+                        <span className={`font-medium ${validation.isAvailable ? 'text-green-600 dark:text-green-300' : 'text-red-600 dark:text-red-300'}`}>
                           {slug || 'your-slug'}
                         </span>
                         {isValidating && (
@@ -382,15 +382,15 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                       </div>
                       {!validation.isAvailable && validation.alternatives && (
                         <div className="space-y-1">
-                          <p className="text-sm text-red-600">{validation.message}</p>
-                          <p className="text-xs text-gray-500">Suggested alternatives:</p>
+                          <p className="text-sm text-red-600 dark:text-red-300">{validation.message}</p>
+                          <p className="text-xs text-muted-foreground">Suggested alternatives:</p>
                           <div className="flex flex-wrap gap-2">
                             {validation.alternatives.map((alt) => (
                               <button
                                 key={alt}
                                 type="button"
                                 onClick={() => selectAlternative(alt)}
-                                className="text-xs text-blue-600 underline hover:text-blue-800"
+                                className="text-xs text-blue-600 dark:text-blue-300 underline hover:text-blue-800 dark:text-blue-300"
                               >
                                 {alt}
                               </button>
@@ -408,7 +408,7 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                       <textarea
                         value={formData.description}
                         onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                        className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="flex-1 rounded-md border border-border px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         placeholder="Describe your workspace's purpose and goals..."
                         rows={4}
                         disabled={!isOnline || loading}
@@ -460,7 +460,7 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                           className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                             formData.teamSize === size.value
                               ? 'bg-blue-600 text-white'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              : 'bg-muted text-foreground hover:bg-muted'
                           }`}
                           disabled={loading}
                         >
@@ -500,7 +500,7 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                     <select
                       value={formData.defaultRole}
                       onChange={(e) => setFormData(prev => ({ ...prev, defaultRole: e.target.value as any }))}
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full rounded-md border border-border px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       disabled={loading}
                     >
                       <option value="VIEWER">Viewer - Can only view</option>
@@ -527,7 +527,7 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                       ].map((integration) => (
                         <div key={integration.key} className="flex items-center justify-between p-4 border rounded-lg">
                           <div className="flex items-center gap-3">
-                            <integration.icon className="w-5 h-5 text-gray-600" />
+                            <integration.icon className="w-5 h-5 text-muted-foreground" />
                             <span className="font-medium">{integration.label}</span>
                           </div>
                           <label className="relative inline-flex items-center cursor-pointer">
@@ -541,7 +541,7 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                               className="sr-only peer"
                               disabled={loading}
                             />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 disabled:opacity-50" />
+                            <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:ring-blue-500/40 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 disabled:opacity-50" />
                           </label>
                         </div>
                       ))}
@@ -558,10 +558,10 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                       ].map((integration) => (
                         <div key={integration.key} className="flex items-center justify-between p-4 border rounded-lg">
                           <div className="flex items-center gap-3">
-                            <integration.icon className="w-5 h-5 text-gray-600" />
+                            <integration.icon className="w-5 h-5 text-muted-foreground" />
                             <div>
                               <span className="font-medium">{integration.label}</span>
-                              <p className="text-xs text-gray-500">Auto-create repository</p>
+                              <p className="text-xs text-muted-foreground">Auto-create repository</p>
                             </div>
                           </div>
                           <label className="relative inline-flex items-center cursor-pointer">
@@ -578,7 +578,7 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                               className="sr-only peer"
                               disabled={loading}
                             />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 disabled:opacity-50" />
+                            <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:ring-blue-500/40 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 disabled:opacity-50" />
                           </label>
                         </div>
                       ))}
@@ -591,41 +591,41 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
               {currentStep === "review" && (
                 <div className="space-y-6">
                   <PanelErrorBoundary panelName="Review Summary">
-                    <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                    <div className="bg-muted rounded-lg p-6 space-y-4">
                       <h3 className="font-semibold text-lg">Workspace Summary</h3>
                       
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <span className="text-sm text-gray-500">Name</span>
+                          <span className="text-sm text-muted-foreground">Name</span>
                           <p className="font-medium">{formData.name}</p>
                         </div>
                         <div>
-                          <span className="text-sm text-gray-500">Template</span>
+                          <span className="text-sm text-muted-foreground">Template</span>
                           <p className="font-medium capitalize">{formData.template.replace('-', ' ')}</p>
                         </div>
                         <div>
-                          <span className="text-sm text-gray-500">Visibility</span>
+                          <span className="text-sm text-muted-foreground">Visibility</span>
                           <p className="font-medium capitalize">{formData.visibility}</p>
                         </div>
                         <div>
-                          <span className="text-sm text-gray-500">Team Size</span>
+                          <span className="text-sm text-muted-foreground">Team Size</span>
                           <p className="font-medium">{formData.teamSize}</p>
                         </div>
                       </div>
 
                       {formData.description && (
                         <div>
-                          <span className="text-sm text-gray-500">Description</span>
+                          <span className="text-sm text-muted-foreground">Description</span>
                           <p className="font-medium">{formData.description}</p>
                         </div>
                       )}
 
                       {formData.industryTags.length > 0 && (
                         <div>
-                          <span className="text-sm text-gray-500">Industry</span>
+                          <span className="text-sm text-muted-foreground">Industry</span>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {formData.industryTags.map(tag => (
-                              <span key={tag} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{tag}</span>
+                              <span key={tag} className="text-xs bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 px-2 py-1 rounded">{tag}</span>
                             ))}
                           </div>
                         </div>
@@ -633,10 +633,10 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
 
                       {formData.allowedDomains.length > 0 && (
                         <div>
-                          <span className="text-sm text-gray-500">Allowed Domains</span>
+                          <span className="text-sm text-muted-foreground">Allowed Domains</span>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {formData.allowedDomains.map(d => (
-                              <span key={d} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">@{d}</span>
+                              <span key={d} className="text-xs bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 px-2 py-1 rounded">@{d}</span>
                             ))}
                           </div>
                         </div>
@@ -644,11 +644,11 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
 
                       {Object.values(formData.integrations).some(v => v) && (
                         <div>
-                          <span className="text-sm text-gray-500">Integrations</span>
+                          <span className="text-sm text-muted-foreground">Integrations</span>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {Object.entries(formData.integrations).map(([key, enabled]) => 
                               enabled ? (
-                                <span key={key} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded capitalize">
+                                <span key={key} className="text-xs bg-green-100 dark:bg-green-500/15 text-green-800 dark:text-green-300 px-2 py-1 rounded capitalize">
                                   {key.replace(/([A-Z])/g, ' $1').trim()}
                                 </span>
                               ) : null
@@ -663,7 +663,7 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <h3 className="font-medium">Show Onboarding Tour</h3>
-                      <p className="text-sm text-gray-500">Display a guided tour when you first visit the workspace</p>
+                      <p className="text-sm text-muted-foreground">Display a guided tour when you first visit the workspace</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -675,7 +675,7 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                         }))}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
+                      <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:ring-blue-500/40 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
                     </label>
                   </div>
                 </div>
@@ -683,13 +683,13 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
 
               {/* Network Offline Alert */}
               {!isOnline && (
-                <div className="rounded-md bg-yellow-50 p-3 text-sm text-yellow-800">
+                <div className="rounded-md bg-yellow-50 dark:bg-yellow-500/10 p-3 text-sm text-yellow-800 dark:text-yellow-300">
                   ⚠️ Internet disconnected. Please check your connection.
                 </div>
               )}
 
               {errors.general && (
-                <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+                <div className="rounded-md bg-red-50 dark:bg-red-500/10 p-3 text-sm text-red-800 dark:text-red-300">
                   {errors.general}
                 </div>
               )}
@@ -701,7 +701,7 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                     <button
                       type="button"
                       onClick={prevStep}
-                      className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
+                      className="rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50"
                       disabled={loading}
                     >
                       Back
@@ -710,7 +710,7 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
                   <button
                     type="button"
                     onClick={onClose}
-                    className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
+                    className="rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50"
                     disabled={loading}
                   >
                     Cancel
@@ -743,7 +743,7 @@ export default function EnterpriseWorkspaceModal({ isOpen, onClose, organization
           </div>
 
           {/* Right Column - Hero Banner */}
-          <div className="hidden lg:block bg-gray-50 p-6 border-l">
+          <div className="hidden lg:block bg-muted p-6 border-l">
             <WorkspaceHeroBanner />
           </div>
         </div>

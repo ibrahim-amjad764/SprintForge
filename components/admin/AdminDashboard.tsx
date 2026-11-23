@@ -141,8 +141,8 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function LoadingSpinner({ label }: { label: string }) {
   return (
-    <div className="flex items-center justify-center rounded-xl border bg-white p-12">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+    <div className="flex items-center justify-center rounded-2xl border border-border bg-card p-12 shadow-card">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       <span className="sr-only">{label}</span>
     </div>
   );
@@ -160,20 +160,20 @@ function StateMessage({
   onRetry?: () => void;
 }) {
   const styles = {
-    unauthorized: 'border-amber-200 bg-amber-50 text-amber-900',
-    forbidden: 'border-red-200 bg-red-50 text-red-900',
-    error: 'border-red-200 bg-red-50 text-red-900',
-    empty: 'border-gray-200 bg-white text-gray-900',
+    unauthorized: 'border-amber-200 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-500/10 text-amber-900 dark:text-amber-300',
+    forbidden: 'border-red-200 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 text-red-900 dark:text-red-300',
+    error: 'border-red-200 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 text-red-900 dark:text-red-300',
+    empty: 'border-border bg-card text-foreground',
   }[kind];
 
   return (
-    <div className={`rounded-xl border p-8 text-center ${styles}`}>
+    <div className={`rounded-2xl border p-8 text-center shadow-card ${styles}`}>
       <h2 className="text-lg font-semibold">{title}</h2>
       {message && <p className="mt-2 text-sm opacity-80">{message}</p>}
       {onRetry && (
         <button
           onClick={onRetry}
-          className="mt-4 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+          className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
         >
           Retry
         </button>
@@ -191,22 +191,22 @@ function PaginationBar({
 }) {
   if (pagination.totalPages <= 1) return null;
   return (
-    <div className="flex items-center justify-between border-t px-6 py-3 text-sm text-gray-600">
-      <span>
-        Page {pagination.page} of {pagination.totalPages} · {pagination.total} total
+    <div className="flex items-center justify-between border-t border-border px-6 py-3 text-sm text-muted-foreground">
+      <span className="font-mono text-xs tabular-nums">
+        Page {pagination.page} of {pagination.totalPages} · {pagination.total.toLocaleString()} total
       </span>
       <div className="flex gap-2">
         <button
           disabled={pagination.page <= 1}
           onClick={() => onPage(pagination.page - 1)}
-          className="rounded-md border px-3 py-1 disabled:opacity-40 hover:bg-gray-50"
+          className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-40"
         >
           Previous
         </button>
         <button
           disabled={pagination.page >= pagination.totalPages}
           onClick={() => onPage(pagination.page + 1)}
-          className="rounded-md border px-3 py-1 disabled:opacity-40 hover:bg-gray-50"
+          className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-40"
         >
           Next
         </button>
@@ -230,7 +230,7 @@ function SearchInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full max-w-xs rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+      className="w-full max-w-xs rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
     />
   );
 }
@@ -259,12 +259,18 @@ function OverviewTab() {
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-      {cards.map((c) => (
-        <div key={c.label} className="rounded-xl border bg-white p-5 shadow-sm">
-          <p className="text-sm text-gray-500">{c.label}</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900">{c.value.toLocaleString()}</p>
-          {c.hint && <p className="mt-1 text-xs text-gray-400">{c.hint}</p>}
+    <div className="stagger grid grid-cols-2 gap-4 sm:grid-cols-3">
+      {cards.map((c, i) => (
+        <div
+          key={c.label}
+          style={{ '--i': i } as React.CSSProperties}
+          className="animate-enter rounded-2xl border border-border bg-card p-5 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-popover"
+        >
+          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">{c.label}</p>
+          <p className="mt-2 font-mono text-2xl font-semibold tracking-tight text-foreground tabular-nums">
+            {c.value.toLocaleString()}
+          </p>
+          {c.hint && <p className="mt-1 font-mono text-[11px] text-muted-foreground tabular-nums">{c.hint}</p>}
         </div>
       ))}
     </div>
@@ -333,7 +339,8 @@ function UsersTab() {
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+          aria-label="Filter by role"
+          className="rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
         >
           <option value="">All roles</option>
           <option value="USER">USER</option>
@@ -344,53 +351,55 @@ function UsersTab() {
       {users.length === 0 ? (
         <StateMessage kind="empty" title="No users found" message="Try adjusting your search or filters." />
       ) : (
-        <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/60">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">User</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Role</th>
-                  <th className="hidden px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 sm:table-cell">Joined</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Manage</th>
+                  <th className="px-6 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">User</th>
+                  <th className="px-6 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Role</th>
+                  <th className="hidden px-6 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground sm:table-cell">Joined</th>
+                  <th className="px-6 py-3 text-right font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Manage</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+              <tbody className="divide-y divide-border bg-card">
                 {users.map((user) => (
-                  <tr key={user._id} className="hover:bg-gray-50">
+                  <tr key={user._id} className="transition-colors hover:bg-muted/50">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         {user.avatar ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={user.avatar} alt="" className="h-9 w-9 rounded-full object-cover" />
                         ) : (
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-sm font-semibold text-primary">
                             {(user.name || user.email || '?').charAt(0).toUpperCase()}
                           </div>
                         )}
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-gray-900">{user.name}</p>
-                          <p className="truncate text-sm text-gray-500">{user.email}</p>
+                          <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
+                          <p className="truncate text-sm text-muted-foreground">{user.email}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
+                        className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                          user.role === 'ADMIN'
+                            ? 'border-violet-500/25 bg-violet-500/10 text-violet-700 dark:text-violet-300'
+                            : 'border-border bg-muted text-muted-foreground'
                         }`}
                       >
                         {user.role}
                       </span>
                     </td>
-                    <td className="hidden px-6 py-4 text-sm text-gray-500 sm:table-cell">
+                    <td className="hidden px-6 py-4 text-sm text-muted-foreground sm:table-cell">
                       {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <select
                         value={user.role}
                         onChange={(e) => changeRole(user, e.target.value as 'USER' | 'ADMIN')}
-                        className="rounded-md border border-gray-300 px-2 py-1 text-xs"
+                        className="rounded-lg border border-input bg-muted/50 px-2 py-1.5 text-xs transition-colors focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
                         aria-label={`Change role for ${user.email}`}
                       >
                         <option value="USER">USER</option>
@@ -445,34 +454,34 @@ function WorkspacesTab() {
       {workspaces.length === 0 ? (
         <StateMessage kind="empty" title="No workspaces found" message="Try a different search." />
       ) : (
-        <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/60">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Workspace</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Owner</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Members</th>
-                  <th className="hidden px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 sm:table-cell">Created</th>
+                  <th className="px-6 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Workspace</th>
+                  <th className="px-6 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Owner</th>
+                  <th className="px-6 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Members</th>
+                  <th className="hidden px-6 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground sm:table-cell">Created</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+              <tbody className="divide-y divide-border bg-card">
                 {workspaces.map((w) => {
                   const owner = typeof w.owner === 'object' && w.owner !== null ? w.owner : null;
                   return (
-                    <tr key={w._id} className="hover:bg-gray-50">
+                    <tr key={w._id} className="transition-colors hover:bg-muted/50">
                       <td className="px-6 py-4">
-                        <p className="text-sm font-medium text-gray-900">{w.name}</p>
-                        <p className="text-sm text-gray-500">/{w.slug}</p>
+                        <p className="text-sm font-medium text-foreground">{w.name}</p>
+                        <p className="text-sm text-muted-foreground">/{w.slug}</p>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
+                      <td className="px-6 py-4 text-sm text-foreground">
                         {owner ? owner.name || owner.email : '—'}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
+                      <td className="px-6 py-4 text-sm text-foreground">
                         {w.memberCount}
                         {w.maxMembers ? ` / ${w.maxMembers}` : ''}
                       </td>
-                      <td className="hidden px-6 py-4 text-sm text-gray-500 sm:table-cell">
+                      <td className="hidden px-6 py-4 text-sm text-muted-foreground sm:table-cell">
                         {w.createdAt ? new Date(w.createdAt).toLocaleDateString() : '—'}
                       </td>
                     </tr>
@@ -531,43 +540,43 @@ function AuditTab() {
           value={actionFilter}
           onChange={(e) => setActionFilter(e.target.value)}
           placeholder="Filter by action (e.g. ADMIN_ROLE_CHANGE)"
-          className="w-full max-w-xs rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          className="w-full max-w-xs rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
         />
       </div>
 
       {logs.length === 0 ? (
         <StateMessage kind="empty" title="No audit entries" message="Administrative actions will appear here." />
       ) : (
-        <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/60">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">When</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Actor</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Action</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Target</th>
-                  <th className="hidden px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 lg:table-cell">Description</th>
+                  <th className="px-6 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">When</th>
+                  <th className="px-6 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Actor</th>
+                  <th className="px-6 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Action</th>
+                  <th className="px-6 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Target</th>
+                  <th className="hidden px-6 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground lg:table-cell">Description</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+              <tbody className="divide-y divide-border bg-card">
                 {logs.map((log) => {
                   const actor = typeof log.user === 'object' && log.user !== null ? log.user : null;
                   return (
-                    <tr key={log._id} className="hover:bg-gray-50">
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    <tr key={log._id} className="transition-colors hover:bg-muted/50">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">
                         {log.createdAt ? new Date(log.createdAt).toLocaleString() : '—'}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
+                      <td className="px-6 py-4 text-sm text-foreground">
                         {actor ? actor.name || actor.email : '—'}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                        <span className="inline-flex rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5 font-mono text-[11px] font-medium text-primary">
                           {log.action}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-mono text-xs text-gray-600">{log.target}</td>
-                      <td className="hidden max-w-xs truncate px-6 py-4 text-sm text-gray-500 lg:table-cell">
+                      <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{log.target}</td>
+                      <td className="hidden max-w-xs truncate px-6 py-4 text-sm text-muted-foreground lg:table-cell">
                         {log.description}
                       </td>
                     </tr>
@@ -590,13 +599,14 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-1 rounded-lg border bg-white p-1 shadow-sm">
+      <div className="flex gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1 shadow-card">
         {TABS.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-              tab === t.id ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'
+            aria-pressed={tab === t.id}
+            className={`min-w-0 flex-1 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-150 sm:px-4 sm:text-sm ${
+              tab === t.id ? 'bg-primary text-primary-foreground shadow-glow' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
             {t.label}

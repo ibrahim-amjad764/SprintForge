@@ -6,7 +6,8 @@ import { getAdminStats } from '@/services/admin.service';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireAdmin } from '@/lib/admin';
 import { rateLimit } from '@/lib/rate-limit';
-import logger from '@/lib/logger';
+
+import { apiError } from '@/utils/error-handler';
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,7 +25,6 @@ export async function GET(request: NextRequest) {
 
     return successResponse(stats);
   } catch (error) {
-    logger.error({ err: error }, 'Get admin stats error:');
-    return errorResponse('Failed to fetch stats', 500);
+    return apiError(error, 'Failed to fetch stats');
   }
 }

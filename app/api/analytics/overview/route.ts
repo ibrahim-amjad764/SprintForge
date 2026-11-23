@@ -4,8 +4,9 @@ import { connectDB } from '@/lib/db';
 
 import { getAnalytics } from '@/services/analytics.service';
 
-import { successResponse, errorResponse } from '@/utils/response';
+import { successResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
+import { apiError } from '@/utils/error-handler';
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,10 +20,6 @@ export async function GET(request: NextRequest) {
 
     return successResponse(data);
   } catch (error) {
-    return errorResponse(
-      'Analytics failed',
-
-      500
-    );
+    return apiError(error, 'Analytics failed');
   }
 }

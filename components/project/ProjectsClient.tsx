@@ -149,14 +149,14 @@ export default function ProjectsClient({
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'completed':
-        return 'bg-green-100 text-green-800';
+        return 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300';
       case 'in-progress':
       case 'active':
-        return 'bg-blue-100 text-blue-800';
+        return 'border-primary/25 bg-primary/10 text-primary';
       case 'archived':
-        return 'bg-gray-100 text-gray-800';
+        return 'border-border bg-muted text-muted-foreground';
       default:
-        return 'bg-yellow-100 text-yellow-800';
+        return 'border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300';
     }
   };
 
@@ -328,24 +328,30 @@ export default function ProjectsClient({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Projects</h1>
+      <div>
+        <p className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-primary">
+          Workspace
+        </p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Projects</h1>
+      </div>
 
       {/* 2-Column Grid Layout */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left Column - Form Panel (1/3 width) */}
         <div className="lg:col-span-1">
-          <div className="sticky top-6 rounded-xl border bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold">Create New Project</h2>
+          <div className="sticky top-6 rounded-2xl border border-border bg-card p-5 shadow-card">
+            <h2 className="mb-1 text-base font-semibold tracking-tight">Create New Project</h2>
+            <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Quick add</p>
             <form onSubmit={submit} className="space-y-4">
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-sm text-red-600 dark:text-red-300">{error}</p>}
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-foreground">
                   Project Name
                 </label>
                 <input
                   ref={nameInputRef}
-                  className="w-full rounded-md border border-gray-300 p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-lg border border-input bg-muted/50 p-3 text-sm transition-colors placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="Enter project name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -355,11 +361,11 @@ export default function ProjectsClient({
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-foreground">
                   Description
                 </label>
                 <textarea
-                  className="w-full rounded-md border border-gray-300 p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-lg border border-input bg-muted/50 p-3 text-sm transition-colors placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="Project description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -371,7 +377,7 @@ export default function ProjectsClient({
               <button
                 type="submit"
                 disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 p-3 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="btn-sheen flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 p-3 text-sm font-semibold text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading && (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
@@ -385,8 +391,8 @@ export default function ProjectsClient({
         {/* Right Column - Projects List (2/3 width) */}
         <div className="space-y-4 lg:col-span-2">
           {/* Tab-Based Filtering */}
-          <div className="rounded-xl border bg-white p-2 shadow-sm">
-            <div className="flex flex-wrap gap-2">
+          <div className="rounded-2xl border border-border bg-card p-1.5 shadow-card">
+            <div className="flex flex-wrap gap-1.5">
               {(['all', 'active', 'completed', 'archived'] as FilterType[]).map(
                 (filterType) => {
                   const count =
@@ -403,17 +409,17 @@ export default function ProjectsClient({
                       onClick={() => setFilter(filterType)}
                       className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                         filter === filterType
-                          ? 'bg-blue-600 text-white'
-                          : 'text-gray-600 hover:bg-gray-100'
+                          ? 'bg-primary text-primary-foreground shadow-glow'
+                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                       }`}
                     >
                       {filterType.charAt(0).toUpperCase() + filterType.slice(1)}{' '}
                       Projects
                       <span
-                        className={`rounded-full px-2 py-0.5 text-xs ${
+                        className={`rounded-full px-2 py-0.5 font-mono text-[11px] tabular-nums ${
                           filter === filterType
-                            ? 'bg-blue-700 text-white'
-                            : 'bg-gray-200 text-gray-700'
+                            ? 'bg-primary-foreground/20 text-primary-foreground'
+                            : 'bg-muted text-muted-foreground'
                         }`}
                       >
                         {count}
@@ -426,30 +432,30 @@ export default function ProjectsClient({
           </div>
 
           {/* Live Search Bar */}
-          <div className="rounded-xl border bg-white p-4 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
             <div className="relative">
-              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
               <input
                 type="text"
                 placeholder="Search projects by name or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 py-2 pr-4 pl-10 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                className="w-full rounded-lg border border-input bg-muted/50 py-2 pr-4 pl-10 text-sm transition-colors placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-background focus:ring-2 focus:ring-primary/25 focus:outline-none"
               />
             </div>
           </div>
 
           {/* Bulk Action Bar */}
           {selectedProjects.size > 0 && (
-            <div className="flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 p-4">
-              <span className="text-sm text-blue-800">
+            <div className="flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/5 p-4">
+              <span className="text-sm text-blue-800 dark:text-blue-300">
                 {selectedProjects.size} project
                 {selectedProjects.size !== 1 ? 's' : ''} selected
               </span>
               <div className="flex gap-2">
                 <button
                   onClick={bulkArchive}
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm transition-colors hover:bg-gray-50"
+                  className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm transition-colors hover:bg-muted"
                 >
                   {filter === 'archived' ? 'Restore' : 'Archive'}
                 </button>
@@ -461,7 +467,7 @@ export default function ProjectsClient({
                 </button>
                 <button
                   onClick={() => setSelectedProjects(new Set())}
-                  className="rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-200"
+                  className="rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted"
                 >
                   Cancel
                 </button>
@@ -472,12 +478,12 @@ export default function ProjectsClient({
           {/* Projects List or Empty State */}
           {filteredProjects.length === 0 ? (
             debouncedSearchQuery ? (
-              <div className="rounded-xl border bg-white p-12 text-center shadow-sm">
-                <Search className="mx-auto mb-4 h-12 w-12 text-gray-300" />
-                <h3 className="mb-2 text-lg font-semibold text-gray-900">
+              <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-card">
+                <Search className="mx-auto mb-4 h-12 w-12 text-muted-foreground/40" aria-hidden="true" />
+                <h3 className="mb-2 text-lg font-semibold text-foreground">
                   No matches found
                 </h3>
-                <p className="mb-4 text-gray-600">
+                <p className="mb-4 text-muted-foreground">
                   Try adjusting your search terms or filters
                 </p>
                 <button
@@ -485,7 +491,7 @@ export default function ProjectsClient({
                     setSearchQuery('');
                     setFilter('all');
                   }}
-                  className="text-sm text-blue-600 hover:text-blue-800"
+                  className="text-sm font-medium text-primary transition-colors hover:text-primary/80 hover:underline"
                 >
                   Clear all filters
                 </button>
@@ -504,17 +510,17 @@ export default function ProjectsClient({
                     filteredProjects.length > 0
                   }
                   onChange={selectAllProjects}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-border text-blue-600 dark:text-blue-300 focus:ring-blue-500"
                 />
-                <span className="text-sm text-gray-600">Select all</span>
+                <span className="text-sm text-muted-foreground">Select all</span>
               </div>
 
               {filteredProjects.map((project) => (
                 <div
                   key={project._id}
-                  className={`relative rounded-xl border bg-white p-5 shadow-sm transition-shadow hover:shadow-md ${
+                  className={`relative rounded-2xl border bg-card p-5 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-popover ${
                     selectedProjects.has(project._id)
-                      ? 'ring-2 ring-blue-500 ring-offset-2'
+                      ? 'ring-2 ring-primary'
                       : ''
                   }`}
                 >
@@ -531,37 +537,37 @@ export default function ProjectsClient({
                         checked={selectedProjects.has(project._id)}
                         onChange={() => toggleProjectSelection(project._id)}
                         onClick={(e) => e.stopPropagation()}
-                        className="pointer-events-auto mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="pointer-events-auto mt-1 h-4 w-4 rounded border-border text-blue-600 dark:text-blue-300 focus:ring-blue-500"
                       />
 
-                      <div className="pointer-events-none flex-1">
+                      <div className="pointer-events-none min-w-0 flex-1">
                         <div className="mb-2 flex items-center gap-3">
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <h3 className="text-lg font-semibold text-foreground">
                             {project.name}
                           </h3>
                           <span
-                            className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${getStatusColor(project.status)}`}
+                            className={`rounded-full border px-2.5 py-1 text-xs font-medium capitalize ${getStatusColor(project.status)}`}
                           >
                             {project.status}
                           </span>
                         </div>
 
                         {project.description && (
-                          <p className="mb-3 text-sm text-gray-600">
+                          <p className="mb-3 text-sm text-muted-foreground">
                             {project.description}
                           </p>
                         )}
 
-                        <div className="mb-3 flex items-center gap-4 text-xs text-gray-500">
+                        <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                           <div className="flex items-center gap-2">
                             <span>Progress:</span>
-                            <div className="h-2 w-24 overflow-hidden rounded-full bg-gray-200">
+                            <div className="h-1.5 w-24 overflow-hidden rounded-full bg-muted">
                               <div
-                                className="h-full bg-blue-600 transition-all duration-300"
+                                className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-300"
                                 style={{ width: `${project.progress ?? 0}%` }}
                               />
                             </div>
-                            <span>{project.progress ?? 0}%</span>
+                            <span className="font-mono tabular-nums">{project.progress ?? 0}%</span>
                           </div>
                           {project.createdAt && (
                             <span>
@@ -576,43 +582,43 @@ export default function ProjectsClient({
                     </div>
 
                     {/* Quick Action Icons */}
-                    <div className="ml-4 flex items-center gap-2">
+                    <div className="ml-4 flex shrink-0 items-center gap-1">
                       <button
                         onClick={(e) => {
                           e.preventDefault();
                           handleArchive(project._id);
                         }}
-                        className="pointer-events-auto rounded-lg p-2 transition-colors hover:bg-gray-100"
+                        className="pointer-events-auto rounded-lg p-2 transition-colors hover:bg-muted"
                         title={
                           project.status === 'archived'
                             ? 'Unarchive'
                             : 'Archive'
                         }
                       >
-                        <Archive className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        <Archive className="h-4 w-4 text-muted-foreground hover:text-muted-foreground" />
                       </button>
                       <button
                         onClick={(e) => {
                           e.preventDefault();
                           handleDelete(project._id);
                         }}
-                        className="pointer-events-auto rounded-lg p-2 transition-colors hover:bg-red-50"
+                        className="pointer-events-auto rounded-lg p-2 transition-colors hover:bg-red-50 dark:bg-red-500/10"
                         title="Delete"
                       >
-                        <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-600" />
+                        <Trash2 className="h-4 w-4 text-muted-foreground hover:text-red-600 dark:text-red-300" />
                       </button>
                       <div className="relative">
                         <button
                           onClick={(e) => toggleMenu(project._id, e)}
-                          className="pointer-events-auto rounded-lg p-2 transition-colors hover:bg-gray-100"
+                          className="pointer-events-auto rounded-lg p-2 transition-colors hover:bg-muted"
                           title="More"
                         >
-                          <MoreVertical className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                          <MoreVertical className="h-4 w-4 text-muted-foreground hover:text-muted-foreground" />
                         </button>
 
                         {/* Dropdown Menu */}
                         {menuOpen === project._id && (
-                          <div className="absolute top-full right-0 z-50 mt-1 w-48 rounded-lg border bg-white shadow-lg">
+                          <div className="animate-scale-in absolute top-full right-0 z-50 mt-1 w-48 rounded-xl border border-border bg-popover p-1.5 shadow-popover">
                             <div className="py-1">
                               {project.status === 'archived' ? (
                                 <button
@@ -621,7 +627,7 @@ export default function ProjectsClient({
                                     handleArchive(project._id);
                                     closeMenu();
                                   }}
-                                  className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-green-600 hover:bg-green-50"
+                                  className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-green-600 dark:text-green-300 hover:bg-green-50 dark:bg-green-500/10"
                                 >
                                   <Archive className="h-4 w-4" />
                                   Restore to Active
@@ -633,7 +639,7 @@ export default function ProjectsClient({
                                     handleArchive(project._id);
                                     closeMenu();
                                   }}
-                                  className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                                  className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-foreground hover:bg-muted"
                                 >
                                   <Archive className="h-4 w-4" />
                                   Archive
@@ -645,7 +651,7 @@ export default function ProjectsClient({
                                   handleDelete(project._id);
                                   closeMenu();
                                 }}
-                                className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                                className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 dark:text-red-300 hover:bg-red-50 dark:bg-red-500/10"
                               >
                                 <Trash2 className="h-4 w-4" />
                                 Delete
@@ -666,20 +672,20 @@ export default function ProjectsClient({
       {/* Delete Confirmation Modal */}
       {deleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
+          <div className="animate-scale-in mx-4 w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-popover">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-foreground">
                 Delete Project
               </h3>
               <button
                 onClick={() => setDeleteModalOpen(false)}
-                className="rounded-lg p-2 transition-colors hover:bg-gray-100"
+                className="rounded-lg p-2 transition-colors hover:bg-muted"
               >
-                <X className="h-5 w-5 text-gray-400" />
+                <X className="h-5 w-5 text-muted-foreground" />
               </button>
             </div>
 
-            <p className="mb-6 text-gray-600">
+            <p className="mb-6 text-muted-foreground">
               Are you sure you want to delete this project? This action cannot
               be undone and all associated tasks will be removed.
             </p>
@@ -690,7 +696,7 @@ export default function ProjectsClient({
                   setDeleteModalOpen(false);
                   setProjectToDelete(null);
                 }}
-                className="rounded-lg px-4 py-2 text-gray-700 transition-colors hover:bg-gray-100"
+                className="rounded-lg px-4 py-2 text-foreground transition-colors hover:bg-muted"
               >
                 Cancel
               </button>

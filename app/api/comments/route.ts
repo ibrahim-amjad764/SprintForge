@@ -6,6 +6,7 @@ import { createComment, getComments } from '@/services/comment.service';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
 import { getMembershipForTask, canCommentWorkspace } from '@/lib/authorization';
+import { apiError } from '@/utils/error-handler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
     });
     return successResponse(comment, 'Comment Added');
   } catch (error) {
-    return errorResponse('Server error', 500);
+    return apiError(error, 'Server error');
   }
 }
 
@@ -56,6 +57,6 @@ export async function GET(request: NextRequest) {
     const comments = await getComments(task);
     return successResponse(comments);
   } catch (error) {
-    return errorResponse('Server error', 500);
+    return apiError(error, 'Server error');
   }
 }

@@ -175,8 +175,14 @@ export default function TasksClient({ projectId }: TasksClientProps) {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-gray-500">Loading tasks...</div>
+      <div className="space-y-4" aria-busy="true" aria-label="Loading tasks">
+        <div className="flex gap-3">
+          <div className="skeleton-shimmer h-10 flex-1 rounded-lg bg-muted" />
+          <div className="skeleton-shimmer h-10 w-28 rounded-lg bg-muted" />
+        </div>
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="skeleton-shimmer h-20 rounded-xl bg-muted" />
+        ))}
       </div>
     );
   }

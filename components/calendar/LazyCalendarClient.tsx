@@ -15,8 +15,8 @@ type CalendarClientProps = ComponentProps<typeof CalendarClientType>;
 const CalendarClient = dynamic(() => import('./CalendarClient'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-[600px] w-full items-center justify-center rounded border bg-gray-50">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-blue-500" />
+    <div className="flex h-[600px] w-full items-center justify-center rounded border border-border bg-muted/30">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
     </div>
   ),
 });

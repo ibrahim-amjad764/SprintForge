@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { createToken, buildAuthCookie, isSameOriginMutation } from "../../../../lib/auth";
 import { errorResponse, successResponse } from "../../../../utils/response";
 import { rateLimit, getClientIP } from "@/lib/rate-limit";
+import { apiError } from '@/utils/error-handler';
 
 // Rate limits: 30 attempts / 15 min per IP (volumetric),
 // 10 attempts / 15 min per email (credential-stuffing protection).
@@ -70,6 +71,6 @@ export async function POST(request: Request) {
     response.headers.append("Set-Cookie", buildAuthCookie(token, SESSION_MAX_AGE));
     return response;
   } catch (error) {
-    return errorResponse("Server error", 500);
+    return apiError(error, 'Server error');
   }
 }

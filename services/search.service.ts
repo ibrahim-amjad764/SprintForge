@@ -10,18 +10,43 @@ import { connectDB } from '@/lib/db';
 Global Search Service
 
 Searches:
-Tasks
-Projects
-Users
+Tasks (title + description)
+Projects (name + description)
+Users (name, workspace members only)
 
 All results are scoped to the workspaces the user belongs to
 (member rows + owned workspaces) — prevents cross-workspace IDOR.
+
+Matching is substring/regex based so partial words still match;
+queries are escaped before use. Results are capped per type and
+sorted by most recently updated.
 */
+
+const RESULT_LIMIT = 10;
+const SNIPPET_LENGTH = 160;
+
+function escapeRegex(input: string): string {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function snippet(text: string | undefined, matchIndex = 0): string {
+  if (!text) return '';
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if (clean.length <= SNIPPET_LENGTH) return clean;
+  const start = Math.max(0, matchIndex - 40);
+  const slice = clean.slice(start, start + SNIPPET_LENGTH);
+  return `${start > 0 ? '…' : ''}${slice}${start + SNIPPET_LENGTH < clean.length ? '…' : ''}`;
+}
 
 export async function globalSearch(query: string, userId: string) {
   await connectDB();
 
-  const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+  const trimmed = query.trim();
+  if (trimmed.length < 2) {
+    return { tasks: [], projects: [], users: [] };
+  }
+
+  const regex = new RegExp(escapeRegex(trimmed.slice(0, 200)), 'i');
 
   // Workspaces the user can access: memberships + owned workspaces
   const [memberRows, owned] = await Promise.all([
@@ -46,17 +71,47 @@ export async function globalSearch(query: string, userId: string) {
   }).distinct('user');
 
   const [tasks, projects, users] = await Promise.all([
-    Task.find({ title: regex, project: { $in: projectIds } }).limit(10).lean(),
-    Project.find({ name: regex, workspace: { $in: workspaceIds } }).limit(10).lean(),
+    Task.find({
+      $or: [{ title: regex }, { description: regex }],
+      project: { $in: projectIds },
+    })
+      .select('title description status project updatedAt')
+      .sort({ updatedAt: -1 })
+      .limit(RESULT_LIMIT)
+      .lean(),
+    Project.find({
+      $or: [{ name: regex }, { description: regex }],
+      workspace: { $in: workspaceIds },
+    })
+      .select('name description workspace updatedAt')
+      .sort({ updatedAt: -1 })
+      .limit(RESULT_LIMIT)
+      .lean(),
     User.find({ name: regex, _id: { $in: memberUserIds } })
       .select('name email avatar')
-      .limit(10)
+      .limit(RESULT_LIMIT)
       .lean(),
   ]);
 
   return {
-    tasks,
-    projects,
-    users,
+    tasks: tasks.map((t) => ({
+      _id: t._id,
+      title: t.title,
+      status: t.status,
+      project: t.project,
+      snippet: snippet(t.description),
+    })),
+    projects: projects.map((p) => ({
+      _id: p._id,
+      name: p.name,
+      workspace: p.workspace,
+      snippet: snippet(p.description),
+    })),
+    users: users.map((u) => ({
+      _id: u._id,
+      name: u.name,
+      email: u.email,
+      avatar: u.avatar,
+    })),
   };
 }

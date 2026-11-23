@@ -7,7 +7,7 @@ import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
 import { getWorkspaceMembership } from '@/lib/authorization';
 import type { WorkspaceRole } from '@/models/WorkspaceMember';
-import logger from '@/lib/logger';
+import { apiError } from '@/utils/error-handler';
 
 const VALID_ROLES: WorkspaceRole[] = ['OWNER', 'ADMIN', 'EDITOR', 'COMMENTER', 'VIEWER'];
 const ADMIN_ROLES: WorkspaceRole[] = ['OWNER', 'ADMIN'];
@@ -67,8 +67,7 @@ export async function PATCH(
     const updated = await updateWorkspaceMember(memberId, role);
     return successResponse(updated, 'Member role updated');
   } catch (error) {
-    logger.error({ err: error }, 'Update member error:');
-    return errorResponse('Server error', 500);
+    return apiError(error, 'Server error');
   }
 }
 
@@ -100,7 +99,6 @@ export async function DELETE(
     await removeWorkspaceMember(memberId);
     return successResponse(null, 'Member removed');
   } catch (error) {
-    logger.error({ err: error }, 'Remove member error:');
-    return errorResponse('Server error', 500);
+    return apiError(error, 'Server error');
   }
 }

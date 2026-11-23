@@ -10,53 +10,60 @@ interface WorkspaceHeroBannerProps {
 export function WorkspaceHeroBanner({ className = '' }: WorkspaceHeroBannerProps) {
   const features = [
     {
-      icon: <Zap className="w-5 h-5 text-yellow-400" />,
+      icon: <Zap className="h-4 w-4 text-amber-400" />,
       text: 'Auto-sync templates instantly',
     },
     {
-      icon: <Lock className="w-5 h-5 text-blue-400" />,
+      icon: <Lock className="h-4 w-4 text-sky-400" />,
       text: 'Enterprise domain restriction active',
     },
     {
-      icon: <Bot className="w-5 h-5 text-purple-400" />,
+      icon: <Bot className="h-4 w-4 text-violet-400" />,
       text: 'AI workspace automation ready',
     },
     {
-      icon: <Users className="w-5 h-5 text-green-400" />,
+      icon: <Users className="h-4 w-4 text-emerald-400" />,
       text: 'Collaborative team workspaces',
     },
     {
-      icon: <Shield className="w-5 h-5 text-red-400" />,
+      icon: <Shield className="h-4 w-4 text-rose-400" />,
       text: 'SOC2 & GDPR compliant',
     },
   ];
 
   return (
-    <div className={`bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-6 text-white ${className}`}>
-      <h2 className="text-xl font-bold mb-2">What is SprintForge Workspace?</h2>
-      <p className="text-gray-300 text-sm mb-6">
-        A powerful collaborative platform designed for modern teams to manage projects, 
+    <div className={`mesh-gradient relative overflow-hidden rounded-2xl border border-border bg-card p-6 text-foreground shadow-card ${className}`}>
+      <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+      <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-accent/10 blur-3xl" aria-hidden="true" />
+
+      <h2 className="relative text-lg font-bold tracking-tight">What is SprintForge Workspace?</h2>
+      <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">
+        A powerful collaborative platform designed for modern teams to manage projects,
         track progress, and automate workflows with enterprise-grade security.
       </p>
 
-      <div className="space-y-3">
-        <h3 className="font-semibold text-sm text-gray-200">Key Features:</h3>
+      <div className="relative mt-5 space-y-3">
+        <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          Key Features
+        </h3>
         <ul className="space-y-2">
-          {features.map((feature, index) => (
-            <li key={index} className="flex items-center gap-3 text-sm">
-              <div className="flex-shrink-0">{feature.icon}</div>
-              <span className="text-gray-300">{feature.text}</span>
-              <CheckCircle className="w-4 h-4 text-green-400 ml-auto" />
+          {features.map((feature) => (
+            <li key={feature.text} className="flex items-center gap-3 text-sm">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/60">
+                {feature.icon}
+              </span>
+              <span className="text-foreground/90">{feature.text}</span>
+              <CheckCircle className="ml-auto h-4 w-4 shrink-0 text-emerald-500" aria-hidden="true" />
             </li>
           ))}
         </ul>
       </div>
 
-      <div className="mt-6 pt-4 border-t border-gray-700">
-        <div className="flex items-center justify-between text-xs text-gray-400">
+      <div className="relative mt-6 border-t border-border pt-4">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>Trusted by enterprise teams worldwide</span>
-          <div className="flex gap-1">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+          <div className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" aria-hidden="true" />
             <span>All systems operational</span>
           </div>
         </div>

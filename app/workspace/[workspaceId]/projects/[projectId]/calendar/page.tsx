@@ -25,7 +25,12 @@ export default async function CalendarPage({
 
   return (
     <div>
-      <h1 className="mb-8 text-3xl font-bold">Project Calendar</h1>
+      <div className="mb-6">
+        <p className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-primary">
+          Project
+        </p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Calendar</h1>
+      </div>
       <LazyCalendarClient initialTasks={JSON.parse(JSON.stringify(tasks))} />
     </div>
   );

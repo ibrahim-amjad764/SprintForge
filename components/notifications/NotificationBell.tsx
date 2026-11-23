@@ -2,9 +2,10 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { apiRequest } from '@/lib/api';
 import useSocket from '@/hooks/useSocket';
+import usePolling from '@/hooks/usePolling';
 
 const PAGE_SIZE = 20;
 
@@ -16,6 +17,9 @@ export default function NotificationBell({ userId }: { userId: string }) {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const socket = useSocket();
+  // Guards against overlapping list refreshes from the 30s open-panel
+  // poll, the 60s focus poll, and manual triggers firing together.
+  const listFetchingRef = useRef(false);
 
   useEffect(() => {
     fetchNotifications();
@@ -25,8 +29,22 @@ export default function NotificationBell({ userId }: { userId: string }) {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('notification:new', (data: any) => {
-      setNotifications((prev) => [data, ...prev]);
+    socket.on('notification:new', (payload: { data?: { _id?: string } }) => {
+      // Server emits { event, data: <notification doc> } — unwrap it and
+      // dedupe by _id so a socket push that the next poll already merged
+      // is never rendered twice.
+      const notification = (payload?.data ?? payload) as
+        | { _id?: string }
+        | undefined;
+      if (!notification || typeof notification !== 'object' || !notification._id) {
+        setUnreadCount((prev) => prev + 1);
+        return;
+      }
+      setNotifications((prev) =>
+        prev.some((n) => n._id === notification._id)
+          ? prev
+          : [notification, ...prev]
+      );
       setUnreadCount((prev) => prev + 1);
     });
 
@@ -54,6 +72,30 @@ export default function NotificationBell({ userId }: { userId: string }) {
       setHasMore(data?.hasMore || false);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
+    }
+  }
+
+  /*
+   * Poll refresh — the primary path on hosts without Socket.IO.
+   * Page-1 items are merged by _id (server is truth for `read` state)
+   * while deeper pages the user already loaded are preserved.
+   */
+  async function refreshNotifications() {
+    if (listFetchingRef.current) return;
+    listFetchingRef.current = true;
+    try {
+      const response = await apiRequest(
+        `/api/notifications?user=${userId}&page=1&limit=${PAGE_SIZE}`
+      );
+      const items: { _id: string }[] = response.data?.items || [];
+      setNotifications((prev) => {
+        const freshIds = new Set(items.map((n) => n._id));
+        return [...items, ...prev.filter((n) => !freshIds.has(n._id))];
+      });
+    } catch (error) {
+      console.error('Failed to refresh notifications:', error);
+    } finally {
+      listFetchingRef.current = false;
     }
   }
 
@@ -103,6 +145,22 @@ export default function NotificationBell({ userId }: { userId: string }) {
     }
   }
 
+  // REST polling fallback: unread badge every 60s; the open panel also
+  // refreshes its list every 30s. Focus/visibility triggers are handled
+  // inside usePolling — hidden tabs never poll.
+  usePolling(
+    () => {
+      fetchUnreadCount();
+      if (isOpen) refreshNotifications();
+    },
+    60_000
+  );
+
+  usePolling(refreshNotifications, 30_000, {
+    enabled: isOpen,
+    refreshOnFocus: false,
+  });
+
   async function markAllAsRead() {
     try {
       await apiRequest(`/api/notifications/read-all?user=${userId}`, { method: 'PATCH' });
@@ -117,7 +175,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded hover:bg-gray-100"
+        className="relative p-2 rounded hover:bg-muted"
       >
         🔔
         {unreadCount > 0 && (
@@ -133,13 +191,13 @@ export default function NotificationBell({ userId }: { userId: string }) {
             className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-20 border">
+          <div className="absolute right-0 mt-2 w-80 bg-card rounded-lg shadow-lg z-20 border">
             <div className="p-4 border-b flex justify-between items-center">
               <h3 className="font-semibold">Notifications</h3>
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className="text-sm text-blue-600 hover:text-blue-800"
+                  className="text-sm text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:text-blue-300"
                 >
                   Mark all as read
                 </button>
@@ -148,13 +206,13 @@ export default function NotificationBell({ userId }: { userId: string }) {
 
             <div className="max-h-96 overflow-y-auto">
               {notifications.length === 0 ? (
-                <p className="p-4 text-gray-500 text-center">No notifications</p>
+                <p className="p-4 text-muted-foreground text-center">No notifications</p>
               ) : (
                 notifications.map((notification) => (
                   <div
                     key={notification._id}
-                    className={`p-4 border-b hover:bg-gray-50 cursor-pointer ${
-                      !notification.read ? 'bg-blue-50' : ''
+                    className={`p-4 border-b hover:bg-muted cursor-pointer ${
+                      !notification.read ? 'bg-blue-50 dark:bg-blue-500/10' : ''
                     }`}
                     onClick={() => {
                       if (!notification.read) {
@@ -166,8 +224,8 @@ export default function NotificationBell({ userId }: { userId: string }) {
                     }}
                   >
                     <p className="font-medium text-sm">{notification.title}</p>
-                    <p className="text-gray-600 text-sm mt-1">{notification.message}</p>
-                    <p className="text-gray-400 text-xs mt-2">
+                    <p className="text-muted-foreground text-sm mt-1">{notification.message}</p>
+                    <p className="text-muted-foreground text-xs mt-2">
                       {new Date(notification.createdAt).toLocaleString()}
                     </p>
                   </div>
@@ -177,7 +235,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
                 <button
                   onClick={loadMoreNotifications}
                   disabled={loadingMore}
-                  className="w-full p-3 text-sm text-blue-600 hover:bg-gray-50 disabled:opacity-50"
+                  className="w-full p-3 text-sm text-blue-600 dark:text-blue-300 hover:bg-muted disabled:opacity-50"
                 >
                   {loadingMore ? 'Loading...' : 'Load more'}
                 </button>

@@ -42,7 +42,7 @@ export default function WorkspaceForm() {
         onChange={(e) => setName(e.target.value)}
       />
 
-      <button className="bg-black text-white p-3 rounded w-full">
+      <button className="bg-primary text-primary-foreground p-3 rounded w-full">
         {loading ? 'Creating...' : 'Create Workspace'}
       </button>
     </form>

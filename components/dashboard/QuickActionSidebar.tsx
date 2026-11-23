@@ -33,50 +33,51 @@ export function QuickActionSidebar({
       id: 'create-project',
       label: 'Create New Project',
       icon: FolderPlus,
-      color: 'text-blue-600 bg-blue-50 hover:bg-blue-100',
+      color: 'text-primary bg-primary/10 hover:bg-primary/15 border border-primary/20',
       onClick: onCreateProject || (() => {}),
     },
     {
       id: 'assign-task',
       label: 'Assign New Task',
       icon: PlusSquare,
-      color: 'text-green-600 bg-green-50 hover:bg-green-100',
+      color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-500/20',
       onClick: onAssignTask || (() => {}),
     },
     {
       id: 'invite-member',
       label: 'Invite Team Members',
       icon: UserPlus,
-      color: 'text-purple-600 bg-purple-50 hover:bg-purple-100',
+      color: 'text-violet-600 dark:text-violet-400 bg-violet-500/10 hover:bg-violet-500/15 border border-violet-500/20',
       onClick: onInviteMember || (() => {}),
     },
     {
       id: 'notifications',
       label: 'Notification Settings',
       icon: Bell,
-      color: 'text-orange-600 bg-orange-50 hover:bg-orange-100',
+      color: 'text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20',
       onClick: onNotifications || (() => {}),
     },
     {
       id: 'integrations',
       label: 'Manage Integrations',
       icon: Zap,
-      color: 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100',
+      color: 'text-primary bg-primary/10 hover:bg-primary/15 border border-primary/20',
       onClick: onIntegrations || (() => {}),
     },
     {
       id: 'settings',
       label: 'Workspace Settings',
       icon: Settings,
-      color: 'text-gray-600 bg-gray-50 hover:bg-gray-100',
+      color: 'text-muted-foreground bg-muted hover:bg-muted border border-border',
       onClick: onSettings || (() => {}),
     },
   ];
 
   return (
     <div className="sticky top-6">
-      <div className="bg-white rounded-xl border shadow-sm p-4">
-        <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
+      <div className="animate-enter rounded-2xl border border-border bg-card p-4 shadow-card" style={{ '--i': 4 } as React.CSSProperties}>
+        <h3 className="mb-1 font-semibold tracking-tight text-foreground">Quick Actions</h3>
+        <p className="mb-4 font-mono text-[11px] text-muted-foreground">SHORTCUTS</p>
         <div className="space-y-2">
           {quickActions.map((action) => {
             const Icon = action.icon;
@@ -84,10 +85,10 @@ export function QuickActionSidebar({
               <button
                 key={action.id}
                 onClick={action.onClick}
-                className={`w-full flex items-center gap-3 p-4 rounded-lg transition-colors ${action.color}`}
+                className={`flex w-full items-center gap-3 rounded-xl p-3 text-left transition-all duration-150 hover:-translate-y-px hover:shadow-card ${action.color}`}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                <span className="text-sm font-medium text-left">{action.label}</span>
+                <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <span className="text-sm font-medium">{action.label}</span>
               </button>
             );
           })}

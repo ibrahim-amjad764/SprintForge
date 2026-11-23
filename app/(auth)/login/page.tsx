@@ -3,11 +3,12 @@
 "use client";
 
 import LoginForm from "@/components/auth/LoginForm";
+import AuthShell from "@/components/auth/AuthShell";
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center">
+    <AuthShell>
       <LoginForm />
-    </main>
+    </AuthShell>
   );
 }

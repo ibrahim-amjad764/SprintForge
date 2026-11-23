@@ -21,7 +21,7 @@ const templates: Template[] = [
     description: 'Start from scratch with full customization freedom',
     icon: <Layout className="w-6 h-6" />,
     features: ['Custom workflows', 'Flexible structure', 'No pre-sets'],
-    color: 'bg-gray-100 border-gray-300',
+    color: 'bg-muted border-border',
   },
   {
     id: 'kanban',
@@ -30,7 +30,7 @@ const templates: Template[] = [
     icon: <Kanban className="w-6 h-6" />,
     features: ['Kanban boards', 'Sprint tracking', 'Agile metrics'],
     compliance: ['Scrum ready', 'Agile compliant'],
-    color: 'bg-blue-100 border-blue-300',
+    color: 'bg-blue-100 dark:bg-blue-500/15 border-blue-300 dark:border-blue-500/40',
   },
   {
     id: 'scrum',
@@ -39,7 +39,7 @@ const templates: Template[] = [
     icon: <GitBranch className="w-6 h-6" />,
     features: ['Sprint planning', 'Release tracking', 'CI/CD hooks'],
     compliance: ['DevOps ready', 'Release management'],
-    color: 'bg-green-100 border-green-300',
+    color: 'bg-green-100 dark:bg-green-500/15 border-green-300 dark:border-green-500/40',
   },
   {
     id: 'bug-tracker',
@@ -48,7 +48,7 @@ const templates: Template[] = [
     icon: <Shield className="w-6 h-6" />,
     features: ['Bug tracking', 'Audit logs', 'Compliance reporting'],
     compliance: ['SOC2 ready', 'HIPAA compliant', 'GDPR ready'],
-    color: 'bg-purple-100 border-purple-300',
+    color: 'bg-purple-100 dark:bg-purple-500/15 border-purple-300 dark:border-purple-500/40',
   },
 ];
 
@@ -71,7 +71,7 @@ export function TemplateCards({ selectedTemplate, onTemplateSelect }: TemplateCa
               relative p-4 rounded-lg border-2 cursor-pointer transition-all
               ${selectedTemplate === template.id 
                 ? `${template.color} border-current ring-2 ring-offset-2 ring-blue-500` 
-                : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-md'
+                : 'bg-card border-border hover:border-border hover:shadow-md'
               }
             `}
             onClick={() => onTemplateSelect(template.id)}
@@ -90,7 +90,7 @@ export function TemplateCards({ selectedTemplate, onTemplateSelect }: TemplateCa
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-sm">{template.name}</h3>
-                <p className="text-xs text-gray-600 mt-1">{template.description}</p>
+                <p className="text-xs text-muted-foreground mt-1">{template.description}</p>
               </div>
             </div>
 

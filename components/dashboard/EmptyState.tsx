@@ -1,4 +1,3 @@
-// components/dashboard/EmptyState.tsx
 "use client";
 
 import { FolderKanban, CheckSquare, Users, Plus } from "lucide-react";
@@ -14,13 +13,13 @@ interface EmptyStateProps {
 const emptyStateConfig = {
   projects: {
     icon: FolderKanban,
-    defaultTitle: 'No projects found',
+    defaultTitle: 'No projects yet',
     defaultDescription: 'Get started by creating your first project to organize your work.',
     defaultActionLabel: 'Create Project',
   },
   tasks: {
     icon: CheckSquare,
-    defaultTitle: 'No tasks found',
+    defaultTitle: 'No tasks yet',
     defaultDescription: 'Create tasks to track progress and collaborate with your team.',
     defaultActionLabel: 'Create Task',
   },
@@ -43,25 +42,28 @@ export function EmptyState({
   const Icon = config.icon;
 
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-4">
-      <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-        <Icon className="w-10 h-10 text-gray-400" />
+    <div className="animate-scale-in flex flex-col items-center justify-center px-4 py-16">
+      <div className="relative mb-6">
+        <div className="absolute inset-0 rounded-full bg-primary/15 blur-xl" aria-hidden="true" />
+        <div className="relative flex h-20 w-20 items-center justify-center rounded-full border border-primary/20 bg-primary/10">
+          <Icon className="h-9 w-9 text-primary" aria-hidden="true" />
+        </div>
       </div>
-      
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+
+      <h3 className="mb-2 text-xl font-semibold tracking-tight text-foreground">
         {title || config.defaultTitle}
       </h3>
-      
-      <p className="text-gray-500 text-center max-w-md mb-6">
+
+      <p className="mb-6 max-w-md text-center text-sm leading-relaxed text-muted-foreground">
         {description || config.defaultDescription}
       </p>
-      
+
       {onAction && (
         <button
           onClick={onAction}
-          className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          className="btn-sheen flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-glow"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="h-4 w-4" aria-hidden="true" />
           {actionLabel || config.defaultActionLabel}
         </button>
       )}

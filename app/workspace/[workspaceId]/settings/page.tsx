@@ -27,8 +27,16 @@ export default async function WorkspaceSettingsPage({
   }
 
   return (
-    <div className="p-10">
-      <h1 className="mb-8 text-3xl font-bold">Workspace Settings</h1>
+    <div className="py-4 sm:py-6">
+      <div className="mb-8">
+        <p className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-primary">
+          Workspace
+        </p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Settings</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          Manage workspace configuration and members.
+        </p>
+      </div>
       
       <div className="space-y-12">
         <WorkspaceSettings

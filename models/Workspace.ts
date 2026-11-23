@@ -11,6 +11,8 @@ export interface IWorkspace {
   defaultRole?: 'VIEWER' | 'COMMENTER' | 'EDITOR' | 'ADMIN';
   maxMembers?: number;
   currentMembers?: number;
+  stripeCustomerId?: string;
+  paddleCustomerId?: string;
   tenantEncryptionKey?: string;
   dataRetentionDays?: number;
   dataRetentionScheduledAt?: Date;
@@ -100,6 +102,14 @@ const WorkspaceSchema = new Schema<IWorkspace>(
     currentMembers: {
       type: Number,
       default: 1,
+    },
+    // Stripe customer for workspace-level billing scope.
+    stripeCustomerId: {
+      type: String,
+    },
+    // Paddle customer (ctm_…) for workspace-level billing scope.
+    paddleCustomerId: {
+      type: String,
     },
     tenantEncryptionKey: {
       type: String,

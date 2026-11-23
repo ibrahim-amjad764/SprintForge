@@ -105,31 +105,31 @@ export default function TasksList({
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'HIGH':
-        return 'bg-red-100 text-red-800';
+        return 'border-red-500/25 bg-red-500/10 text-red-700 dark:text-red-300';
       case 'MEDIUM':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300';
       case 'LOW':
-        return 'bg-green-100 text-green-800';
+        return 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300';
       case 'URGENT':
-        return 'bg-purple-100 text-purple-800';
+        return 'border-violet-500/25 bg-violet-500/10 text-violet-700 dark:text-violet-300';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'border-border bg-muted text-foreground';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'TODO':
-        return 'bg-gray-100 text-gray-800';
+        return 'border-border bg-muted text-foreground';
       case 'IN_PROGRESS':
-        return 'bg-blue-100 text-blue-800';
+        return 'border-primary/25 bg-primary/10 text-primary';
       case 'REVIEW':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300';
       case 'DONE':
       case 'COMPLETED':
-        return 'bg-green-100 text-green-800';
+        return 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'border-border bg-muted text-foreground';
     }
   };
 
@@ -182,7 +182,6 @@ export default function TasksList({
     } else if (task.teamId && typeof task.teamId === 'object') {
       // support {_id, id} shapes
       // prefer _id then id
-      // @ts-ignore
       setEditTeamId(task.teamId._id || task.teamId.id || undefined);
     } else {
       setEditTeamId(undefined);
@@ -223,64 +222,66 @@ export default function TasksList({
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
       {/* <Link
                               href={`/workspace/${workspaceId}/projects/${projectId}`}
-                              className="text-sm text-blue-600 hover:text-blue-800 mb-2 inline-block"
+                              className="text-sm text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:text-blue-300 mb-2 inline-block"
                             >
                               ← Back to Project
                             </Link> */}
-      <table className="w-full">
-        <thead className="border-b bg-gray-50">
+      <div className="overflow-x-auto">
+      <table className="w-full min-w-[860px]">
+        <thead className="border-b border-border bg-muted/60">
           <tr>
-            <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
+            <th className="px-6 py-3.5 text-left font-mono text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
               Task Title
             </th>
-            <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
+            <th className="px-6 py-3.5 text-left font-mono text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
               Priority
             </th>
-            <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
+            <th className="px-6 py-3.5 text-left font-mono text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
               Status
             </th>
-            <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
+            <th className="px-6 py-3.5 text-left font-mono text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
               Assignee
             </th>
-            <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
+            <th className="px-6 py-3.5 text-left font-mono text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
               Team
             </th>
-            <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
+            <th className="px-6 py-3.5 text-left font-mono text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
               Due Date
             </th>
-            <th className="px-6 py-4 text-right text-xs font-semibold tracking-wider text-gray-600 uppercase">
+            <th className="px-6 py-3.5 text-right font-mono text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
               Actions
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200">
+        <tbody className="divide-y divide-border/60">
           {tasks.length === 0 ? (
             <tr>
-              <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
-                No tasks found
+              <td colSpan={7} className="px-6 py-14 text-center">
+                <p className="text-sm font-medium text-foreground">No tasks found</p>
+                <p className="mt-1 text-xs text-muted-foreground">Tasks assigned to this project will appear here.</p>
               </td>
             </tr>
           ) : (
             tasks.map((task) => (
-              <tr key={task._id} className="transition-colors hover:bg-gray-50">
+              <tr key={task._id} className="transition-colors hover:bg-muted/40">
                 <td className="px-6 py-4">
                   {editingTaskId === task._id ? (
                     <input
                       type="text"
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
-                      className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
+                      className="w-full rounded border border-border px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
                     />
                   ) : (
                     <>
-                      <div className="font-medium text-gray-900">
+                      <div className="font-medium text-foreground">
                         {task.title}
                       </div>
                       {task.description && (
-                        <div className="mt-1 line-clamp-1 text-sm text-gray-500">
+                        <div className="mt-1 line-clamp-1 text-sm text-muted-foreground">
                           {task.description}
                         </div>
                       )}
@@ -292,7 +293,7 @@ export default function TasksList({
                     <select
                       value={editPriority}
                       onChange={(e) => setEditPriority(e.target.value)}
-                      className="rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
+                      className="rounded border border-border px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
                     >
                       <option value="HIGH">High</option>
                       <option value="MEDIUM">Medium</option>
@@ -301,8 +302,9 @@ export default function TasksList({
                     </select>
                   ) : (
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${getPriorityColor(task.priority)}`}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${getPriorityColor(task.priority)}`}
                     >
+                      <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
                       {task.priority}
                     </span>
                   )}
@@ -312,7 +314,7 @@ export default function TasksList({
                     <select
                       value={editStatus}
                       onChange={(e) => setEditStatus(e.target.value)}
-                      className="rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
+                      className="rounded border border-border px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
                     >
                       <option value="TODO">To Do</option>
                       <option value="IN_PROGRESS">In Progress</option>
@@ -322,8 +324,9 @@ export default function TasksList({
                     </select>
                   ) : (
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusColor(task.status)}`}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${getStatusColor(task.status)}`}
                     >
+                      <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
                       {task.status === 'IN_PROGRESS' ? 'In Progress' : 
                        task.status === 'DONE' ? 'Done' : 
                        task.status === 'COMPLETED' ? 'Completed' :
@@ -339,7 +342,7 @@ export default function TasksList({
                       onChange={(e) =>
                         setEditAssignedToId(e.target.value || undefined)
                       }
-                      className="rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
+                      className="rounded border border-border px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
                     >
                       <option value="">Unassigned</option>
                       {availableMembers.map((member) => (
@@ -355,12 +358,12 @@ export default function TasksList({
                           .charAt(0)
                           .toUpperCase()}
                       </div>
-                      <span className="text-sm text-gray-700">
+                      <span className="text-sm text-foreground">
                         {getMemberName(task.assignedToId)}
                       </span>
                     </div>
                   ) : (
-                    <span className="text-sm text-gray-400">Unassigned</span>
+                    <span className="text-sm text-muted-foreground">Unassigned</span>
                   )}
                 </td>
                 <td className="px-6 py-4">
@@ -368,7 +371,7 @@ export default function TasksList({
                     <select
                       value={editTeamId || ''}
                       onChange={(e) => setEditTeamId(e.target.value || undefined)}
-                      className="rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
+                      className="rounded border border-border px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
                     >
                       <option value="">Unassigned</option>
                       {teamsList.map((teamItem: any) => (
@@ -378,7 +381,7 @@ export default function TasksList({
                       ))}
                     </select>
                   ) : (
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-muted-foreground">
                       {getTeamName(typeof task.teamId === 'string' ? task.teamId : task.teamId?.id || task.teamId?._id)}
                     </span>
                   )}
@@ -389,10 +392,10 @@ export default function TasksList({
                       type="date"
                       value={editDueDate}
                       onChange={(e) => setEditDueDate(e.target.value)}
-                      className="rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
+                      className="rounded border border-border px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
                     />
                   ) : (
-                    <div className="text-sm text-gray-600">
+                    <div className="font-mono text-xs text-muted-foreground tabular-nums">
                       {task.dueDate
                         ? formatDueDate(task.dueDate)
                         : 'No due date'}
@@ -405,34 +408,38 @@ export default function TasksList({
                       <>
                         <button
                           onClick={() => handleEditSave(task)}
-                          className="rounded-lg p-2 transition-colors hover:bg-green-50"
+                          className="rounded-lg p-2 text-emerald-600 transition-colors hover:bg-emerald-500/10 dark:text-emerald-400"
                           title="Save"
+                          aria-label="Save task"
                         >
-                          <Edit2 className="h-4 w-4 text-gray-400 hover:text-green-600" />
+                          <Edit2 className="h-4 w-4" />
                         </button>
                         <button
                           onClick={handleEditCancel}
-                          className="rounded-lg p-2 transition-colors hover:bg-gray-100"
+                          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted"
                           title="Cancel"
+                          aria-label="Cancel edit"
                         >
-                          <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                          <X className="h-4 w-4" />
                         </button>
                       </>
                     ) : (
                       <>
                         <button
                           onClick={() => handleEditStart(task)}
-                          className="rounded-lg p-2 transition-colors hover:bg-blue-50"
+                          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                           title="Edit"
+                          aria-label="Edit task"
                         >
-                          <Edit2 className="h-4 w-4 text-gray-400 hover:text-blue-600" />
+                          <Edit2 className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(task._id)}
-                          className="rounded-lg p-2 transition-colors hover:bg-red-50"
+                          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400"
                           title="Delete"
+                          aria-label="Delete task"
                         >
-                          <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-600" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </>
                     )}
@@ -443,6 +450,7 @@ export default function TasksList({
           )}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

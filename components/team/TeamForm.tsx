@@ -44,7 +44,7 @@ export default function TeamForm({ workspaceId }: Props) {
         onChange={(e) => setName(e.target.value)}
       />
 
-      <button className="bg-black text-white px-4 py-2 rounded">
+      <button className="bg-primary text-primary-foreground px-4 py-2 rounded">
         Create Team
       </button>
     </form>

@@ -77,6 +77,8 @@ const TaskSchema = new Schema<ITask>(
 // Hot paths: task lists/counts/aggregations filter by project (+status);
 // assignee lookups for workload/my-tasks queries.
 TaskSchema.index({ project: 1, status: 1 });
+// Paginated task lists sort by createdAt desc within a project.
+TaskSchema.index({ project: 1, createdAt: -1 });
 TaskSchema.index({ assignee: 1 });
 
 const Task: Model<ITask> =

@@ -27,6 +27,55 @@ export async function getTeams(workspace: string) {
   });
 }
 
+interface PaginationInput {
+  page: number;
+  limit: number;
+  skip: number;
+}
+
+interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+/*
+ * Deterministic createdAt-desc ordering for stable offset pages.
+ * `search` filters team names server-side so pagination stays
+ * correct when the UI search box is active.
+ */
+export async function getTeamsPaginated(
+  workspace: string,
+  pagination: PaginationInput,
+  search?: string,
+): Promise<PaginatedResult<unknown>> {
+  const { page, limit, skip } = pagination;
+
+  const filter: Record<string, unknown> = { workspace };
+  if (search && search.trim()) {
+    filter.name = { $regex: search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' };
+  }
+
+  const [items, total] = await Promise.all([
+    Team.find(filter)
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Team.countDocuments(filter),
+  ]);
+
+  return {
+    items,
+    total,
+    page,
+    limit,
+    hasMore: skip + items.length < total,
+  };
+}
+
 export async function updateTeam(
   id: string,
 

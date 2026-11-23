@@ -5,6 +5,7 @@ import Notification from '@/models/Notification';
 import { markRead } from '@/services/notification.service';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
+import { apiError } from '@/utils/error-handler';
 
 export async function PUT(
   req: NextRequest,
@@ -29,6 +30,6 @@ export async function PUT(
 
     return successResponse(result);
   } catch (error) {
-    return errorResponse('Server error', 500);
+    return apiError(error, 'Server error');
   }
 }

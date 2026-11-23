@@ -19,8 +19,11 @@ export default async function TasksPage({
   return (
     <div className="h-full">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Tasks List</h1>
-        <p className="text-gray-600 mt-2">Manage and track all project tasks</p>
+        <p className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-primary">
+          Project
+        </p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Tasks</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">Manage and track all project tasks</p>
       </div>
       <TasksClient projectId={projectId} />
     </div>
