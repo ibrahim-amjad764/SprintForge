@@ -9,5 +9,9 @@
   # These env vars are intentionally non-secret and legitimately appear in
   # build output — omit them from secrets scanning:
   #   NEXT_PUBLIC_* are inlined into client bundles by design
+  #     (Paddle.js and Stripe.js both require their public tokens client-side)
   #   PADDLE_ENV is a sandbox/production flag ('sandbox' matches everywhere)
-  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_APP_URL,NEXT_PUBLIC_SOCKET_URL,PADDLE_ENV"
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_APP_URL,NEXT_PUBLIC_SOCKET_URL,NEXT_PUBLIC_PADDLE_CLIENT_TOKEN,NEXT_PUBLIC_STRIPE_KEY,PADDLE_ENV"
+  # netlify.toml contains the omit list itself — don't scan it or the
+  # scanner flags SECRETS_SCAN_OMIT_KEYS' own value as a "secret".
+  SECRETS_SCAN_OMIT_PATHS = "netlify.toml"
