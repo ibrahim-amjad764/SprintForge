@@ -44,3 +44,11 @@ next-env.d.ts
 # playwright
 /playwright-report/
 /test-results/
+
+# local screenshot/debug output (Playwright verification artifacts)
+/shots/
+
+# stray runtime logs
+*.log
+__pycache__/
+*.pyc

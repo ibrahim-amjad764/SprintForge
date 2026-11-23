@@ -22,6 +22,12 @@
   must NOT call connectDB()).
 - Graceful shutdown: `server/lifecycle.ts` via instrumentation; do not install signal
   handlers in Jest/dev.
+- Billing: Stripe + Paddle share a provider-neutral `Subscription` projection;
+  webhooks are signature-verified and idempotent via `BillingEvent`
+  (`{provider, providerEventId}`). Ops runbook — event coverage,
+  unmapped-price recovery, migrations, index readiness — lives in
+  `docs/billing-operations.md`. Paddle sandbox E2E (P7.9.2B) is pending
+  hosting; do not claim it complete.
 
 ## Known scalability ceiling (Phase 5D-3)
 
@@ -52,3 +58,13 @@ datasets. These reads carry `.maxTimeMS(30s)` so pathological queries fail fast.
   advisories — upgrade both before production exposure at scale (Next ≥ patched
   16.4.x/16.5.x line; mongoose ≥9.11.4). `proxy-addr`/`express`/`@modelcontextprotocol/sdk`
   findings are dev-only (shadcn CLI), not shipped to production.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

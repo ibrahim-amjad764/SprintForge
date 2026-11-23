@@ -3,6 +3,9 @@
 # are kept as-is; this file only tunes the secrets scanner.
 
 [build.environment]
+  # Next.js 16 requires Node >= 20.9; Netlify's current default is 22,
+  # pinned explicitly so a future default change can't break the build.
+  NODE_VERSION = "22"
   # These env vars are intentionally non-secret and legitimately appear in
   # build output — omit them from secrets scanning:
   #   NEXT_PUBLIC_* are inlined into client bundles by design

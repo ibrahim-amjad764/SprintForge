@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SprintForge — UI/UX Visual Review Gallery</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    background: #0d0d12;
+    color: #e4e4e7;
+  }
+  header {
+    padding: 32px 24px 8px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  header p { color: #a1a1aa; font-size: 13px; margin: 0; }
+  section { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  h2 {
+    font-size: 13px; text-transform: uppercase; letter-spacing: .15em;
+    color: #818cf8; margin: 0 0 16px; font-family: ui-monospace, monospace;
+  }
+  .grid { display: grid; gap: 20px; }
+  .grid.cols-2 { grid-template-columns: repeat(auto-fill, minmax(560px, 1fr)); }
+  .grid.cols-4 { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  figure {
+    margin: 0; background: #16161d; border: 1px solid #27272a;
+    border-radius: 12px; overflow: hidden;
+  }
+  figcaption {
+    padding: 10px 14px; font-size: 12px; color: #a1a1aa;
+    border-top: 1px solid #27272a; font-family: ui-monospace, monospace;
+    display: flex; justify-content: space-between; gap: 8px;
+  }
+  figcaption b { color: #e4e4e7; font-weight: 600; }
+  img { display: block; width: 100%; height: auto; background: #0d0d12; }
+  .tag {
+    font-size: 10px; padding: 2px 8px; border-radius: 999px;
+    background: #312e81; color: #c7d2fe; white-space: nowrap;
+  }
+  .tag.light { background: #3f3f46; color: #d4d4d8; }
+  .note { font-size: 12px; color: #71717a; margin-top: 6px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>SprintForge — UI/UX Visual Review</h1>
+  <p>P1 Foundation · P2 Shell + Auth + Landing · P3 Core Product (Dashboard, Tasks, Kanban, Calendar, Workspace) · P4 Advanced (Analytics, Billing, Profile, Admin) · captured via Playwright (real Chromium) · 1440px desktop / 375px mobile · dark + light</p>
+</header>
+
+<section>
+  <h2>Landing Page</h2>
+  <div class="grid cols-2">
+    <figure><img src="p2-landing-dark-desktop.png" alt="Landing dark desktop" /><figcaption><b>Landing</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p2-landing-dark-desktop-full.png" alt="Landing dark desktop full page" /><figcaption><b>Landing</b> · Desktop · Dark · Full page <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p2-landing-light-desktop.png" alt="Landing light desktop" /><figcaption><b>Landing</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p2-landing-light-desktop-full.png" alt="Landing light desktop full page" /><figcaption><b>Landing</b> · Desktop · Light · Full page <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p2-landing-dark-mobile.png" alt="Landing dark mobile" /><figcaption><b>Landing</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p2-landing-light-mobile.png" alt="Landing light mobile" /><figcaption><b>Landing</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+  </div>
+</section>
+<section>
+  <h2>Authentication</h2>
+  <div class="grid cols-4">
+    <figure><img src="p2-login-dark-desktop.png" alt="Login dark desktop" /><figcaption><b>Login</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p2-login-light-desktop.png" alt="Login light desktop" /><figcaption><b>Login</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p2-login-dark-mobile.png" alt="Login dark mobile" /><figcaption><b>Login</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p2-login-light-mobile.png" alt="Login light mobile" /><figcaption><b>Login</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+    <figure><img src="p2-register-dark-desktop.png" alt="Register dark desktop" /><figcaption><b>Register</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p2-register-light-desktop.png" alt="Register light desktop" /><figcaption><b>Register</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p2-register-dark-mobile.png" alt="Register dark mobile" /><figcaption><b>Register</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p2-register-light-mobile.png" alt="Register light mobile" /><figcaption><b>Register</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+    <figure><img src="p2-forgot-dark-desktop.png" alt="Forgot password dark desktop" /><figcaption><b>Forgot password</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p2-forgot-light-desktop.png" alt="Forgot password light desktop" /><figcaption><b>Forgot password</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p2-forgot-dark-mobile.png" alt="Forgot password dark mobile" /><figcaption><b>Forgot password</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p2-forgot-light-mobile.png" alt="Forgot password light mobile" /><figcaption><b>Forgot password</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+  </div>
+</section>
+<section>
+  <h2>Application Shell</h2>
+  <div class="grid cols-4">
+    <figure><img src="p2-shell-dashboard-dark-desktop.png" alt="Dashboard dark desktop" /><figcaption><b>Dashboard</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p2-shell-dashboard-light-desktop.png" alt="Dashboard light desktop" /><figcaption><b>Dashboard</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p2-shell-dashboard-dark-mobile.png" alt="Dashboard dark mobile" /><figcaption><b>Dashboard</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p2-shell-dashboard-light-mobile.png" alt="Dashboard light mobile" /><figcaption><b>Dashboard</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+    <figure><img src="p2-shell-sidebar-expanded-dark-desktop.png" alt="Sidebar expanded dark" /><figcaption><b>Sidebar</b> · Expanded · Dark <span class="tag">element</span></figcaption></figure>
+    <figure><img src="p2-shell-sidebar-expanded-light-desktop.png" alt="Sidebar expanded light" /><figcaption><b>Sidebar</b> · Expanded · Light <span class="tag light">element</span></figcaption></figure>
+    <figure><img src="p2-shell-drawer-dark-mobile.png" alt="Drawer open dark mobile" /><figcaption><b>Sidebar</b> · Drawer open · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p2-shell-drawer-light-mobile.png" alt="Drawer open light mobile" /><figcaption><b>Sidebar</b> · Drawer open · Light <span class="tag light">375px</span></figcaption></figure>
+    <figure><img src="p2-notifications-dark-desktop.png" alt="Notifications dark" /><figcaption><b>Notifications</b> · Open · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p2-notifications-light-desktop.png" alt="Notifications light" /><figcaption><b>Notifications</b> · Open · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p2-shell-workspace-switcher-dark-desktop.png" alt="Workspace switcher dark" /><figcaption><b>Workspace switcher</b> · Focused · Dark <span class="tag">element</span></figcaption></figure>
+    <figure><img src="p2-shell-workspace-switcher-light-desktop.png" alt="Workspace switcher light" /><figcaption><b>Workspace switcher</b> · Focused · Light <span class="tag light">element</span></figcaption></figure>
+  </div>
+  <p class="note">Note: the workspace switcher is a native &lt;select&gt; — screenshots show its focused state; the dropdown list itself is OS-rendered. Drawer-open state shown on mobile (375px); desktop sidebar has no collapsed state.</p>
+</section>
+
+<section>
+  <h2>Dashboard</h2>
+  <div class="grid cols-4">
+    <figure><img src="p3-dashboard-dark-desktop.png" alt="Dashboard dark desktop" /><figcaption><b>Dashboard</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3-dashboard-dark-mobile.png" alt="Dashboard dark mobile" /><figcaption><b>Dashboard</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p3-dashboard-light-desktop.png" alt="Dashboard light desktop" /><figcaption><b>Dashboard</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p3-dashboard-light-mobile.png" alt="Dashboard light mobile" /><figcaption><b>Dashboard</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+  </div>
+</section>
+<section>
+  <h2>Tasks</h2>
+  <div class="grid cols-4">
+    <figure><img src="p3-tasks-dark-desktop.png" alt="Tasks dark desktop" /><figcaption><b>Tasks</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3-tasks-dark-mobile.png" alt="Tasks dark mobile" /><figcaption><b>Tasks</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p3-tasks-light-desktop.png" alt="Tasks light desktop" /><figcaption><b>Tasks</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p3-tasks-light-mobile.png" alt="Tasks light mobile" /><figcaption><b>Tasks</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+    <figure><img src="p3-project-tasks-dark-desktop.png" alt="Project Tasks dark desktop" /><figcaption><b>Project Tasks</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3-project-tasks-dark-mobile.png" alt="Project Tasks dark mobile" /><figcaption><b>Project Tasks</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p3-project-tasks-light-desktop.png" alt="Project Tasks light desktop" /><figcaption><b>Project Tasks</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p3-project-tasks-light-mobile.png" alt="Project Tasks light mobile" /><figcaption><b>Project Tasks</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+  </div>
+    <figure><img src="p3-project-tasks-list-dark-desktop.png" alt="Project Tasks — List View dark desktop" /><figcaption><b>Project Tasks — List View</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3-project-tasks-list-dark-mobile.png" alt="Project Tasks — List View dark mobile" /><figcaption><b>Project Tasks — List View</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p3-project-tasks-list-light-desktop.png" alt="Project Tasks — List View light desktop" /><figcaption><b>Project Tasks — List View</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p3-project-tasks-list-light-mobile.png" alt="Project Tasks — List View light mobile" /><figcaption><b>Project Tasks — List View</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+  </div>
+</section>>
+  <h2>Kanban</h2>
+  <div class="grid cols-4">
+    <figure><img src="p3-kanban-dark-desktop.png" alt="Kanban Board dark desktop" /><figcaption><b>Kanban Board</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3-kanban-dark-mobile.png" alt="Kanban Board dark mobile" /><figcaption><b>Kanban Board</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p3-kanban-light-desktop.png" alt="Kanban Board light desktop" /><figcaption><b>Kanban Board</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p3-kanban-light-mobile.png" alt="Kanban Board light mobile" /><figcaption><b>Kanban Board</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+    <figure><img src="p3-workspace-tasks-dark-desktop.png" alt="Workspace Tasks (Kanban) dark desktop" /><figcaption><b>Workspace Tasks (Kanban)</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3-workspace-tasks-dark-mobile.png" alt="Workspace Tasks (Kanban) dark mobile" /><figcaption><b>Workspace Tasks (Kanban)</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p3-workspace-tasks-light-desktop.png" alt="Workspace Tasks (Kanban) light desktop" /><figcaption><b>Workspace Tasks (Kanban)</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p3-workspace-tasks-light-mobile.png" alt="Workspace Tasks (Kanban) light mobile" /><figcaption><b>Workspace Tasks (Kanban)</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+  </div>
+</section>
+<section>
+  <h2>Calendar</h2>
+  <div class="grid cols-4">
+    <figure><img src="p3-calendar-dark-desktop.png" alt="Calendar dark desktop" /><figcaption><b>Calendar</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3-calendar-dark-mobile.png" alt="Calendar dark mobile" /><figcaption><b>Calendar</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p3-calendar-light-desktop.png" alt="Calendar light desktop" /><figcaption><b>Calendar</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p3-calendar-light-mobile.png" alt="Calendar light mobile" /><figcaption><b>Calendar</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+  </div>
+</section>
+<section>
+  <h2>Workspace</h2>
+  <div class="grid cols-4">
+    <figure><img src="p3-workspace-dark-desktop.png" alt="Workspace Home dark desktop" /><figcaption><b>Workspace Home</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3-workspace-dark-mobile.png" alt="Workspace Home dark mobile" /><figcaption><b>Workspace Home</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p3-workspace-light-desktop.png" alt="Workspace Home light desktop" /><figcaption><b>Workspace Home</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p3-workspace-light-mobile.png" alt="Workspace Home light mobile" /><figcaption><b>Workspace Home</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+    <figure><img src="p3-projects-dark-desktop.png" alt="Projects dark desktop" /><figcaption><b>Projects</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3-projects-dark-mobile.png" alt="Projects dark mobile" /><figcaption><b>Projects</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p3-projects-light-desktop.png" alt="Projects light desktop" /><figcaption><b>Projects</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p3-projects-light-mobile.png" alt="Projects light mobile" /><figcaption><b>Projects</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+  </div>
+</section>
+<section>
+  <h2>Project Details</h2>
+  <div class="grid cols-4">
+    <figure><img src="p3-project-detail-dark-desktop.png" alt="Project Detail dark desktop" /><figcaption><b>Project Detail</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3-project-detail-dark-mobile.png" alt="Project Detail dark mobile" /><figcaption><b>Project Detail</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p3-project-detail-light-desktop.png" alt="Project Detail light desktop" /><figcaption><b>Project Detail</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p3-project-detail-light-mobile.png" alt="Project Detail light mobile" /><figcaption><b>Project Detail</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+  </div>
+</section>
+<section>
+  <h2>Interaction States &amp; Edge Cases</h2>
+  <div class="grid cols-4">
+    <figure><img src="p3i-tasks-cards-dark-desktop.png" alt="Tasks — Card grid dark desktop" /><figcaption><b>Tasks — Card grid</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3i-tasks-filter-high-dark-desktop.png" alt="Tasks — Priority filter (High) dark desktop" /><figcaption><b>Tasks — Priority filter (High)</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3i-taskcard-menu-dark-desktop.png" alt="Task card — actions menu open dark desktop" /><figcaption><b>Task card — actions menu open</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3i-globalfilter-open-dark-desktop.png" alt="Project tasks — filter panel open dark desktop" /><figcaption><b>Project tasks — filter panel open</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3i-kanban-dark-desktop.png" alt="Kanban — board with seeded tasks dark desktop" /><figcaption><b>Kanban — board with seeded tasks</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3i-kanban-card-menu-dark-desktop.png" alt="Kanban — card status menu open dark desktop" /><figcaption><b>Kanban — card status menu open</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3i-kanban-light-light-desktop.png" alt="Kanban — light theme light desktop" /><figcaption><b>Kanban — light theme</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p3i-calendar-month-dark-desktop.png" alt="Calendar — month view dark desktop" /><figcaption><b>Calendar — month view</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3i-calendar-week-dark-desktop.png" alt="Calendar — week view dark desktop" /><figcaption><b>Calendar — week view</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3i-calendar-day-dark-desktop.png" alt="Calendar — day view dark desktop" /><figcaption><b>Calendar — day view</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3i-calendar-agenda-dark-desktop.png" alt="Calendar — agenda view dark desktop" /><figcaption><b>Calendar — agenda view</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3i-calendar-filters-dark-desktop.png" alt="Calendar — filter drawer open dark desktop" /><figcaption><b>Calendar — filter drawer open</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3i-projects-bulkbar-dark-desktop.png" alt="Projects — bulk action bar dark desktop" /><figcaption><b>Projects — bulk action bar</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3i-dashboard-empty-dark-desktop.png" alt="Dashboard — empty state (new user) dark desktop" /><figcaption><b>Dashboard — empty state (new user)</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p3i-dashboard-light-light-desktop.png" alt="Dashboard — light theme light desktop" /><figcaption><b>Dashboard — light theme</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+  </div>
+  <p class="note">Captured via Playwright against a seeded test workspace. Functional checks: priority filter narrows task list (4→1), global filter dropdown + select work, calendar month/week/day/agenda switching works, filter drawer opens, projects bulk bar appears on selection, task card menu opens, kanban card status menu changes task status via API, dashboard empty state renders for new users. Zero page errors.</p>
+</section>
+<section>
+  <h2>Analytics</h2>
+  <div class="grid cols-4">
+    <figure><img src="p4-analytics-dark-desktop.png" alt="Analytics Dashboard dark desktop" /><figcaption><b>Analytics Dashboard</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p4-analytics-dark-mobile.png" alt="Analytics Dashboard dark mobile" /><figcaption><b>Analytics Dashboard</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p4-analytics-light-desktop.png" alt="Analytics Dashboard light desktop" /><figcaption><b>Analytics Dashboard</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p4-analytics-light-mobile.png" alt="Analytics Dashboard light mobile" /><figcaption><b>Analytics Dashboard</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>Billing</h2>
+  <div class="grid cols-4">
+    <figure><img src="p4-pricing-dark-desktop.png" alt="Pricing / Plans dark desktop" /><figcaption><b>Pricing / Plans</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p4-pricing-dark-mobile.png" alt="Pricing / Plans dark mobile" /><figcaption><b>Pricing / Plans</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p4-pricing-light-desktop.png" alt="Pricing / Plans light desktop" /><figcaption><b>Pricing / Plans</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p4-pricing-light-mobile.png" alt="Pricing / Plans light mobile" /><figcaption><b>Pricing / Plans</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+    <figure><img src="p4-pricing-yearly-dark-desktop.png" alt="Pricing — Yearly toggle dark desktop" /><figcaption><b>Pricing — Yearly toggle</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>Profile</h2>
+  <div class="grid cols-4">
+    <figure><img src="p4-profile-dark-desktop.png" alt="Profile dark desktop" /><figcaption><b>Profile</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p4-profile-dark-mobile.png" alt="Profile dark mobile" /><figcaption><b>Profile</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p4-profile-light-desktop.png" alt="Profile light desktop" /><figcaption><b>Profile</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p4-profile-light-mobile.png" alt="Profile light mobile" /><figcaption><b>Profile</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>Admin</h2>
+  <div class="grid cols-4">
+    <figure><img src="p4-admin-dark-desktop.png" alt="Admin — Overview dark desktop" /><figcaption><b>Admin — Overview</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p4-admin-dark-mobile.png" alt="Admin — Overview dark mobile" /><figcaption><b>Admin — Overview</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p4-admin-light-desktop.png" alt="Admin — Overview light desktop" /><figcaption><b>Admin — Overview</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p4-admin-light-mobile.png" alt="Admin — Overview light mobile" /><figcaption><b>Admin — Overview</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+    <figure><img src="p4-admin-tab-users-dark-desktop.png" alt="Admin users dark" /><figcaption><b>Admin — Users</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p4-admin-tab-workspaces-dark-desktop.png" alt="Admin workspaces dark" /><figcaption><b>Admin — Workspaces</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p4-admin-tab-audit-log-dark-desktop.png" alt="Admin audit-log dark" /><figcaption><b>Admin — Audit Log</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p4-admin-tab-overview-dark-desktop.png" alt="Admin overview dark" /><figcaption><b>Admin — Overview</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>P5 — Advanced Visual Experience</h2>
+  <div class="grid cols-4">
+    <figure><img src="p5-dashboard-dark-desktop.png" alt="P5 Dashboard dark desktop" /><figcaption><b>Dashboard</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p5-dashboard-light-desktop.png" alt="P5 Dashboard light desktop" /><figcaption><b>Dashboard</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p5-dashboard-dark-mobile.png" alt="P5 Dashboard dark mobile" /><figcaption><b>Dashboard</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p5-dashboard-light-mobile.png" alt="P5 Dashboard light mobile" /><figcaption><b>Dashboard</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+    <figure><img src="p5-tasks-dark-desktop.png" alt="P5 Tasks dark desktop" /><figcaption><b>Tasks</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p5-tasks-light-desktop.png" alt="P5 Tasks light desktop" /><figcaption><b>Tasks</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p5-ws-home-dark-desktop.png" alt="P5 Workspace home dark desktop" /><figcaption><b>Workspace Home</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p5-ws-home-light-desktop.png" alt="P5 Workspace home light desktop" /><figcaption><b>Workspace Home</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p5-ws-projects-dark-desktop.png" alt="P5 Workspace projects dark desktop" /><figcaption><b>Workspace — Projects</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p5-ws-projects-light-desktop.png" alt="P5 Workspace projects light desktop" /><figcaption><b>Workspace — Projects</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p5-ws-projects-dark-mobile.png" alt="P5 Workspace projects dark mobile" /><figcaption><b>Workspace — Projects</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p5-ws-tasks-dark-desktop.png" alt="P5 Workspace tasks dark desktop" /><figcaption><b>Workspace — Tasks / Kanban</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p5-ws-teams-dark-desktop.png" alt="P5 Workspace teams dark desktop" /><figcaption><b>Workspace — Teams</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p5-ws-teams-light-mobile.png" alt="P5 Workspace teams light mobile" /><figcaption><b>Workspace — Teams</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+    <figure><img src="p5-ws-settings-dark-desktop.png" alt="P5 Workspace settings dark desktop" /><figcaption><b>Workspace — Settings</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p5-ws-settings-light-mobile.png" alt="P5 Workspace settings light mobile" /><figcaption><b>Workspace — Settings</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+    <figure><img src="p5-task-new-dark-desktop.png" alt="P5 New task dark desktop" /><figcaption><b>New Task</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p5-task-new-light-desktop.png" alt="P5 New task light desktop" /><figcaption><b>New Task</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p5-task-detail-dark-desktop.png" alt="P5 Task detail dark desktop" /><figcaption><b>Task Detail</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p5-task-detail-light-mobile.png" alt="P5 Task detail light mobile" /><figcaption><b>Task Detail</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+    <figure><img src="p5-task-edit-dark-desktop.png" alt="P5 Task edit dark desktop" /><figcaption><b>Task Edit</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p5-task-edit-light-desktop.png" alt="P5 Task edit light desktop" /><figcaption><b>Task Edit</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p5-unauthorized-dark-desktop.png" alt="P5 Unauthorized dark desktop" /><figcaption><b>Unauthorized</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p5-unauthorized-light-mobile.png" alt="P5 Unauthorized light mobile" /><figcaption><b>Unauthorized</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>P6 — Subscription &amp; Upgrade Flow</h2>
+  <div class="grid cols-4">
+    <figure><img src="p6-upgrade-modal-dark-desktop.png" alt="Upgrade prompt dark desktop" /><figcaption><b>Workspace limit → Upgrade prompt</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p6-upgrade-modal-light-desktop.png" alt="Upgrade prompt light desktop" /><figcaption><b>Workspace limit → Upgrade prompt</b> · Desktop · Light <span class="tag light">1440px</span></figcaption></figure>
+    <figure><img src="p6-upgrade-modal-dark-mobile.png" alt="Upgrade prompt dark mobile" /><figcaption><b>Workspace limit → Upgrade prompt</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+    <figure><img src="p6-upgrade-modal-light-mobile.png" alt="Upgrade prompt light mobile" /><figcaption><b>Workspace limit → Upgrade prompt</b> · Mobile · Light <span class="tag light">375px</span></figcaption></figure>
+    <figure><img src="p6-upgrade-modal-e2e-dark-desktop.png" alt="E2E upgrade modal dark" /><figcaption><b>E2E — real Free user hits limit</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p6-upgrade-checkout-pending-dark-desktop.png" alt="Checkout pending credentials" /><figcaption><b>Get Pro Plan — pending Stripe config</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>P5 — Interaction States</h2>
+  <div class="grid cols-4">
+    <figure><img src="p5-notifications-open-dark-desktop.png" alt="P5 Notifications dropdown open dark" /><figcaption><b>Notifications — open</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p5-kanban-menu-open-dark-desktop.png" alt="P5 Kanban card menu dark" /><figcaption><b>Kanban — card menu</b> · Desktop · Dark <span class="tag">1440px</span></figcaption></figure>
+    <figure><img src="p5-drawer-open-dark-mobile.png" alt="P5 Mobile drawer open dark" /><figcaption><b>Mobile drawer — open</b> · Mobile · Dark <span class="tag">375px</span></figcaption></figure>
+  </div>
+</section>
+</body>
+</html>
