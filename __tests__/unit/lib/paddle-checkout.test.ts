@@ -15,6 +15,7 @@ const tick = () => new Promise((r) => setTimeout(r, 0));
 let paddleEventCallback: ((event: { name?: string }) => void) | null = null;
 let initializeCalls = 0;
 let openImpl: (opts: Record<string, unknown>) => void;
+let environmentSetMock: jest.Mock;
 
 const PARAMS = {
   priceId: 'pri_test',
@@ -30,9 +31,11 @@ beforeEach(() => {
   initializeCalls = 0;
   openImpl = () => {};
   process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN = 'test_token';
+  environmentSetMock = jest.fn();
 
   (globalThis as Record<string, unknown>).window = {
     Paddle: {
+      Environment: { set: environmentSetMock },
       Initialize: jest.fn(
         (opts: { eventCallback?: (e: { name?: string }) => void }) => {
           initializeCalls += 1;
@@ -142,5 +145,44 @@ describe('openPaddleCheckout', () => {
     expect(openMock.mock.calls[0][0]).not.toHaveProperty('eventCallback');
     paddleEventCallback?.({ name: 'checkout.closed' });
     await promise;
+  });
+
+  it('sets sandbox environment before Initialize for test_ tokens', async () => {
+    process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN = 'test_abc123';
+    const promise = openPaddleCheckout(PARAMS);
+    await tick();
+    expect(environmentSetMock).toHaveBeenCalledTimes(1);
+    expect(environmentSetMock).toHaveBeenCalledWith('sandbox');
+    // Environment.set must run before Paddle.Initialize.
+    const setOrder = environmentSetMock.mock.invocationCallOrder[0];
+    const initOrder = (
+      globalThis.window.Paddle.Initialize as jest.Mock
+    ).mock.invocationCallOrder[0];
+    expect(setOrder).toBeLessThan(initOrder);
+    paddleEventCallback?.({ name: 'checkout.closed' });
+    await promise;
+  });
+
+  it('does not set environment for live_ tokens', async () => {
+    process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN = 'live_abc123';
+    const promise = openPaddleCheckout(PARAMS);
+    await tick();
+    expect(environmentSetMock).not.toHaveBeenCalled();
+    expect(initializeCalls).toBe(1);
+    paddleEventCallback?.({ name: 'checkout.closed' });
+    await promise;
+  });
+
+  it('sets sandbox environment only once across repeated checkouts', async () => {
+    const first = openPaddleCheckout(PARAMS);
+    await tick();
+    paddleEventCallback?.({ name: 'checkout.closed' });
+    await first;
+    const second = openPaddleCheckout(PARAMS);
+    await tick();
+    paddleEventCallback?.({ name: 'checkout.closed' });
+    await second;
+    expect(environmentSetMock).toHaveBeenCalledTimes(1);
+    expect(initializeCalls).toBe(1);
   });
 });

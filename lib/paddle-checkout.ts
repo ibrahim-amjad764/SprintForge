@@ -34,6 +34,9 @@ declare global {
         token: string;
         eventCallback?: (event: { name?: string }) => void;
       }) => void;
+      Environment?: {
+        set: (environment: string) => void;
+      };
       Checkout: {
         open: (opts: Record<string, unknown>) => void;
       };
@@ -97,6 +100,13 @@ function ensureInitialized(token: string): void {
   const paddle = window.Paddle;
   if (!paddle) throw new Error('Paddle.js unavailable');
   if (initializedToken === token) return;
+  // Sandbox tokens require the environment to be set explicitly —
+  // without it Paddle.js defaults to production and rejects the
+  // sandbox-scoped token (403 invalid_client_token). Live tokens
+  // already target production, so Environment.set is skipped.
+  if (token.startsWith('test_')) {
+    paddle.Environment?.set('sandbox');
+  }
   paddle.Initialize({ token, eventCallback: handlePaddleEvent });
   initializedToken = token;
 }
