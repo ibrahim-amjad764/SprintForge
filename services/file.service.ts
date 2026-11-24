@@ -2,7 +2,7 @@
 import cloudinary from '@/lib/cloudinary';
 import File from '@/models/File';
 import logger from '@/lib/logger';
-import { describeError, withUploadStage } from '@/lib/error-info';
+import { describeError } from '@/lib/error-info';
 
 export async function uploadFile(
   file: any,
@@ -25,7 +25,7 @@ export async function uploadFile(
       outcome: 'rejected',
       ...describeError(error),
     }, 'File service: Cloudinary rejected the upload');
-    throw withUploadStage(error, 'cloudinary-callback');
+    throw error;
   }
 
   logger.info({
@@ -49,7 +49,7 @@ export async function uploadFile(
       outcome: 'rejected',
       ...describeError(error),
     }, 'File service: File.create failed after Cloudinary upload');
-    throw withUploadStage(error, 'mongo-create');
+    throw error;
   }
 }
 

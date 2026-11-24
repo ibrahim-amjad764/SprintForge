@@ -2,7 +2,7 @@
 
 import { NextRequest } from 'next/server';
 import { uploadFile } from '@/lib/upload';
-import { describeError, uploadErrorResponse } from '@/lib/error-info';
+import { describeError } from '@/lib/error-info';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
 import logger from '@/lib/logger';
@@ -171,8 +171,7 @@ export async function POST(request: NextRequest) {
       ...describeError(error),
     }, 'Upload API - upload failed:');
 
-    // TEMPORARY: sanitized diagnostics in response for staging root-cause
-    // analysis. Public message stays generic; remove after fix verified.
-    return uploadErrorResponse(error, 'api-upload');
+    // Public response stays generic — diagnostics live in logs only.
+    return errorResponse('Upload failed', 500);
   }
 }
