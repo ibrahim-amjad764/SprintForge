@@ -1,4 +1,4 @@
-import { describeError } from '@/lib/error-info';
+import { describeError, withUploadStage, getUploadStage, uploadErrorResponse } from '@/lib/error-info';
 
 describe('describeError', () => {
   it('normalizes a standard Error', () => {
@@ -77,5 +77,59 @@ describe('describeError', () => {
     circular.self = circular;
     expect(() => describeError(circular)).not.toThrow();
     expect(() => describeError(Symbol('x'))).not.toThrow();
+  });
+});
+
+describe('withUploadStage / getUploadStage', () => {
+  it('attaches and reads stage on Error objects', () => {
+    const err = new Error('x');
+    withUploadStage(err, 'cloudinary-callback');
+    expect(getUploadStage(err)).toBe('cloudinary-callback');
+    // non-enumerable — must not leak into JSON.stringify
+    expect(JSON.stringify(err)).not.toContain('__uploadStage');
+  });
+
+  it('attaches stage on plain objects', () => {
+    const obj = { message: 'x' };
+    withUploadStage(obj, 'mongo-create');
+    expect(getUploadStage(obj)).toBe('mongo-create');
+  });
+
+  it('returns undefined for primitives and unmarked values', () => {
+    expect(getUploadStage('string')).toBeUndefined();
+    expect(getUploadStage(new Error('plain'))).toBeUndefined();
+    expect(getUploadStage(null)).toBeUndefined();
+  });
+});
+
+describe('uploadErrorResponse', () => {
+  it('returns sanitized diagnostics with fallback stage', async () => {
+    const res = uploadErrorResponse(new Error('db exploded'), 'api-upload');
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.success).toBe(false);
+    expect(body.message).toBe('Upload failed');
+    expect(body.diagnostics).toMatchObject({
+      stage: 'api-upload',
+      name: 'Error',
+      message: 'db exploded',
+      isError: true,
+    });
+  });
+
+  it('prefers the attached upload stage over fallback', async () => {
+    const err = Object.assign(new Error('denied'), { http_code: 403 });
+    withUploadStage(err, 'cloudinary-callback');
+    const res = uploadErrorResponse(err, 'api-upload');
+    const body = await res.json();
+    expect(body.diagnostics.stage).toBe('cloudinary-callback');
+    expect(body.diagnostics.httpCode).toBe(403);
+  });
+
+  it('handles non-Error rejections', async () => {
+    const res = uploadErrorResponse('weird', 'api-files-upload');
+    const body = await res.json();
+    expect(body.diagnostics.name).toBe('string');
+    expect(body.diagnostics.message).toBe('weird');
   });
 });

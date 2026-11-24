@@ -102,6 +102,66 @@ export function describeError(error: unknown): ErrorInfo {
   }
 }
 
+/**
+ * Attaches a diagnostic stage marker to a thrown/rejected value so
+ * route-level catch blocks can report WHERE the failure occurred.
+ * Returns the same value (mutated when possible) — never throws.
+ */
+export function withUploadStage<T>(error: T, stage: string): T {
+  try {
+    if (error !== null && (typeof error === 'object' || typeof error === 'function')) {
+      Object.defineProperty(error, '__uploadStage', {
+        value: stage,
+        enumerable: false,
+        configurable: true,
+        writable: true,
+      });
+    }
+  } catch {
+    // non-extensible objects — stage marker is best-effort only
+  }
+  return error;
+}
+
+/** Reads the stage marker set by withUploadStage, if present. */
+export function getUploadStage(error: unknown): string | undefined {
+  try {
+    if (error !== null && typeof error === 'object') {
+      const stage = (error as Record<string, unknown>).__uploadStage;
+      return typeof stage === 'string' ? stage : undefined;
+    }
+  } catch {
+    // ignore
+  }
+  return undefined;
+}
+
+/**
+ * TEMPORARY diagnostic response for upload endpoints (staging only).
+ * Returns sanitized describeError() fields so the failing stage can be
+ * identified from the client without exposing internals.
+ * REMOVE after root cause is confirmed.
+ */
+export function uploadErrorResponse(error: unknown, fallbackStage: string) {
+  const info = describeError(error);
+  const stage = getUploadStage(error) ?? fallbackStage;
+  return Response.json(
+    {
+      success: false,
+      message: 'Upload failed',
+      diagnostics: {
+        stage,
+        name: info.name,
+        message: info.message,
+        ...(info.httpCode !== undefined ? { httpCode: info.httpCode } : {}),
+        ...(info.cloudinaryCode ? { cloudinaryCode: info.cloudinaryCode } : {}),
+        isError: info.isError,
+      },
+    },
+    { status: 500 },
+  );
+}
+
 function extractCloudinaryCode(record: Record<string, unknown>): string | undefined {
   try {
     // Cloudinary SDK errors often nest the API error under `error.error`.

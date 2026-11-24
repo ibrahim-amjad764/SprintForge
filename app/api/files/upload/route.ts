@@ -6,8 +6,7 @@ import { uploadFile } from '@/services/file.service';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
 import { validateAttachmentFile } from '@/lib/file-validation';
-import { apiError } from '@/utils/error-handler';
-import { describeError } from '@/lib/error-info';
+import { describeError, uploadErrorResponse } from '@/lib/error-info';
 import logger from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
@@ -44,6 +43,8 @@ export async function POST(request: NextRequest) {
       stage: 'api-files-upload',
       ...describeError(error),
     }, 'Files upload API - upload failed:');
-    return apiError(error, 'Upload failed');
+    // TEMPORARY: sanitized diagnostics in response for staging root-cause
+    // analysis. Public message stays generic; remove after fix verified.
+    return uploadErrorResponse(error, 'api-files-upload');
   }
 }
