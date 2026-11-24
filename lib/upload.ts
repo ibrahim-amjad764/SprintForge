@@ -1,6 +1,7 @@
 // lib/upload.ts
 import { v2 as cloudinary } from 'cloudinary';
 import logger from '@/lib/logger';
+import { describeError } from '@/lib/error-info';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -80,8 +81,13 @@ export async function uploadFile(
   }
 
   return new Promise((resolve, reject) => {
-    logger.info('📤 Starting Cloudinary upload...');
-    
+    logger.info({ values: [{
+      stage: 'cloudinary-request',
+      folder,
+      resourceType,
+      bytes: buffer.length,
+    }] }, '📤 Upload: invoking Cloudinary SDK');
+
     cloudinary.uploader.upload_stream(
       {
         folder,
@@ -90,10 +96,16 @@ export async function uploadFile(
       },
       (error, result) => {
         if (error) {
-          logger.error({ err: error }, '❌ Cloudinary upload failed:');
+          logger.error({
+            stage: 'cloudinary-callback',
+            outcome: 'rejected',
+            ...describeError(error),
+          }, '❌ Upload: Cloudinary rejected the upload');
           reject(error);
         } else if (result) {
           logger.info({ values: [{
+            stage: 'cloudinary-callback',
+            outcome: 'success',
             publicId: result.public_id,
             url: result.secure_url,
             width: result.width,
@@ -107,7 +119,10 @@ export async function uploadFile(
             format: result.format || '',
           });
         } else {
-          logger.error('❌ Upload failed: No result from Cloudinary');
+          logger.error({
+            stage: 'cloudinary-callback',
+            outcome: 'empty-result',
+          }, '❌ Upload: Cloudinary returned no result');
           reject(new Error('Upload failed: No result from Cloudinary'));
         }
       }

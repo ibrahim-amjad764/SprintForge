@@ -1,27 +1,56 @@
 // services/file.service.ts
 import cloudinary from '@/lib/cloudinary';
 import File from '@/models/File';
+import logger from '@/lib/logger';
+import { describeError } from '@/lib/error-info';
 
 export async function uploadFile(
   file: any,
   user: string
 ) {
-  const uploaded = await cloudinary.uploader.upload(
-    file,
+  logger.info({ stage: 'cloudinary-request', resourceType: 'auto' }, 'File service: invoking Cloudinary SDK');
 
-    {
-      resource_type: 'auto',
-    }
-  );
+  let uploaded;
+  try {
+    uploaded = await cloudinary.uploader.upload(
+      file,
 
-  return File.create({
-    name: uploaded.original_filename,
-    url: uploaded.secure_url,
-    publicId: uploaded.public_id,
-    type: uploaded.resource_type,
-    size: uploaded.bytes,
-    user,
-  });
+      {
+        resource_type: 'auto',
+      }
+    );
+  } catch (error) {
+    logger.error({
+      stage: 'cloudinary-callback',
+      outcome: 'rejected',
+      ...describeError(error),
+    }, 'File service: Cloudinary rejected the upload');
+    throw error;
+  }
+
+  logger.info({
+    stage: 'cloudinary-callback',
+    outcome: 'success',
+    publicId: uploaded?.public_id,
+  }, 'File service: Cloudinary upload succeeded');
+
+  try {
+    return await File.create({
+      name: uploaded.original_filename,
+      url: uploaded.secure_url,
+      publicId: uploaded.public_id,
+      type: uploaded.resource_type,
+      size: uploaded.bytes,
+      user,
+    });
+  } catch (error) {
+    logger.error({
+      stage: 'mongo-create',
+      outcome: 'rejected',
+      ...describeError(error),
+    }, 'File service: File.create failed after Cloudinary upload');
+    throw error;
+  }
 }
 
 export async function deleteFile(id: string) {

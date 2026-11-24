@@ -7,6 +7,8 @@ import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
 import { validateAttachmentFile } from '@/lib/file-validation';
 import { apiError } from '@/utils/error-handler';
+import { describeError } from '@/lib/error-info';
+import logger from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,6 +40,10 @@ export async function POST(request: NextRequest) {
 
     return successResponse(result);
   } catch (error) {
+    logger.error({
+      stage: 'api-files-upload',
+      ...describeError(error),
+    }, 'Files upload API - upload failed:');
     return apiError(error, 'Upload failed');
   }
 }
