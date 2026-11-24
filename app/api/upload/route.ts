@@ -2,6 +2,7 @@
 
 import { NextRequest } from 'next/server';
 import { uploadFile } from '@/lib/upload';
+import { describeError } from '@/lib/error-info';
 import { successResponse, errorResponse } from '@/utils/response';
 import { requireSession } from '@/lib/session';
 import logger from '@/lib/logger';
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
     const resourceType: (typeof validResourceTypes)[number] | 'image' =
       typeof resourceTypeValue === 'string' &&
       resourceTypeValue.trim() &&
-      validResourceTypes.includes(resourceTypeValue.trim() as any)
+      validResourceTypes.includes(resourceTypeValue.trim() as (typeof validResourceTypes)[number])
         ? (resourceTypeValue.trim() as (typeof validResourceTypes)[number])
         : 'image';
 
@@ -165,12 +166,12 @@ export async function POST(request: NextRequest) {
     // Centralized upload error handling.
     // --------------------------------------------------------
 
-    logger.error({ err: error }, 'Upload API - upload failed:');
+    logger.error({
+      stage: 'api-upload',
+      ...describeError(error),
+    }, 'Upload API - upload failed:');
 
-    const message = error instanceof Error ? error.message : 'Upload failed';
-
-    logger.error({ values: [message] }, 'Upload API - error message:');
-
-    return errorResponse(message, 500);
+    // Public response stays generic — diagnostics live in logs only.
+    return errorResponse('Upload failed', 500);
   }
 }
