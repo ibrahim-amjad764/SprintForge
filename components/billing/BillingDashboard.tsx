@@ -12,6 +12,16 @@ interface SubscriptionInfo {
     trialEnd: string | null;
     cancelAtPeriodEnd: boolean;
     canceledAt: string | null;
+    // Actual billed amounts — provider-verified snapshots; null on
+    // legacy docs. Never substitute catalog prices for these.
+    price?: { amountCents: number; currency: string } | null;
+    lastTransaction?: {
+      totalCents: number;
+      currency: string | null;
+      taxCents: number | null;
+      discountCents: number | null;
+      at: string | null;
+    } | null;
   } | null;
   provider?: 'stripe' | 'paddle';
   hasBillingAccount: boolean;
@@ -35,6 +45,20 @@ function formatDate(iso: string | null): string | null {
   return Number.isNaN(d.getTime())
     ? null
     : d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function formatMoney(amountCents: number, currency: string | null): string {
+  if (currency) {
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency,
+      }).format(amountCents / 100);
+    } catch {
+      // Unknown currency code — fall through to explicit formatting.
+    }
+  }
+  return `${(amountCents / 100).toFixed(2)}${currency ? ` ${currency}` : ''}`;
 }
 
 /*
@@ -133,6 +157,17 @@ export function BillingDashboardCard({
   const status = sub?.status ?? 'none';
   const periodEnd = formatDate(sub?.currentPeriodEnd ?? null);
   const trialEnd = formatDate(sub?.trialEnd ?? null);
+  // Actual billed amounts — only rendered when the provider supplied
+  // verified snapshots; never falls back to catalog pricing.
+  const priceLabel =
+    sub?.price && sub.interval
+      ? `${formatMoney(sub.price.amountCents, sub.price.currency)} ${sub.interval === 'year' ? 'per year' : 'per month'}`
+      : sub?.price
+        ? formatMoney(sub.price.amountCents, sub.price.currency)
+        : null;
+  const lastPaymentLabel = sub?.lastTransaction
+    ? `${formatMoney(sub.lastTransaction.totalCents, sub.lastTransaction.currency)}${formatDate(sub.lastTransaction.at) ? ` · ${formatDate(sub.lastTransaction.at)}` : ''}`
+    : null;
 
   return (
     <div className="mb-10 overflow-hidden rounded-2xl border border-border bg-card shadow-card">
@@ -164,6 +199,18 @@ export function BillingDashboardCard({
                 <div className="flex gap-1.5">
                   <dt className="font-mono text-[10px] uppercase tracking-wider">Billing</dt>
                   <dd>{sub.interval === 'year' ? 'Yearly' : 'Monthly'}</dd>
+                </div>
+              )}
+              {priceLabel && (
+                <div className="flex gap-1.5">
+                  <dt className="font-mono text-[10px] uppercase tracking-wider">Price</dt>
+                  <dd>{priceLabel}</dd>
+                </div>
+              )}
+              {lastPaymentLabel && (
+                <div className="flex gap-1.5">
+                  <dt className="font-mono text-[10px] uppercase tracking-wider">Last payment</dt>
+                  <dd>{lastPaymentLabel}</dd>
                 </div>
               )}
               {periodEnd && (

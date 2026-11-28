@@ -576,3 +576,55 @@ describe('createPortalSession — paddle provider', () => {
     expect(mockPaddlePortalCreate).not.toHaveBeenCalled();
   });
 });
+
+describe('createPortalSession — user isolation', () => {
+  const USER_A = '64b0000000000000000000a1';
+  const USER_B = '64b0000000000000000000b2';
+
+  function subOwnedBy(owner: string) {
+    return {
+      provider: 'paddle',
+      providerCustomerId: `ctm_${owner.slice(-2)}`,
+      providerSubscriptionId: `sub_${owner.slice(-2)}`,
+      user: owner,
+    };
+  }
+
+  it('queries subscriptions scoped to the authenticated user only', async () => {
+    mockPaddlePortalCreate.mockResolvedValue({
+      urls: { general: { overview: 'https://portal.paddle.com/z' } },
+    });
+    mockSubFindOne.mockImplementation((filter: { user?: string }) =>
+      leanChain(filter.user === USER_A ? subOwnedBy(USER_A) : null),
+    );
+
+    const resB = await createPortalSession({ userId: USER_B });
+    expect(resB.ok).toBe(false);
+    if (!resB.ok) expect(resB.status).toBe(404);
+    expect(mockPaddlePortalCreate).not.toHaveBeenCalled();
+
+    const resA = await createPortalSession({ userId: USER_A });
+    expect(resA.ok).toBe(true);
+    // Portal session is created for USER_A's customer only.
+    expect(mockPaddlePortalCreate).toHaveBeenCalledWith('ctm_a1', ['sub_a1']);
+    // The subscription lookup was scoped by user — never by a
+    // client-supplied customer/subscription ID.
+    expect(mockSubFindOne).toHaveBeenCalledWith(
+      expect.objectContaining({ user: USER_A, workspace: null }),
+    );
+  });
+
+  it('workspace scope rejects non-owner before any portal call', async () => {
+    mockWsFindById.mockReturnValue(
+      selectLean({ owner: 'someone-else' }),
+    );
+    const res = await createPortalSession({
+      userId: USER_B,
+      workspaceId: WS_ID,
+    });
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.status).toBe(403);
+    expect(mockSubFindOne).not.toHaveBeenCalled();
+    expect(mockPaddlePortalCreate).not.toHaveBeenCalled();
+  });
+});

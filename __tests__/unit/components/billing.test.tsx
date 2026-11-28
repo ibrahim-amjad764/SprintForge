@@ -149,6 +149,69 @@ describe('BillingDashboardCard — subscription status display', () => {
     expect(html).toContain('Free plan');
     expect(html).not.toContain('Manage billing');
   });
+
+  it('renders actual monthly price and last payment from provider snapshots', () => {
+    const html = cardHtml({
+      sub: {
+        status: 'active',
+        interval: 'month',
+        currentPeriodEnd: '2026-12-01T00:00:00.000Z',
+        trialEnd: null,
+        cancelAtPeriodEnd: false,
+        canceledAt: null,
+        price: { amountCents: 1900, currency: 'USD' },
+        lastTransaction: {
+          totalCents: 2052,
+          currency: 'USD',
+          taxCents: 152,
+          discountCents: 0,
+          at: '2026-11-27T19:43:46.000Z',
+        },
+      },
+    });
+    expect(html).toContain('19.00');
+    expect(html).toContain('per month');
+    expect(html).toContain('20.52'); // tax-inclusive charge total
+    expect(html).toContain('Last payment');
+  });
+
+  it('renders yearly price distinctly from monthly', () => {
+    const html = cardHtml({
+      sub: {
+        status: 'active',
+        interval: 'year',
+        currentPeriodEnd: '2027-11-27T00:00:00.000Z',
+        trialEnd: null,
+        cancelAtPeriodEnd: false,
+        canceledAt: null,
+        price: { amountCents: 19000, currency: 'USD' },
+        lastTransaction: null,
+      },
+    });
+    expect(html).toContain('190.00');
+    expect(html).toContain('per year');
+    expect(html).not.toContain('Last payment');
+  });
+
+  it('hides price fields entirely when provider snapshots are absent', () => {
+    const html = cardHtml({
+      sub: {
+        status: 'active',
+        interval: 'month',
+        currentPeriodEnd: '2026-12-01T00:00:00.000Z',
+        trialEnd: null,
+        cancelAtPeriodEnd: false,
+        canceledAt: null,
+        price: null,
+        lastTransaction: null,
+      },
+    });
+    // Legacy docs carry no amounts — nothing is invented.
+    expect(html).not.toContain('>Price<');
+    expect(html).not.toContain('Last payment');
+    expect(html).not.toContain('per month');
+    expect(html).not.toContain('per year');
+  });
 });
 
 describe('CheckoutReturnNotice', () => {

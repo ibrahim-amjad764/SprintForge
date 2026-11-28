@@ -42,6 +42,22 @@ export interface ISubscription {
   providerCustomerId?: string;
   providerSubscriptionId?: string;
   paddleTransactionId?: string;
+  /*
+    Billing amount snapshots — populated exclusively from
+    provider-verified webhook data. `priceCents`/`priceCurrency` is
+    the recurring subscription unit price (Paddle
+    items[0].price.unitPrice); lastTransaction* records the most
+    recent successful charge totals (tax/discount inclusive —
+    distinct from the recurring price). Null on legacy docs and
+    providers that don't supply amounts; never client-supplied.
+  */
+  priceCents?: number | null;
+  priceCurrency?: string | null;
+  lastTransactionTotalCents?: number | null;
+  lastTransactionCurrency?: string | null;
+  lastTransactionTaxCents?: number | null;
+  lastTransactionDiscountCents?: number | null;
+  lastTransactionAt?: Date | null;
   // Legacy Stripe fields — required relaxed for Paddle documents.
   // stripeSubscriptionId remains populated for Paddle rows too
   // (it holds the provider-native subscription ID) because the
@@ -100,6 +116,13 @@ const SubscriptionSchema = new Schema<ISubscription>(
     providerCustomerId: String,
     providerSubscriptionId: String,
     paddleTransactionId: String,
+    priceCents: { type: Number, default: null },
+    priceCurrency: { type: String, default: null },
+    lastTransactionTotalCents: { type: Number, default: null },
+    lastTransactionCurrency: { type: String, default: null },
+    lastTransactionTaxCents: { type: Number, default: null },
+    lastTransactionDiscountCents: { type: Number, default: null },
+    lastTransactionAt: { type: Date, default: null },
     stripeCustomerId: {
       type: String,
     },

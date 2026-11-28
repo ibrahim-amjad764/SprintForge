@@ -135,6 +135,22 @@ export function normalizePaddleSubscription(
 
   const trialEnd = item?.trialDates?.endsAt ?? null;
 
+  /*
+    Recurring price snapshot — Paddle Money.amount is a string in
+    the currency's smallest unit (cents). Only a well-formed amount
+    is persisted; malformed/missing values stay null so the UI can
+    hide rather than invent a number.
+  */
+  const unitPrice = item?.price?.unitPrice;
+  const priceCents =
+    unitPrice && /^\d+$/.test(unitPrice.amount)
+      ? Number.parseInt(unitPrice.amount, 10)
+      : null;
+  const priceCurrency =
+    priceCents !== null && typeof unitPrice?.currencyCode === 'string'
+      ? unitPrice.currencyCode
+      : null;
+
   return {
     provider: 'paddle',
     providerSubscriptionId: subscription.id,
@@ -148,6 +164,8 @@ export function normalizePaddleSubscription(
     // Paddle expresses pending cancellation as a scheduled change.
     cancelAtPeriodEnd: subscription.scheduledChange?.action === 'cancel',
     canceledAt: isoToDate(subscription.canceledAt),
+    priceCents,
+    priceCurrency,
     occurredAt,
     rawRef: subscription.id,
     customData: (subscription.customData ?? null) as Record<
