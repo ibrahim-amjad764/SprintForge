@@ -33,6 +33,12 @@ export interface NormalizedSubscription {
   occurredAt: Date;
   // Provider-native reference for logging/alerts (never secrets)
   rawRef: string;
+  // Recurring unit price snapshot from the provider's subscription
+  // item (Paddle items[0].price.unitPrice). Amount is in the
+  // currency's smallest unit (cents). Null when the provider
+  // payload carries no price — never client-supplied.
+  priceCents?: number | null;
+  priceCurrency?: string | null;
   // Provider customData — advisory correlation ONLY. Never trusted
   // for entitlement decisions without server-side verification.
   customData?: Record<string, unknown> | null;

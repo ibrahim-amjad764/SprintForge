@@ -734,3 +734,131 @@ describe('getEffectivePlan — provider-agnostic entitlement', () => {
     expect(plan).toBe('FREE');
   });
 });
+
+describe('Paddle billing amount snapshots', () => {
+  function entityWithPrice(unitPrice: unknown, priceId = 'pri_pro_monthly_test') {
+    return paddleSubscriptionEntity({
+      items: [
+        {
+          status: 'active',
+          quantity: 1,
+          recurring: true,
+          price: { id: priceId, unitPrice },
+          product: { id: 'pro_test' },
+          trialDates: null,
+        },
+      ],
+    });
+  }
+
+  it('extracts monthly recurring price from subscription unitPrice', () => {
+    const n = normalizePaddleSubscription(
+      entityWithPrice({ amount: '1900', currencyCode: 'USD' }) as never,
+      OCCURRED,
+    );
+    expect(n.priceCents).toBe(1900);
+    expect(n.priceCurrency).toBe('USD');
+  });
+
+  it('extracts yearly recurring price independently of interval', () => {
+    const n = normalizePaddleSubscription(
+      entityWithPrice(
+        { amount: '19000', currencyCode: 'USD' },
+        'pri_pro_yearly_test',
+      ) as never,
+      OCCURRED,
+    );
+    expect(n.interval).toBe('year');
+    expect(n.priceCents).toBe(19000);
+    expect(n.priceCurrency).toBe('USD');
+  });
+
+  it('leaves price null when unitPrice is missing or malformed', () => {
+    for (const bad of [undefined, null, {}, { amount: 'abc', currencyCode: 'USD' }, { amount: '19.5', currencyCode: 'USD' }]) {
+      const n = normalizePaddleSubscription(
+        entityWithPrice(bad) as never,
+        OCCURRED,
+      );
+      expect(n.priceCents).toBeNull();
+      expect(n.priceCurrency).toBeNull();
+    }
+  });
+
+  it('sync persists recurring price snapshot on the subscription doc', async () => {
+    const n = normalizePaddleSubscription(
+      entityWithPrice({ amount: '19000', currencyCode: 'USD' }, 'pri_pro_yearly_test') as never,
+      OCCURRED,
+    );
+    await syncSubscriptionFromPaddle(n);
+    const set = mockSubUpdate.mock.calls[0][1].$set;
+    expect(set.priceCents).toBe(19000);
+    expect(set.priceCurrency).toBe('USD');
+  });
+
+  it('transaction.completed persists last-transaction totals (tax/discount inclusive)', async () => {
+    mockRetrieveSubscription.mockResolvedValue(
+      entityWithPrice({ amount: '1900', currencyCode: 'USD' }),
+    );
+    const txn = {
+      id: 'txn_amt',
+      subscriptionId: 'sub_paddle_123',
+      status: 'completed',
+      customData: {},
+      details: {
+        totals: {
+          subtotal: '1900',
+          discount: '0',
+          tax: '152',
+          total: '2052',
+          currencyCode: 'USD',
+        },
+      },
+    };
+    await handlePaddleEvent(normalizedEvent('transaction.completed', txn));
+    const set = mockSubUpdate.mock.calls[0][1].$set;
+    expect(set.lastTransactionTotalCents).toBe(2052);
+    expect(set.lastTransactionCurrency).toBe('USD');
+    expect(set.lastTransactionTaxCents).toBe(152);
+    expect(set.lastTransactionDiscountCents).toBe(0);
+    expect(set.lastTransactionAt).toBe(OCCURRED);
+    // Recurring price comes from the subscription entity, not totals.
+    expect(set.priceCents).toBe(1900);
+  });
+
+  it('transaction.payment_failed does NOT overwrite last-payment snapshot', async () => {
+    mockRetrieveSubscription.mockResolvedValue(
+      entityWithPrice({ amount: '1900', currencyCode: 'USD' }),
+    );
+    const txn = {
+      id: 'txn_fail',
+      subscriptionId: 'sub_paddle_123',
+      status: 'failed',
+      details: { totals: { total: '2052', tax: '152', discount: '0', currencyCode: 'USD' } },
+    };
+    await handlePaddleEvent(normalizedEvent('transaction.payment_failed', txn));
+    const set = mockSubUpdate.mock.calls[0][1].$set;
+    expect(set.lastTransactionTotalCents).toBeUndefined();
+    expect(set.lastTransactionAt).toBeUndefined();
+  });
+
+  it('cross-user safety: reservation owner wins over conflicting subscription customData', async () => {
+    const OTHER_USER = '64b0000000000000000000ff';
+    reservationLookup({
+      _id: 'res_owner',
+      user: USER_ID,
+      workspace: null,
+      provider: 'paddle',
+      status: 'pending',
+    });
+    // Subscription customData claims a DIFFERENT user — must be ignored.
+    const entity = paddleSubscriptionEntity({
+      customData: { checkoutReservationId: 'res_owner', userId: OTHER_USER },
+    });
+    const n = normalizePaddleSubscription(entity as never, OCCURRED);
+    const result = await syncSubscriptionFromPaddle(n);
+    expect(result).toBe('synced');
+    const set = mockSubUpdate.mock.calls[0][1].$set;
+    expect(set.user).toBe(USER_ID);
+    expect(set.user).not.toBe(OTHER_USER);
+  });
+});

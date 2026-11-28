@@ -291,6 +291,62 @@ describe('GET /api/billing/subscription', () => {
     const res = await subGET(getRequest('workspaceId=ws-1'));
     expect(res.status).toBe(403);
   });
+
+  it('exposes provider-verified price and last-transaction snapshots', async () => {
+    (Subscription.findOne as jest.Mock).mockReturnValue({
+      sort: jest.fn(() => ({
+        select: jest.fn(() => ({
+          lean: jest.fn(async () => ({
+            plan: 'PRO',
+            status: 'active',
+            interval: 'year',
+            provider: 'paddle',
+            providerCustomerId: 'ctm_1',
+            priceCents: 19000,
+            priceCurrency: 'USD',
+            lastTransactionTotalCents: 20520,
+            lastTransactionCurrency: 'USD',
+            lastTransactionTaxCents: 1520,
+            lastTransactionDiscountCents: 0,
+            lastTransactionAt: new Date('2026-11-27T19:43:46.000Z'),
+          })),
+        })),
+      })),
+    });
+    const res = await subGET(getRequest());
+    const json = await res.json();
+    expect(json.data.subscription.price).toEqual({
+      amountCents: 19000,
+      currency: 'USD',
+    });
+    expect(json.data.subscription.lastTransaction).toEqual({
+      totalCents: 20520,
+      currency: 'USD',
+      taxCents: 1520,
+      discountCents: 0,
+      at: '2026-11-27T19:43:46.000Z',
+    });
+  });
+
+  it('returns null price fields for legacy subscriptions without snapshots', async () => {
+    (Subscription.findOne as jest.Mock).mockReturnValue({
+      sort: jest.fn(() => ({
+        select: jest.fn(() => ({
+          lean: jest.fn(async () => ({
+            plan: 'PRO',
+            status: 'active',
+            interval: 'month',
+            provider: 'stripe',
+            stripeCustomerId: 'cus_1',
+          })),
+        })),
+      })),
+    });
+    const res = await subGET(getRequest());
+    const json = await res.json();
+    expect(json.data.subscription.price).toBeNull();
+    expect(json.data.subscription.lastTransaction).toBeNull();
+  });
 });
 
 describe('POST /api/billing/webhook', () => {

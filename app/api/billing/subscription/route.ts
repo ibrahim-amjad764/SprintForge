@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     })
       .sort({ createdAt: -1 })
       .select(
-        'plan interval status currentPeriodEnd trialEnd cancelAtPeriodEnd canceledAt stripeCustomerId provider providerCustomerId',
+        'plan interval status currentPeriodEnd trialEnd cancelAtPeriodEnd canceledAt stripeCustomerId provider providerCustomerId priceCents priceCurrency lastTransactionTotalCents lastTransactionCurrency lastTransactionTaxCents lastTransactionDiscountCents lastTransactionAt',
       )
       .lean();
 
@@ -58,6 +58,27 @@ export async function GET(request: NextRequest) {
         trialEnd: sub.trialEnd ?? null,
         cancelAtPeriodEnd: !!sub.cancelAtPeriodEnd,
         canceledAt: sub.canceledAt ?? null,
+        /*
+          Actual billed amounts — provider-verified snapshots only.
+          `price` is the recurring subscription unit price; `lastTransaction`
+          is the most recent successful charge (tax/discount inclusive).
+          Both stay null on legacy docs — clients must hide, never
+          substitute catalog prices.
+        */
+        price:
+          sub.priceCents != null && sub.priceCurrency
+            ? { amountCents: sub.priceCents, currency: sub.priceCurrency }
+            : null,
+        lastTransaction:
+          sub.lastTransactionTotalCents != null
+            ? {
+                totalCents: sub.lastTransactionTotalCents,
+                currency: sub.lastTransactionCurrency ?? null,
+                taxCents: sub.lastTransactionTaxCents ?? null,
+                discountCents: sub.lastTransactionDiscountCents ?? null,
+                at: sub.lastTransactionAt ?? null,
+              }
+            : null,
       },
       // Legacy docs lack `provider` ⇒ 'stripe'. Customer IDs
       // themselves are never returned — only presence. Paddle rows

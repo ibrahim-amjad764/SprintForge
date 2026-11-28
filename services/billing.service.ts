@@ -1726,9 +1726,46 @@ async function resolvePaddleSubscriptionOwner(
   - duplicate-key conflicts are retried once after confirming the
     document exists.
 */
+/*
+  Successful-charge snapshot extracted from a Paddle transaction's
+  authoritative details.totals — amounts actually billed (tax and
+  discount inclusive), distinct from the recurring subscription
+  price. Only populated for transaction.completed / transaction.paid.
+*/
+export interface PaddleTransactionSnapshot {
+  totalCents: number;
+  currency: string | null;
+  taxCents: number | null;
+  discountCents: number | null;
+}
+
+function paddleMoneyToCents(value: unknown): number | null {
+  if (typeof value !== 'string' || !/^\d+$/.test(value)) return null;
+  const n = Number.parseInt(value, 10);
+  return Number.isSafeInteger(n) ? n : null;
+}
+
+function extractPaddleTransactionSnapshot(
+  transaction: PaddleTransactionEntity,
+): PaddleTransactionSnapshot | null {
+  const totals = transaction.details?.totals;
+  if (!totals) return null;
+  const totalCents = paddleMoneyToCents(totals.total);
+  if (totalCents === null) return null;
+  return {
+    totalCents,
+    currency: typeof totals.currencyCode === 'string' ? totals.currencyCode : null,
+    taxCents: paddleMoneyToCents(totals.tax),
+    discountCents: paddleMoneyToCents(totals.discount),
+  };
+}
+
 export async function syncSubscriptionFromPaddle(
   normalized: NormalizedSubscription,
-  options?: { paddleTransactionId?: string | null },
+  options?: {
+    paddleTransactionId?: string | null;
+    transactionSnapshot?: PaddleTransactionSnapshot | null;
+  },
 ): Promise<'synced' | 'stale' | 'unmapped'> {
   await connectDB();
 
@@ -1801,6 +1838,26 @@ export async function syncSubscriptionFromPaddle(
     stripeSubscriptionId: normalized.providerSubscriptionId,
     stripeCustomerId: normalized.providerCustomerId ?? undefined,
     paddleTransactionId: options?.paddleTransactionId ?? undefined,
+    /*
+      Amount snapshots — recurring price comes from the verified
+      subscription entity on every sync; transaction totals only
+      update on successful-charge events. Undefined fields are
+      dropped by Mongoose $set, so events lacking amounts never
+      erase previously persisted values.
+    */
+    priceCents: normalized.priceCents ?? undefined,
+    priceCurrency: normalized.priceCurrency ?? undefined,
+    lastTransactionTotalCents:
+      options?.transactionSnapshot?.totalCents ?? undefined,
+    lastTransactionCurrency:
+      options?.transactionSnapshot?.currency ?? undefined,
+    lastTransactionTaxCents:
+      options?.transactionSnapshot?.taxCents ?? undefined,
+    lastTransactionDiscountCents:
+      options?.transactionSnapshot?.discountCents ?? undefined,
+    lastTransactionAt: options?.transactionSnapshot
+      ? normalized.occurredAt
+      : undefined,
     currentPeriodStart: normalized.currentPeriodStart ?? undefined,
     currentPeriodEnd: normalized.currentPeriodEnd ?? undefined,
     trialEnd: normalized.trialEnd ?? undefined,
@@ -2027,8 +2084,19 @@ export async function handlePaddleEvent(
               checkoutReservationId: reservationId,
             };
           }
+          /*
+            Charge totals are only meaningful for successful
+            payments — payment_failed transactions carry no money
+            movement and must not overwrite the last-payment
+            snapshot.
+          */
+          const transactionSnapshot =
+            event.eventType === 'transaction.payment_failed'
+              ? null
+              : extractPaddleTransactionSnapshot(transaction);
           const result = await syncSubscriptionFromPaddle(normalized, {
             paddleTransactionId: transaction.id,
+            transactionSnapshot,
           });
           logger.info(
             {
